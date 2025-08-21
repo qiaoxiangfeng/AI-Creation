@@ -1,0 +1,202 @@
+# AI-Creation 后端规则文件（Java规范）
+
+## Java 后端通用规范
+
+### 禁止事项
+- 使用 Map、Pair、JSONObject 等作为方法入参或返回值
+- 在 service 底层中使用 BaseResponse
+- 在 REST 层编写业务逻辑
+- 使用 Lombok 的 @Data 注解
+- 对整个类进行一键格式化
+- 在 getter/setter 中编写业务逻辑
+- 多条件排序使用 Comparator.comparing(...).reversed()（BigDecimal 降序不支持）
+- Controller 层直接使用 Converter/MapStruct 进行对象转换
+- 抛出非 BusinessException 的业务异常
+- 错误码未在 ErrorCode 中定义或直接硬编码字符串（如 "CM01"）
+- 使用 double/float 表示金额或高精度数值
+- BigDecimal 使用 equals 进行大小比较
+- BigDecimal 使用 new BigDecimal(浮点字面量) 方式构造
+- BigDecimal.setScale 未明确指定 RoundingMode
+- 直接使用 == null/!= null 等判断
+- Util类包含有状态或有依赖的方法
+- Util类包含业务逻辑
+- 对象映射转换不使用MapStruct
+
+### 必须事项
+- BigDecimal 使用字符串构造：new BigDecimal("1")
+- BigDecimal 转字符串使用 toPlainString
+- 数字计算使用 BigDecimal 并指定小数位
+- 金额拆分考虑最后一笔精度尾差
+- 提测前完成代码走查与 Sonar 扫描
+- 成员变量使用 private（继承可用 protected）
+- 合理分包：同包/同类方法须具有关联性；包名单词且全小写
+- 采用接口+实现，注入使用接口，禁止注入实现类
+- 使用锁/分布式锁/文件流须在 finally 释放或 try-with-resources
+- 实现方法标注 @Override
+- 统一使用 Objects.equals(a, b) 进行对象等值比较，避免 NPE
+- switch 必须包含 default
+- @Deprecated 需说明原因与替代方案
+- 外部访问逻辑必须置于 `com.aicreation.external` 包
+- Controller/Service/Mapper 层禁止直接使用 RestTemplate/HttpClient/WebClient/SDK 调用外部接口，必须通过 external 层封装
+- external 层必须统一超时、重试、熔断、日志与监控；对外请求必须打印关键上下文（目标、请求、响应摘要、耗时）
+- external 层暴露接口（interface）并通过 Spring 注入，便于 Mock 与替换；实现类命名以 XxxExternalClient 结尾
+- 外部请求/响应对象放在 `com.aicreation.external.dto` 或就近子包中，禁止与 API DTO/PO/BO 混用
+- 常量按类型归类（如 Redis Key 单独类或就近定义）
+- 对象转换使用 MapStruct
+- 对象转换统一在 Service 层完成，Controller 仅做入参校验、调用 Service、返回结果
+- API 入参必须为对象（DTO），禁止使用多个散参数或基本类型
+- 业务异常统一使用 BusinessException 抛出，错误码必须引用 ErrorCode 枚举常量
+- 数值比较统一使用 BigDecimal.compareTo，避免 equals 带来的精度与符号问题
+- 涉及金额/精度计算统一使用 BigDecimal，并显式设置 scale 与 RoundingMode（如 RoundingMode.HALF_UP）
+- 金额/数值字段统一使用 BigDecimal 存储与传输
+- 日期命名：年月日以 Dt 结尾；到秒以 Time 结尾
+- 统一使用 Objects、StringUtils、CollectionUtils 进行判空/比较
+- Util类仅限无状态、无依赖、可复用的静态方法
+- 业务逻辑必须写在Service中
+- 对象映射转换统一使用MapStruct进行映射
+
+### 提示
+- Comparator 多条件降序：Comparator.comparing(类::属性, Comparator.reverseOrder())
+
+## MyBatis 规范
+
+### 禁止事项
+- 使用 QueryClause 等代码拼接 SQL
+- 在注解中书写 SQL（如 @Select("...")）
+- SQL 中使用 where 1=1
+- MyBatis 使用 ${} 传参（无特殊场景）
+- 使用注解写SQL，如@Select("...")
+- 表关联使用FROM A, B WHERE写法
+
+### 必须事项
+- 查询可使用 Bo/Po 作为入参
+- 自定义 SQL 放在 Ext 目录下的 XML
+- insert/merge/select 尽量 <include refid="Base_Column_List" />
+- 使用 #{param,jdbcType=...}
+- if 作为 where 条件时使用 <where>
+- in 传入 list 通过 <foreach>，数量不超过 999
+- 分页查询统一使用 PageHelper
+- 表关联必须使用JOIN
+- 禁止使用FROM A, B WHERE写法
+
+## 数据库规范
+
+### 禁止事项
+- 批量 insert 超过 1000 行
+- SQL 中进行复杂字符串/格式化处理
+- 大查询不分页
+- 分页查询不排序或排序字段不唯一
+- select *
+- 使用数据库时间函数（如 sysdate、now()）
+- 使用 where 关联表而非 join
+
+### 必须事项
+- 使用乐观锁更新需检查影响行数
+- 表结构变更需同步检查所有 XML 字段
+- 生产数据库连接使用密文配置
+- 针对环境合理设置连接池
+- 在保证一致性前提下缩小事务范围，避免事务内大量查询/复杂计算/调用外部接口
+
+## 线程池规范
+
+### 禁止事项
+- 使用 FixedThreadPool
+- 方法内部临时创建线程池后未托管/销毁
+- 使用 @Async 未指定线程池
+
+### 必须事项
+- 固定线程池使用 Spring ThreadPoolTaskExecutor 并纳入 IOC
+- 合理设置 core/max/queue/callerRuns 等参数
+- 队列长度禁止无界
+
+## 异常与错误码规范
+
+### 禁止事项
+- 无必要场景下捕获并吞掉异常
+- 多个不同错误复用同一 code
+- 使用 BusinessException 除 BusinessException(ErrorCode) 以外的构造方法
+- 抛出 BusinessException 前未打印日志（warn/error）
+
+### 必须事项
+- 无特殊业务处理时由框架统一异常转换为错误码
+- 需要返回错误码时抛业务异常，错误码使用枚举定义
+- 抛出业务异常前必须先使用 logger.warn 或 logger.error 打印关键上下文信息（如入参/用户ID等）
+- 仅使用 BusinessException(ErrorCode errorCode) 构造方法抛出业务异常
+
+## 缓存与 Redis 规范
+
+### 禁止事项
+- 本地缓存无过期或无大小控制
+- 缓存未设置过期时间或 value 过大
+- Redis Key 未包含数据版本
+- Redis Key 未使用系统名前缀
+- Redis Key 未覆盖全部入参
+
+### 必须事项
+- 优先使用成熟本地缓存框架并控制过期与容量
+- 设置合理 TTL 并预留手动清理入口
+- 控制缓存 value 大小
+
+## 日志规范
+
+### 禁止事项
+- 使用 System.out/System.err
+- 使用 e.printStackTrace()
+- log.error(e.getMessage()) 或字符串拼接日志
+
+### 必须事项
+- 异常必须打印堆栈
+- 使用参数化日志占位符：logger.debug("param {}", param)
+
+## DTO/PO/BO 规范
+
+### 禁止事项
+- 直接使用 PO/BO 作为请求/响应
+- DTO 直接传入数据库层
+- 使用基本类型代替包装类型
+- 一个 Bo 复用多个差异化需求导致大量空字段
+- 方法参数超过 5 个
+- DTO 对象未继承 BaseDto
+- 分页请求对象未继承 PageReqDto
+- 分页响应对象未使用 PageRespDto
+- 非分页 API 返回对象未使用 BaseResponse
+- 分页 API 返回对象被 BaseResponse 包裹
+- 新增方法请求对象包含 id/createTime/updateTime 字段
+- 修改方法请求对象包含 createTime/updateTime 字段
+- API层对象命名不以Dto结尾
+- 请求对象命名不以ReqDto结尾
+- 响应对象命名不以RespDto结尾
+
+### 必须事项
+- DTO/PO/BO 分层清晰，定义 serialVersionUID，名称以 DTO/PO/BO 结尾
+- DTO 作为 API 入出参需配合 Swagger 注解完善中文含义与枚举值
+- 出入参禁止使用枚举类型（在 DTO 层）
+- 超 5 个参数使用 Bo 封装
+- 分页请求对象必须继承 PageReqDto
+- 分页响应对象统一使用 PageRespDto
+- 非分页 API 返回对象统一使用 BaseResponse
+- 分页 API 返回对象统一使用 PageRespDto（顶层对象，不再包裹 BaseResponse）
+- API 查询列表的入参必须为 PageReqDto 或其子类
+- API 查询列表的出参必须为 PageRespDto
+- Controller 入参为对象时，Service 层方法也必须以对象接收（DTO）
+- Service 层内严禁直接传递/复用 DTO，进入业务处理前需转换为 BO 并以 BO 在 Service 内部流转
+- 所有API层对象必须以Dto结尾
+- 请求对象必须以ReqDto结尾
+- 响应对象必须以RespDto结尾
+- 列表对象可直接命名为XxxDto
+
+## 注释规范
+
+### 必须事项
+- 接口与抽象方法使用 Javadoc，说明功能、参数、返回、异常
+- 方法内单行注释放在上一行，使用 //，禁止行尾注释
+- 多行注释使用 /* */ 或多行 //，与代码对齐
+- 枚举常量需注释用途
+- 复杂业务方法必须详细注释代码逻辑
+- @date 获取方式通过命令行 date "+%Y-%m-%d %H:%M:%S" 填写
+
+description:
+globs:
+  - src/main/java/com/aicreation/**
+alwaysApply: false
+---

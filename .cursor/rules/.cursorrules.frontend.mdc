@@ -1,0 +1,240 @@
+# AI-Creation 前端规则文件（TypeScript/Vue规范）
+
+## 错误处理与错误码规范
+
+### 禁止事项
+- 直接将后端错误透传到 UI（未做用户可读映射）
+- 未捕获的 Promise 拒绝或未统一处理异常
+- 在 UI 中硬编码错误文案且无法国际化
+- 在 UI 中硬编码后端错误码/错误文案
+- 以 alert/confirm 作为错误兜底（无可用性保障）
+
+### 必须事项
+- 使用统一的错误处理与拦截器，将后端错误码映射到用户可读文案（维护 code→i18n 文案映射表）
+- 区分可重试/不可重试错误，并提供重试策略（退避/限制次数）
+- 为切页/取消场景提供请求取消（AbortController/axios cancel）
+- 错误与请求 traceId 关联，便于排查（日志/埋点）
+
+## 缓存与本地存储规范
+
+### 禁止事项
+- 本地缓存无过期或无容量控制
+- 在本地存储中明文存储敏感信息（token/用户数据）
+- 缓存 Key 未包含系统名前缀或数据版本
+- value 过大或无大小控制
+
+### 必须事项
+- 优先使用成熟本地缓存框架（TTL、LRU），并设置合理 TTL
+- 敏感信息仅存内存并提供刷新机制；必要时加密并最小化持久化范围
+- Key 命名包含系统名前缀与版本号，确保可灰度/回滚
+- 提供手动清理入口，避免缓存污染
+
+## 注释与文档规范
+
+### 必须事项
+- 公共接口/抽象方法使用 JSDoc/TS Doc，说明功能、参数、返回、异常
+- 复杂业务方法必须详细注释代码逻辑，解释"为什么"
+- 单行注释放在上一行，使用 //，禁止行尾注释
+- 多行注释使用 /* */ 或多行 //，与代码对齐
+
+## 命名与目录分层规范
+
+### 必须事项
+- 模块分层明确：components/hooks/services/types/utils/pages/store
+- 变量/类型/常量命名规范：camelCase/PascalCase/UPPER_SNAKE_CASE
+- 同一目录内文件职责单一，每个文件仅导出一个主体（组件/函数/类）
+- 包/目录命名单词且全小写，避免缩写与歧义
+
+## 安全与权限规范
+
+### 禁止事项
+- 在富文本/HTML 注入处未做 XSS 防护
+- 在请求中遗漏 CSRF/鉴权头
+- 在前端硬编码权限逻辑且未与后端校验配合
+
+### 必须事项
+- 敏感输出统一走转义/白名单渲染，第三方内容使用可信渲染器
+- 请求统一携带鉴权信息并支持过期刷新
+- 路由/组件级权限双重校验（路由守卫 + 视图兜底）
+
+## 国际化与文案规范
+
+### 禁止事项
+- 在源码中硬编码中文文案
+- 将日期/数字/金额直接拼接为字符串显示
+
+### 必须事项
+- 使用 i18n（如 i18next）管理文案与复数/性别/区间（ICU 规则）
+- 统一的日期/数字/金额格式化工具，按 locale 渲染
+- 文本与变量分离，避免字符串拼接导致的可读性与安全问题
+
+## 构建与依赖规范
+
+### 禁止事项
+- 直接引入体积巨大的依赖且未做按需加载/代码分割
+- 未锁定依赖（无 lockfile）或在源码中使用私有注册表地址
+- 重复/冲突依赖未治理
+
+### 必须事项
+- 生产构建开启 Tree Shaking、代码分割与资源压缩
+- 对关键依赖设定体积阈值与 Bundle 监控（如 200KB gzip）
+- 锁定依赖版本并启用漏洞扫描（npm audit/pnpm audit）
+
+## 路由与页面结构规范
+
+### 禁止事项
+- 在路由中硬编码魔法路径或散落的权限判断
+- 无 404/500 兜底页面
+
+### 必须事项
+- 路由模块化与懒加载，分离业务与路由配置
+- 为受保护页面提供路由守卫与登录重定向
+- 标准化的面包屑/标题策略与动态路由参数校验
+
+## API 与网络请求规范
+
+### 禁止事项
+- 在组件中直接拼接 URL 与发起请求
+- 忽略请求超时/重试/取消
+- 在控制器/组件中散落业务级参数校验（应在 service 层）
+- 分页接口使用 BaseResponse 包裹顶层结果
+- 在组件中解析/拼接后端分页结构（应在 service/adapter 中完成）
+- 使用GET、PUT、DELETE等其他HTTP方法（必须统一使用POST）
+- 通过URL参数传递数据（必须通过请求体传递）
+- 未设置Content-Type: application/json请求头
+
+### 必须事项
+- 统一 request 客户端与拦截器（鉴权、重试、节流、去抖）
+- 环境与 baseURL 通过 .env.* 配置，禁止硬编码
+- 请求/响应类型在服务层定义并导出，UI 仅消费类型
+- 为列表/搜索提供取消与竞争条件处理
+- 非分页 API：响应顶层使用 BaseResponse 结构（code/msg/data）
+- 分页 API：响应顶层使用 PageRespDto，不再包裹 BaseResponse
+- 与后端 DTO 契约对齐（字段名/可选项/枚举），统一从 types 导出
+- 列表请求入参必须包含 pageNum/pageSize 字段，或使用继承自 PageReqDto 的类型
+- 所有后端API调用必须使用POST方法
+- 请求头统一设置：Content-Type: application/json
+- 请求体统一使用JSON格式
+- 所有参数通过请求体传递
+- 所有API路径必须以 /api/ 开头
+- 使用RESTful风格的路径命名
+
+## 判空与等值规范
+
+### 禁止事项
+- 直接使用 == null/=== null/!= null/!== null 进行空判断
+- 使用 str === '' 或 str.length === 0 判空
+- 对对象直接使用 ===/== 比较语义等值（需要深比较的场景除外）
+
+### 必须事项
+- 统一使用工具函数进行判空：lodash isNil/isEmpty，或项目自定义 util
+- 等值比较优先使用安全封装（如 Object.is 或工具函数），避免 NPE/undefined 问题
+- 数组/集合判空统一使用 isEmpty/size 判断
+
+## 分层职责规范
+
+### 禁止事项
+- 组件层编写业务逻辑或进行数据转换（Adapter 之外）
+- 服务层直接操作 DOM/路由
+- 跨层直接互调导致强耦合（组件直接依赖底层数据源）
+
+### 必须事项
+- components 仅负责 UI 展示与交互，严禁写业务逻辑
+- services 负责 IO/并发/重试/缓存，统一返回领域数据
+- adapters 负责 API DTO 与 ViewModel 的对象转换与兼容
+- types 层集中定义请求/响应/视图模型类型，供全局复用
+
+## 状态管理与数据流
+
+### 禁止事项
+- 在任意模块读写全局可变单例状态
+- 跨模块相互直接引用导致强耦合
+
+### 必须事项
+- 轻量使用 React Context + Reducer；复杂场景采用 Zustand/Redux Toolkit/Recoil
+- 状态切片按业务域划分，异步请求统一在 slice/service 中
+- 派生状态通过 selector/memoization 计算，避免重复存储
+
+## API调用代码示例规范
+
+### 必须事项
+- 使用统一的HTTP客户端（如axios）进行API调用
+- 所有API调用都包含完整的错误处理（try-catch）
+- 分页查询使用正确的参数名：pageNum、pageSize
+- 响应数据处理使用正确的字段：data.list、data.total等
+- 错误信息显示使用用户友好的文案，而不是技术错误信息
+
+### 正确示例
+```typescript
+const resp = await http.post('/api/users/list', { pageNum: 1, pageSize: 10 });
+const resp = await http.post('/api/users/create', { userName: 'user', userPassword: '123456' });
+const resp = await http.post('/api/users/update', { userId: 1, userName: 'updated' });
+const resp = await http.post('/api/users/delete', { userId: 1 });
+```
+
+## 测试与质量保障
+
+### 禁止事项
+- 将测试数据硬编码在生产源码中
+- 端到端测试依赖不可控的外部服务（未做桩/Mock）
+
+### 必须事项
+- 单元/组件测试使用 Vitest/Jest + Testing Library
+- 测试文件放在 test/ 目录并与被测文件同名
+- 关键业务逻辑与边界条件覆盖（空/异常/并发/取消）
+- CI 中运行测试并输出覆盖率报告
+
+## 可访问性与性能
+
+### 禁止事项
+- img 缺少 alt、表单元素缺少 label/aria-*
+- 阻塞主线程的重计算未做节流/分片
+- 直接引入超大静态资源未压缩/未懒加载
+
+### 必须事项
+- 核心交互满足可键盘操作与可见焦点
+- 关键路径资源按需加载与代码分割（dynamic import）
+- 大列表使用虚拟滚动/窗口化，重计算做 memo/worker
+- 使用 Lighthouse/Performance 回归评估
+
+## 日志与监控
+
+### 禁止事项
+- 在生产代码中保留 console.log/console.error
+- 直接将后端错误堆栈展示给用户
+
+### 必须事项
+- 使用轻量日志封装（分级别）并在生产构建中剔除调试日志
+- 接入前端异常上报（window.onerror/unhandledrejection）与关键行为埋点
+- 错误日志关联请求 traceId
+
+## 配置管理规范
+
+### 禁止事项
+- 在多个文件中重复定义相同的配置项
+- 在组件或业务逻辑中硬编码配置值
+- 配置文件分散在多个目录中
+- 使用多个同类型的配置文件（如多个vite.config.*文件）
+- 配置文件中包含业务逻辑或复杂计算
+- 生成README.md、MIGRATION.md等说明文档
+- 生成各种检查脚本、验证脚本、lint脚本等工具脚本
+
+### 必须事项
+- 所有配置相关文件必须统一放在 src/config 目录中
+- 配置文件按功能分类：index.ts（主配置）、env.ts（环境配置）、vite.ts（构建配置）等
+- 使用统一的配置导出方式，避免循环引用
+- 环境变量通过 .env.* 文件管理，配置文件中提供默认值
+- 配置值使用 as const 确保类型安全
+- 配置变更后需要重启开发服务器
+- 敏感信息通过环境变量注入，不在配置文件中硬编码
+
+### 配置使用示例
+```typescript
+import { API_CONFIG, ENV } from '@/config';
+const apiUrl = API_CONFIG.BASE_URL;
+if (ENV.IS_DEV) { console.log('开发环境'); }
+```
+description:
+globs:
+alwaysApply: false
+---

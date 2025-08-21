@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.ArticleMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.Article">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="article_name" jdbcType="VARCHAR" property="articleName"/>
+        <result column="article_outline" jdbcType="VARCHAR" property="articleOutline"/>
+        <result column="image_desc" jdbcType="VARCHAR" property="imageDesc"/>
+        <result column="article_content" jdbcType="VARCHAR" property="articleContent"/>
+        <result column="voice_tone" jdbcType="VARCHAR" property="voiceTone"/>
+        <result column="voice_link" jdbcType="VARCHAR" property="voiceLink"/>
+        <result column="voice_file_path" jdbcType="VARCHAR" property="voiceFilePath"/>
+        <result column="video_link" jdbcType="VARCHAR" property="videoLink"/>
+        <result column="video_file_path" jdbcType="VARCHAR" property="videoFilePath"/>
+        <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
+        <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 列表查询结果映射（不包含删除状态） -->
+    <resultMap id="ListResultMap" type="com.aicreation.entity.po.Article">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="article_name" jdbcType="VARCHAR" property="articleName"/>
+        <result column="article_outline" jdbcType="VARCHAR" property="articleOutline"/>
+        <result column="image_desc" jdbcType="VARCHAR" property="imageDesc"/>
+        <result column="article_content" jdbcType="VARCHAR" property="articleContent"/>
+        <result column="voice_tone" jdbcType="VARCHAR" property="voiceTone"/>
+        <result column="voice_link" jdbcType="VARCHAR" property="voiceLink"/>
+        <result column="voice_file_path" jdbcType="VARCHAR" property="voiceFilePath"/>
+        <result column="video_link" jdbcType="VARCHAR" property="videoLink"/>
+        <result column="video_file_path" jdbcType="VARCHAR" property="videoFilePath"/>
+        <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, article_name, article_outline, image_desc, article_content, voice_tone, voice_link, voice_file_path, 
+        video_link, video_file_path, publish_status, res_state, create_time, update_time
+    </sql>
+
+    <!-- 根据ID查询文章 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article
+        WHERE id = #{id,jdbcType=BIGINT}
+        AND res_state = 1
+    </select>
+
+    <!-- 根据文章名称查询文章 -->
+    <select id="selectByArticleName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article
+        WHERE article_name = #{articleName,jdbcType=VARCHAR}
+        AND res_state = 1
+    </select>
+
+    <!-- 查询文章列表（用于显示，不包含删除状态） -->
+    <select id="selectArticleList" resultMap="ListResultMap">
+        SELECT
+        id, article_name, article_outline, image_desc, article_content, voice_tone, voice_link, voice_file_path, 
+        video_link, video_file_path, publish_status, create_time, update_time
+        FROM article
+        <where>
+            res_state = 1
+            <if test="articleName != null and articleName != ''">
+                AND article_name LIKE CONCAT('%', #{articleName,jdbcType=VARCHAR}, '%')
+            </if>
+            <if test="voiceTone != null and voiceTone != ''">
+                AND voice_tone = #{voiceTone,jdbcType=VARCHAR}
+            </if>
+            <if test="publishStatus != null">
+                AND publish_status = #{publishStatus,jdbcType=SMALLINT}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 插入文章 -->
+    <insert id="insert" parameterType="com.aicreation.entity.po.Article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article (
+            article_name, article_outline, image_desc, article_content, voice_tone, voice_link, voice_file_path,
+            video_link, video_file_path, publish_status, res_state, create_time, update_time
+        ) VALUES (
+            #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleContent,jdbcType=VARCHAR},
+            #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR}, 
+            #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR}, 
+            #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT}, 
+            #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 更新文章 -->
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.Article">
+        UPDATE article
+        <set>
+            <if test="articleName != null">article_name = #{articleName,jdbcType=VARCHAR},</if>
+            <if test="articleOutline != null">article_outline = #{articleOutline,jdbcType=VARCHAR},</if>
+            <if test="imageDesc != null">image_desc = #{imageDesc,jdbcType=VARCHAR},</if>
+            <if test="articleContent != null">article_content = #{articleContent,jdbcType=VARCHAR},</if>
+            <if test="voiceTone != null">voice_tone = #{voiceTone,jdbcType=VARCHAR},</if>
+            <if test="voiceLink != null">voice_link = #{voiceLink,jdbcType=VARCHAR},</if>
+            <if test="voiceFilePath != null">voice_file_path = #{voiceFilePath,jdbcType=VARCHAR},</if>
+            <if test="videoLink != null">video_link = #{videoLink,jdbcType=VARCHAR},</if>
+            <if test="videoFilePath != null">video_file_path = #{videoFilePath,jdbcType=VARCHAR},</if>
+            <if test="publishStatus != null">publish_status = #{publishStatus,jdbcType=SMALLINT},</if>
+            <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 根据ID删除文章（软删除） -->
+    <update id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        UPDATE article
+        SET res_state = 0, update_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 更新文章发布状态 -->
+    <update id="updatePublishStatus">
+        UPDATE article
+        SET publish_status = #{publishStatus,jdbcType=SMALLINT}, update_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

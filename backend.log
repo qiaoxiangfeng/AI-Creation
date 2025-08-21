@@ -1,0 +1,828 @@
+[INFO] Scanning for projects...
+[WARNING] The requested profile "aliyun" could not be activated because it does not exist.
+[INFO] 
+[INFO] ---------------------< com.aicreation:ai-creation >---------------------
+[INFO] Building AI-Creation 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.0:run (default-cli) > test-compile @ ai-creation >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ ai-creation ---
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] Copying 8 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ ai-creation ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ ai-creation ---
+[INFO] skip non existing resourceDirectory /Users/qiaoxiangfeng/IdeaProjects/AI-Creation/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ ai-creation ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] <<< spring-boot:3.2.0:run (default-cli) < test-compile @ ai-creation <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.0:run (default-cli) @ ai-creation ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2025-08-20 13:14:07.175 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-08-20 13:14:07.197 [main] INFO  c.aicreation.AiCreationApplication - Starting AiCreationApplication using Java 17.0.9 with PID 21097 (/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes started by qiaoxiangfeng in /Users/qiaoxiangfeng/IdeaProjects/AI-Creation)
+2025-08-20 13:14:07.198 [main] DEBUG c.aicreation.AiCreationApplication - Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-08-20 13:14:07.198 [main] INFO  c.aicreation.AiCreationApplication - The following 1 profile is active: "dev"
+2025-08-20 13:14:07.796 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-20 13:14:07.797 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-20 13:14:07.811 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 9 ms. Found 0 JPA repository interfaces.
+2025-08-20 13:14:07.820 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-20 13:14:07.821 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-20 13:14:07.828 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2025-08-20 13:14:07.874 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/com/aicreation/mapper/ArticleMapper.class]
+2025-08-20 13:14:07.874 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/com/aicreation/mapper/UserMapper.class]
+2025-08-20 13:14:07.875 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'articleMapper' and 'com.aicreation.mapper.ArticleMapper' mapperInterface
+2025-08-20 13:14:07.876 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Enabling autowire by type for MapperFactoryBean with name 'articleMapper'.
+2025-08-20 13:14:07.876 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.aicreation.mapper.UserMapper' mapperInterface
+2025-08-20 13:14:07.876 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Enabling autowire by type for MapperFactoryBean with name 'userMapper'.
+2025-08-20 13:14:08.358 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-08-20 13:14:08.363 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-08-20 13:14:08.364 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-20 13:14:08.365 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-08-20 13:14:08.397 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-08-20 13:14:08.397 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1173 ms
+2025-08-20 13:14:08.508 [main] DEBUG o.s.w.f.ServerHttpObservationFilter - Filter 'webMvcObservationFilter' configured for use
+2025-08-20 13:14:08.724 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-20 13:14:08.754 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2025-08-20 13:14:08.772 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-08-20 13:14:08.891 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-20 13:14:08.903 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-08-20 13:14:09.007 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@29d563bd
+2025-08-20 13:14:09.008 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-08-20 13:14:09.030 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-08-20 13:14:09.202 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-20 13:14:09.205 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+Logging initialized using 'class org.apache.ibatis.logging.stdout.StdOutImpl' adapter.
+2025-08-20 13:14:09.346 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/mapper/ArticleMapper.xml]'
+2025-08-20 13:14:09.355 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/mapper/UserMapper.xml]'
+2025-08-20 13:14:09.524 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-20 13:14:09.635 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 20 mappings in 'requestMappingHandlerMapping'
+2025-08-20 13:14:09.732 [main] DEBUG o.s.w.s.h.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-08-20 13:14:09.775 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-08-20 13:14:09.802 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 2 @ExceptionHandler, 1 ResponseBodyAdvice
+
+
+,------.                           ,--.  ,--.         ,--.                         
+|  .--. '  ,--,--.  ,---.   ,---.  |  '--'  |  ,---.  |  |  ,---.   ,---.  ,--.--. 
+|  '--' | ' ,-.  | | .-. | | .-. : |  .--.  | | .-. : |  | | .-. | | .-. : |  .--' 
+|  | --'  \ '-'  | ' '-' ' \   --. |  |  |  | \   --. |  | | '-' ' \   --. |  |    
+`--'       `--`--' .`-  /   `----' `--'  `--'  `----' `--' |  |-'   `----' `--'    
+                   `---'                                   `--'                        is intercepting.
+
+2025-08-20 13:14:10.258 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-08-20 13:14:10.304 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-08-20 13:14:10.313 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-08-20 13:14:10.323 [main] INFO  c.aicreation.AiCreationApplication - Started AiCreationApplication in 3.42 seconds (process running for 3.6)
+2025-08-20 13:14:16.824 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-20 13:14:16.824 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-20 13:14:16.824 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-08-20 13:14:16.825 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-08-20 13:14:16.825 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-08-20 13:14:16.826 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@1f062e10
+2025-08-20 13:14:16.827 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@435e224d
+2025-08-20 13:14:16.827 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-08-20 13:14:16.827 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2025-08-20 13:14:16.837 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 13:14:16.848 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 13:14:17.089 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 13:14:17.115 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@18502d95]
+2025-08-20 13:14:17.133 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:28.781 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/login", parameters={}
+2025-08-20 13:21:28.788 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#login(UserLoginReqDto)
+2025-08-20 13:21:28.877 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserLoginReqDto@6779e77c[password=123456,userName=admin]]
+2025-08-20 13:21:28.918 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 用户登录，用户名: admin
+2025-08-20 13:21:28.918 [http-nio-8080-exec-2] DEBUG c.a.service.impl.UserServiceImpl - 用户登录，用户名: admin
+2025-08-20 13:21:28.919 [http-nio-8080-exec-2] DEBUG c.a.service.impl.UserServiceImpl - 根据用户名查询用户信息，用户名: admin
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3826d66d] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1941691853 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE user_name = ? AND res_state = 1
+==> Parameters: admin(String)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 10:48:26.940404, 2025-08-17 07:09:51.962571, 2025-08-20 10:48:26.942028, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3826d66d]
+2025-08-20 13:21:28.978 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户成功，用户名: admin
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@482d2cc4] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@922527242 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: UPDATE user_info SET user_name = ?, user_password = ?, user_email = ?, user_phone = ?, user_status = ?, last_login_time = ?, update_time = ?, res_state = ? WHERE id = ? AND res_state = 1
+==> Parameters: admin(String), $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi(String), admin@aicreation.com(String), 13800138000(String), 1(Integer), 2025-08-20T13:21:29.068085(LocalDateTime), 2025-08-20T10:48:26.942028(LocalDateTime), 1(Integer), 1(Long)
+<==    Updates: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@482d2cc4]
+2025-08-20 13:21:29.139 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 用户登录成功，用户名: admin
+2025-08-20 13:21:29.142 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:29.145 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [BaseResponse(code=00000000, msg=操作成功！, data=com.aicreation.entity.dto.UserRespDto@4281625c[createTim (truncated)...]
+2025-08-20 13:21:29.149 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:29.170 [http-nio-8080-exec-3] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:21:29.170 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:21:29.177 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@70b6e544[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:21:29.184 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:21:29.185 [http-nio-8080-exec-3] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b782a2b] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.0
+JDBC Connection [HikariProxyConnection@1312894843 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b782a2b]
+2025-08-20 13:21:29.224 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:21:29.227 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:29.227 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@6bee75f5[list=[com.aicreation.entity.dto.UserRespDto@6ffc (truncated)...]
+2025-08-20 13:21:29.228 [http-nio-8080-exec-3] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:30.942 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:21:30.943 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:21:30.948 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@145ed67d[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3c854a42] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.0
+JDBC Connection [HikariProxyConnection@1233270882 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3c854a42]
+2025-08-20 13:21:30.956 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:30.958 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@11846e00[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:21:30.959 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:32.457 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:21:32.458 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:21:32.459 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@7d5200ee[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@796d9b9c] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.3333333333333333
+JDBC Connection [HikariProxyConnection@1621204772 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@796d9b9c]
+2025-08-20 13:21:32.464 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:32.465 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@7098f5ef[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:21:32.465 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:33.064 [http-nio-8080-exec-6] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:21:33.064 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:21:33.066 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@27a747be[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2398c792] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.5
+JDBC Connection [HikariProxyConnection@1244789256 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2398c792]
+2025-08-20 13:21:33.075 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:33.075 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@22b4d37d[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:21:33.076 [http-nio-8080-exec-6] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:38.477 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:21:38.481 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:21:38.485 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@173ff38f[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:21:38.486 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:21:38.487 [http-nio-8080-exec-7] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@130065b0] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.6
+JDBC Connection [HikariProxyConnection@257254330 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@130065b0]
+2025-08-20 13:21:38.498 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:21:38.499 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:38.499 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@679e4a54[list=[com.aicreation.entity.dto.UserRespDto@7723 (truncated)...]
+2025-08-20 13:21:38.500 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:43.506 [http-nio-8080-exec-8] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:21:43.506 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:21:43.507 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@3666d73c[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@32595528] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.6666666666666666
+JDBC Connection [HikariProxyConnection@1186561610 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@32595528]
+2025-08-20 13:21:43.513 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:43.514 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@46668e96[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:21:43.514 [http-nio-8080-exec-8] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:21:46.047 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:21:46.047 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:21:46.048 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@3e867a52[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3ab9f95a] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.7142857142857143
+JDBC Connection [HikariProxyConnection@1138191734 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3ab9f95a]
+2025-08-20 13:21:46.055 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:21:46.055 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@b971c89[list=[com.aicreation.entity.dto.ArticleListRespDt (truncated)...]
+2025-08-20 13:21:46.056 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:29:36.838 [http-nio-8080-exec-10] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:29:36.842 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:29:36.849 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@61d3979[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:29:36.851 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:29:36.852 [http-nio-8080-exec-10] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@222ad62] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.75
+JDBC Connection [HikariProxyConnection@420780002 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@222ad62]
+2025-08-20 13:29:36.960 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:29:36.962 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:29:36.963 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@824e59c[list=[com.aicreation.entity.dto.UserRespDto@721aa (truncated)...]
+2025-08-20 13:29:36.965 [http-nio-8080-exec-10] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:29:39.589 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:29:39.593 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:29:39.595 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@517a0475[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7c3da717] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.7777777777777778
+JDBC Connection [HikariProxyConnection@1351730404 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7c3da717]
+2025-08-20 13:29:39.615 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:29:39.616 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@7d5f9bfd[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:29:39.622 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:30:02.052 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - PUT "/api/articles/1/publish?publishStatus=2", parameters={masked}
+2025-08-20 13:30:02.053 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#updateArticlePublishStatus(Long, Integer)
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5b670171] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1388224667 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, res_state, create_time, update_time FROM article WHERE id = ? AND res_state = 1
+==> Parameters: 1(Long)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, res_state, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 1, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5b670171]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3ed02a4a] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@78730149 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: UPDATE article SET publish_status = ?, update_time = NOW() WHERE id = ?
+==> Parameters: 2(Integer), 1(Long)
+<==    Updates: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3ed02a4a]
+2025-08-20 13:30:02.076 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:30:02.076 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [BaseResponse(code=00000000, msg=操作成功！, data=true)]
+2025-08-20 13:30:02.078 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:30:03.329 [http-nio-8080-exec-3] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:30:03.330 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:30:03.331 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@72d6e5b8[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6546a078] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8
+JDBC Connection [HikariProxyConnection@1844297851 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 2, 2025-08-20 04:34:16.631732, 2025-08-20 13:30:02.066885
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6546a078]
+2025-08-20 13:30:03.337 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:30:03.337 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@2853135b[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:30:03.338 [http-nio-8080-exec-3] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:30:06.116 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:30:06.116 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:30:06.117 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@13073f50[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@679522b] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8181818181818182
+JDBC Connection [HikariProxyConnection@10561190 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, 男声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, 女声, null, null, null, null, 1, 2025-08-20 04:34:16.631732, 2025-08-20 04:34:16.631732
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, 女声, null, null, null, null, 2, 2025-08-20 04:34:16.631732, 2025-08-20 13:30:02.066885
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@679522b]
+2025-08-20 13:30:06.122 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:30:06.123 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@2af6645d[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:30:06.124 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:39:31.519 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 13:39:31.533 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 13:39:31.578 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 13:39:31.584 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@3471d3df]
+2025-08-20 13:39:31.586 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:39:34.208 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:39:34.209 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:39:34.216 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@798cfd1[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:39:34.219 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:39:34.219 [http-nio-8080-exec-7] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2fe61157] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8333333333333334
+JDBC Connection [HikariProxyConnection@1041781982 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2fe61157]
+2025-08-20 13:39:34.274 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:39:34.282 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:39:34.283 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@711ccc5[list=[com.aicreation.entity.dto.UserRespDto@17c1c (truncated)...]
+2025-08-20 13:39:34.285 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:39:38.426 [http-nio-8080-exec-8] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:39:38.429 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:39:38.433 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@133ad99d[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:39:38.434 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:39:38.434 [http-nio-8080-exec-8] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1bae027d] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8461538461538461
+JDBC Connection [HikariProxyConnection@319242023 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1bae027d]
+2025-08-20 13:39:38.450 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:39:38.452 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:39:38.452 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@7d6df652[list=[com.aicreation.entity.dto.UserRespDto@2fd9 (truncated)...]
+2025-08-20 13:39:38.457 [http-nio-8080-exec-8] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:39:51.111 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:39:51.113 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:39:51.115 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@11bc4a07[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6c04fe95] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8571428571428571
+JDBC Connection [HikariProxyConnection@1620750933 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6c04fe95]
+2025-08-20 13:39:51.124 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:39:51.125 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@13053033[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:39:51.127 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:39:53.331 [http-nio-8080-exec-10] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:39:53.331 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:39:53.332 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@573032cc[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@70363674] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8666666666666667
+JDBC Connection [HikariProxyConnection@1323188181 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@70363674]
+2025-08-20 13:39:53.336 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:39:53.337 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@18aec290[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:39:53.338 [http-nio-8080-exec-10] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:29.686 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:41:29.687 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:41:29.690 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@464f5064[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:41:29.692 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:41:29.693 [http-nio-8080-exec-1] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@33cc48d2] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.875
+JDBC Connection [HikariProxyConnection@395550217 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@33cc48d2]
+2025-08-20 13:41:29.702 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:41:29.703 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:29.703 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@32627398[list=[com.aicreation.entity.dto.UserRespDto@390a (truncated)...]
+2025-08-20 13:41:29.711 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:30.701 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:41:30.702 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:41:30.703 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@67bea6cb[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@40a378df] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8823529411764706
+JDBC Connection [HikariProxyConnection@1899811014 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@40a378df]
+2025-08-20 13:41:30.706 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:30.707 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@63a6a8d4[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:41:30.707 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:32.811 [http-nio-8080-exec-3] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:41:32.811 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:41:32.813 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@63cfb1cf[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2a5a9a84] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8888888888888888
+JDBC Connection [HikariProxyConnection@1186511119 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2a5a9a84]
+2025-08-20 13:41:32.818 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:32.819 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@58e729de[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:41:32.820 [http-nio-8080-exec-3] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:33.815 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:41:33.815 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:41:33.817 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@41e825d2[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:41:33.817 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:41:33.817 [http-nio-8080-exec-4] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3351e54e] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.8947368421052632
+JDBC Connection [HikariProxyConnection@1450024610 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3351e54e]
+2025-08-20 13:41:33.821 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:41:33.822 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:33.822 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@56abe708[list=[com.aicreation.entity.dto.UserRespDto@6aec (truncated)...]
+2025-08-20 13:41:33.823 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:34.627 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:41:34.628 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:41:34.629 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@1aba65e7[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@631842e5] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9
+JDBC Connection [HikariProxyConnection@306619328 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@631842e5]
+2025-08-20 13:41:34.634 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:34.634 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@5b9a6932[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:41:34.635 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:35.466 [http-nio-8080-exec-6] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:41:35.467 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:41:35.468 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@4a40003d[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:41:35.468 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:41:35.468 [http-nio-8080-exec-6] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@31956500] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9047619047619048
+JDBC Connection [HikariProxyConnection@42007213 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@31956500]
+2025-08-20 13:41:35.478 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:41:35.478 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:35.478 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@18bcdaa0[list=[com.aicreation.entity.dto.UserRespDto@1d6c (truncated)...]
+2025-08-20 13:41:35.479 [http-nio-8080-exec-6] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:41:36.566 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:41:36.567 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:41:36.568 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@72a8b136[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6b100a7e] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9090909090909091
+JDBC Connection [HikariProxyConnection@215445896 wrapping org.postgresql.jdbc.PgConnection@29d563bd] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6b100a7e]
+2025-08-20 13:41:36.571 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:41:36.572 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@3b414025[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:41:36.572 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:45:43.131 [http-nio-8080-exec-8] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:45:43.133 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:45:43.138 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@cb15078[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:45:43.141 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:45:43.141 [http-nio-8080-exec-8] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5f3fe124] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9130434782608695
+JDBC Connection [HikariProxyConnection@8700707 wrapping org.postgresql.jdbc.PgConnection@6b061db] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5f3fe124]
+2025-08-20 13:45:43.167 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:45:43.173 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:45:43.174 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@26a696e8[list=[com.aicreation.entity.dto.UserRespDto@2dad (truncated)...]
+2025-08-20 13:45:43.179 [http-nio-8080-exec-8] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:45:44.049 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:45:44.050 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:45:44.051 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@549aa7c3[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:45:44.051 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:45:44.051 [http-nio-8080-exec-9] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@b9509ef] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9166666666666666
+JDBC Connection [HikariProxyConnection@1888997422 wrapping org.postgresql.jdbc.PgConnection@6b061db] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM user_info WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state FROM user_info WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state
+<==        Row: 1, admin, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, admin@aicreation.com, 13800138000, 1, 2025-08-20 13:21:29.068085, 2025-08-17 07:09:51.962571, 2025-08-20 13:21:29.081667, 1
+<==        Row: 2, test_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, test@aicreation.com, 13800138001, 1, null, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==        Row: 3, demo_user, $2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi, demo@aicreation.com, 13800138002, 1, 2025-08-18 09:42:17.969563, 2025-08-17 07:09:51.962571, 2025-08-20 10:08:02.381484, 1
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@b9509ef]
+2025-08-20 13:45:44.055 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:45:44.055 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:45:44.055 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@7132d540[list=[com.aicreation.entity.dto.UserRespDto@52cb (truncated)...]
+2025-08-20 13:45:44.056 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:45:44.667 [http-nio-8080-exec-10] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:45:44.668 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:45:44.669 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@52eaebb9[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5d1ce279] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.92
+JDBC Connection [HikariProxyConnection@527974926 wrapping org.postgresql.jdbc.PgConnection@6b061db] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5d1ce279]
+2025-08-20 13:45:44.695 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:45:44.695 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@1acad57b[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:45:44.696 [http-nio-8080-exec-10] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:46:04.780 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:46:04.781 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:46:04.784 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@7133e152[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@41de4eaa] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9230769230769231
+JDBC Connection [HikariProxyConnection@662967075 wrapping org.postgresql.jdbc.PgConnection@6b061db] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@41de4eaa]
+2025-08-20 13:46:04.792 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 13:46:04.793 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@a53fa61[list=[com.aicreation.entity.dto.ArticleListRespDt (truncated)...]
+2025-08-20 13:46:04.793 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 14:31:59.727 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 14:31:59.734 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 14:31:59.740 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@72d1ef58[articleName=<null>,publishStatus=<null>,voiceTo (truncated)...]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@8bccf44] was not registered for synchronization because synchronization is not active
+Cache Hit Ratio [SQL_CACHE]: 0.9259259259259259
+JDBC Connection [HikariProxyConnection@1963894789 wrapping org.postgresql.jdbc.PgConnection@85822d3] will not be managed by Spring
+==>  Preparing: SELECT count(0) FROM article WHERE res_state = 1
+==> Parameters: 
+<==    Columns: count
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time FROM article WHERE res_state = 1 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Integer)
+<==    Columns: id, article_name, article_outline, article_content, voice_tone, voice_link, voice_file_path, video_link, video_file_path, publish_status, create_time, update_time
+<==        Row: 1, AI技术发展趋势, 本文主要介绍AI技术的发展趋势和未来展望, 人工智能（AI）技术正在快速发展，从机器学习到深度学习，从自然语言处理到计算机视觉，AI已经在各个领域展现出巨大的潜力。随着算力的提升和算法的优化，AI技术将继续推动社会进步和产业升级。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 2, 区块链技术应用, 探讨区块链技术在各个行业的应用场景, 区块链作为一种分布式账本技术，具有去中心化、不可篡改、透明可追溯等特性。在金融、供应链、医疗、教育等领域都有广泛的应用前景。通过智能合约，可以实现自动化的业务流程，提高效率降低成本。, anna, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==        Row: 3, 云计算架构设计, 介绍现代云计算架构的设计原则和最佳实践, 云计算架构设计需要考虑可扩展性、高可用性、安全性等多个方面。通过微服务架构、容器化部署、自动化运维等手段，可以构建稳定可靠的云平台。同时要关注成本优化和性能调优，确保系统的高效运行。, alex, null, null, null, null, 1, 2025-08-20 05:37:04.831734, 2025-08-20 05:37:04.831734
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@8bccf44]
+2025-08-20 14:31:59.797 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-08-20 14:31:59.797 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@66f01a73[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 14:31:59.804 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 14:33:37.226 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m27s450ms).
+2025-08-20 19:21:41.943 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=49m32s365ms).
+2025-08-20 20:44:57.683 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h23m15s780ms).
+2025-08-20 22:06:57.595 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h21m59s911ms).
+2025-08-20 22:56:53.763 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=49m56s168ms).
+2025-08-20 23:32:29.213 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=35m35s452ms).
+2025-08-21 00:19:30.980 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=47m1s766ms).
+2025-08-21 01:40:14.504 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h20m43s508ms).
+2025-08-21 03:23:20.274 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h43m5s785ms).
+2025-08-21 04:47:01.982 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h23m41s708ms).
+2025-08-21 06:07:30.979 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h20m28s998ms).
+2025-08-21 06:42:08.867 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=34m37s887ms).
+2025-08-21 08:05:04.608 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h22m55s741ms).
+2025-08-21 08:43:47.580 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=38m42s972ms).
+2025-08-21 11:46:43.443 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=16m24s289ms).
+2025-08-21 12:03:23.462 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=16m10s12ms).
+2025-08-21 12:38:26.691 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-08-21 12:38:26.699 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-08-21 12:38:26.700 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

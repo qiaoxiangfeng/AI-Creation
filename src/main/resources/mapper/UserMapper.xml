@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.UserMapper">
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, user_name, user_password, user_email, user_phone, user_status, last_login_time, 
+        create_time, update_time, res_state
+    </sql>
+
+    <!-- 根据主键查询用户 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultType="com.aicreation.entity.po.User">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM user_info 
+        WHERE id = #{id} AND res_state = 1
+    </select>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="selectByUserName" parameterType="java.lang.String" resultType="com.aicreation.entity.po.User">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM user_info 
+        WHERE user_name = #{userName} AND res_state = 1
+    </select>
+
+    <!-- 插入用户 -->
+    <insert id="insert" parameterType="com.aicreation.entity.po.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_info (
+            user_name, user_password, user_email, user_phone, user_status, last_login_time,
+            create_time, update_time, res_state
+        ) VALUES (
+            #{userName,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR}, #{userEmail,jdbcType=VARCHAR}, #{userPhone,jdbcType=VARCHAR}, #{userStatus,jdbcType=INTEGER}, #{lastLoginTime,jdbcType=TIMESTAMP},
+            #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{resState,jdbcType=INTEGER}
+        )
+    </insert>
+
+    <!-- 根据主键更新用户 -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.aicreation.entity.po.User">
+        UPDATE user_info
+        <set>
+            <if test="userName != null">user_name = #{userName,jdbcType=VARCHAR},</if>
+            <if test="userPassword != null">user_password = #{userPassword,jdbcType=VARCHAR},</if>
+            <if test="userEmail != null">user_email = #{userEmail,jdbcType=VARCHAR},</if>
+            <if test="userPhone != null">user_phone = #{userPhone,jdbcType=VARCHAR},</if>
+            <if test="userStatus != null">user_status = #{userStatus,jdbcType=INTEGER},</if>
+            <if test="lastLoginTime != null">last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},</if>
+            <if test="updateTime != null">update_time = #{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
+        </set>
+        WHERE id = #{id} AND res_state = 1
+    </update>
+
+    <!-- 根据主键删除用户（逻辑删除） -->
+    <update id="deleteByPrimaryKey">
+        UPDATE user_info 
+        SET res_state = 0, update_time = #{updateTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=BIGINT} AND res_state = 1
+    </update>
+
+    <!-- 查询用户列表 -->
+    <select id="selectUserList" resultType="com.aicreation.entity.po.User">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM user_info 
+        WHERE res_state = 1
+        <if test="userName != null and userName != ''">
+            AND user_name ILIKE CONCAT('%', #{userName,jdbcType=VARCHAR}, '%')
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 批量更新用户密码 -->
+    <update id="updateUserPasswords">
+        UPDATE user_info 
+        SET user_password = #{newPassword,jdbcType=VARCHAR}, update_time = #{updateTime,jdbcType=TIMESTAMP}
+        WHERE res_state = 1
+        <if test="userIds != null and userIds.size() > 0">
+            AND id IN
+            <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+                #{userId,jdbcType=BIGINT}
+            </foreach>
+        </if>
+    </update>
+
+</mapper> 

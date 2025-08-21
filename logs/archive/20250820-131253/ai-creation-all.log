@@ -1,0 +1,149 @@
+2025-08-20 12:51:43.988 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-08-20 12:51:44.009 [main] INFO  c.aicreation.AiCreationApplication - Starting AiCreationApplication using Java 17.0.9 with PID 12124 (/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes started by qiaoxiangfeng in /Users/qiaoxiangfeng/IdeaProjects/AI-Creation)
+2025-08-20 12:51:44.010 [main] DEBUG c.aicreation.AiCreationApplication - Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-08-20 12:51:44.010 [main] INFO  c.aicreation.AiCreationApplication - The following 1 profile is active: "dev"
+2025-08-20 12:51:44.570 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-20 12:51:44.571 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-20 12:51:44.584 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 8 ms. Found 0 JPA repository interfaces.
+2025-08-20 12:51:44.592 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-20 12:51:44.593 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-20 12:51:44.599 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
+2025-08-20 12:51:44.643 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/com/aicreation/mapper/ArticleMapper.class]
+2025-08-20 12:51:44.644 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/com/aicreation/mapper/UserMapper.class]
+2025-08-20 12:51:44.644 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'articleMapper' and 'com.aicreation.mapper.ArticleMapper' mapperInterface
+2025-08-20 12:51:44.645 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Enabling autowire by type for MapperFactoryBean with name 'articleMapper'.
+2025-08-20 12:51:44.645 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.aicreation.mapper.UserMapper' mapperInterface
+2025-08-20 12:51:44.645 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Enabling autowire by type for MapperFactoryBean with name 'userMapper'.
+2025-08-20 12:51:45.080 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-08-20 12:51:45.084 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-08-20 12:51:45.085 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-20 12:51:45.085 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-08-20 12:51:45.121 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-08-20 12:51:45.121 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1086 ms
+2025-08-20 12:51:45.224 [main] DEBUG o.s.w.f.ServerHttpObservationFilter - Filter 'webMvcObservationFilter' configured for use
+2025-08-20 12:51:45.438 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-20 12:51:45.465 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2025-08-20 12:51:45.483 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-08-20 12:51:45.598 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-20 12:51:45.611 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-08-20 12:51:45.709 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7d2be319
+2025-08-20 12:51:45.710 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-08-20 12:51:45.735 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-08-20 12:51:45.888 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-20 12:51:45.890 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-08-20 12:51:46.007 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/mapper/ArticleMapper.xml]'
+2025-08-20 12:51:46.014 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/mapper/UserMapper.xml]'
+2025-08-20 12:51:46.160 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-20 12:51:46.257 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 20 mappings in 'requestMappingHandlerMapping'
+2025-08-20 12:51:46.350 [main] DEBUG o.s.w.s.h.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-08-20 12:51:46.385 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-08-20 12:51:46.411 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 2 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-08-20 12:51:46.833 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-08-20 12:51:46.877 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-08-20 12:51:46.885 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-08-20 12:51:46.895 [main] INFO  c.aicreation.AiCreationApplication - Started AiCreationApplication in 3.159 seconds (process running for 3.401)
+2025-08-20 12:51:46.981 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-20 12:51:46.981 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-20 12:51:46.981 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-08-20 12:51:46.981 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-08-20 12:51:46.981 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-08-20 12:51:46.982 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@5c438795
+2025-08-20 12:51:46.982 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@7fba30fe
+2025-08-20 12:51:46.982 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-08-20 12:51:46.982 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-08-20 12:51:46.989 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 12:51:46.997 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 12:51:47.202 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 12:51:47.221 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@5e4fc3a6]
+2025-08-20 12:51:47.234 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 12:52:28.936 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-08-20 12:52:28.940 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-08-20 12:52:28.942 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-08-20 12:54:31.526 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2025-08-20 12:54:31.547 [main] INFO  c.aicreation.AiCreationApplication - Starting AiCreationApplication using Java 17.0.9 with PID 13483 (/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes started by qiaoxiangfeng in /Users/qiaoxiangfeng/IdeaProjects/AI-Creation)
+2025-08-20 12:54:31.547 [main] DEBUG c.aicreation.AiCreationApplication - Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-08-20 12:54:31.548 [main] INFO  c.aicreation.AiCreationApplication - The following 1 profile is active: "dev"
+2025-08-20 12:54:32.106 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-20 12:54:32.106 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-20 12:54:32.119 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 8 ms. Found 0 JPA repository interfaces.
+2025-08-20 12:54:32.127 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-20 12:54:32.127 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-20 12:54:32.133 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+2025-08-20 12:54:32.171 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/com/aicreation/mapper/ArticleMapper.class]
+2025-08-20 12:54:32.171 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/com/aicreation/mapper/UserMapper.class]
+2025-08-20 12:54:32.172 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'articleMapper' and 'com.aicreation.mapper.ArticleMapper' mapperInterface
+2025-08-20 12:54:32.173 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Enabling autowire by type for MapperFactoryBean with name 'articleMapper'.
+2025-08-20 12:54:32.173 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.aicreation.mapper.UserMapper' mapperInterface
+2025-08-20 12:54:32.173 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Enabling autowire by type for MapperFactoryBean with name 'userMapper'.
+2025-08-20 12:54:32.572 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-08-20 12:54:32.577 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-08-20 12:54:32.577 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-20 12:54:32.577 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-08-20 12:54:32.607 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-08-20 12:54:32.607 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1032 ms
+2025-08-20 12:54:32.704 [main] DEBUG o.s.w.f.ServerHttpObservationFilter - Filter 'webMvcObservationFilter' configured for use
+2025-08-20 12:54:32.906 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-20 12:54:32.935 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2025-08-20 12:54:32.955 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-08-20 12:54:33.062 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-20 12:54:33.073 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-08-20 12:54:33.154 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2648aa1b
+2025-08-20 12:54:33.154 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-08-20 12:54:33.176 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-08-20 12:54:33.331 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-20 12:54:33.334 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-08-20 12:54:33.441 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/mapper/ArticleMapper.xml]'
+2025-08-20 12:54:33.448 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [/Users/qiaoxiangfeng/IdeaProjects/AI-Creation/target/classes/mapper/UserMapper.xml]'
+2025-08-20 12:54:33.596 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-20 12:54:33.686 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 20 mappings in 'requestMappingHandlerMapping'
+2025-08-20 12:54:33.787 [main] DEBUG o.s.w.s.h.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-08-20 12:54:33.830 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-08-20 12:54:33.856 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 2 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-08-20 12:54:34.260 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2025-08-20 12:54:34.305 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-08-20 12:54:34.313 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-08-20 12:54:34.322 [main] INFO  c.aicreation.AiCreationApplication - Started AiCreationApplication in 3.066 seconds (process running for 3.233)
+2025-08-20 12:54:47.068 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-20 12:54:47.069 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-20 12:54:47.069 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-08-20 12:54:47.069 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-08-20 12:54:47.069 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-08-20 12:54:47.070 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@381d7c4c
+2025-08-20 12:54:47.070 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@62aefc75
+2025-08-20 12:54:47.070 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-08-20 12:54:47.070 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-08-20 12:54:47.078 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 12:54:47.088 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 12:54:47.392 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 12:54:47.411 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@785e3bbb]
+2025-08-20 12:54:47.424 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:04:41.265 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 13:04:41.285 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 13:04:41.329 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 13:04:41.331 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@7f6d5c91]
+2025-08-20 13:04:41.334 [http-nio-8080-exec-2] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:06:35.972 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 13:06:35.977 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 13:06:35.999 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 13:06:36.000 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@7c39c09b]
+2025-08-20 13:06:36.002 [http-nio-8080-exec-4] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:06:41.218 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/users/list", parameters={}
+2025-08-20 13:06:41.234 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.UserController#getUserList(UserListReqDto)
+2025-08-20 13:06:41.359 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.UserListReqDto@5727332c[userName=<null>,pageNo=1,pageSize=10]]
+2025-08-20 13:06:41.412 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:06:41.413 [http-nio-8080-exec-5] DEBUG c.a.service.impl.UserServiceImpl - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 13:06:41.531 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 13:06:41.535 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-08-20 13:06:41.536 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@523ac810[list=[com.aicreation.entity.dto.UserRespDto@137a (truncated)...]
+2025-08-20 13:06:41.541 [http-nio-8080-exec-5] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:06:44.731 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - POST "/api/articles/list", parameters={}
+2025-08-20 13:06:44.731 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.aicreation.controller.ArticleController#getArticleList(ArticleListReqDto)
+2025-08-20 13:06:44.733 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [com.aicreation.entity.dto.ArticleListReqDto@bdd8e10[articleName=<null>,publishStatus=<null>,voiceTon (truncated)...]
+2025-08-20 13:06:44.751 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-08-20 13:06:44.752 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.aicreation.entity.dto.base.PageRespDto@169654b9[list=[com.aicreation.entity.dto.ArticleListRespD (truncated)...]
+2025-08-20 13:06:44.754 [http-nio-8080-exec-7] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
+2025-08-20 13:11:56.593 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - GET "/api/actuator/health", parameters={}
+2025-08-20 13:11:56.597 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/octet-stream" to []
+2025-08-20 13:11:56.610 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Using 'application/vnd.spring-boot.actuator.v3+json', given [*/*] and supported [application/vnd.spring-boot.actuator.v3+json, application/vnd.spring-boot.actuator.v2+json, application/json]
+2025-08-20 13:11:56.611 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.HttpEntityMethodProcessor - Writing [org.springframework.boot.actuate.health.SystemHealth@4c58ffb8]
+2025-08-20 13:11:56.617 [http-nio-8080-exec-9] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK

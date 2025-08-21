@@ -1,0 +1,182 @@
+2025-08-20 08:57:23.202 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: 
+2025-08-20 08:57:23.871 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:00:27.809 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: 
+2025-08-20 09:00:27.855 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:16:38.323 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:16:38.337 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:17:25.601 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:17:25.617 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:17:37.637 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:17:37.640 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:17:42.438 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:17:42.441 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:26:50.687 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:26:50.698 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:27:26.136 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:27:26.142 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:28:01.010 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:28:01.024 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:33:24.227 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:33:24.242 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:33:30.540 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:33:30.545 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:33:35.958 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:33:35.962 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:33:44.814 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:33:44.819 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:33:53.323 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:33:53.326 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:34:05.313 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:34:05.317 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:34:13.698 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:34:13.702 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:37:32.596 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:37:32.617 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:37:39.441 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:37:39.446 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:37:46.560 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:37:46.563 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:38:12.495 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:38:12.505 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:38:17.446 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 更新用户信息，用户ID: 1
+2025-08-20 09:38:17.487 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 更新用户信息，用户ID: 1
+2025-08-20 09:38:17.583 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 用户信息更新成功，用户ID: 1
+2025-08-20 09:39:08.548 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:39:08.560 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:43:29.901 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:43:29.912 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:49:27.666 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:49:27.682 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:49:29.537 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:49:29.543 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:49:39.924 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:49:39.936 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:54:39.130 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:54:39.153 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:56:44.368 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 用户登录，用户名: admin
+2025-08-20 09:56:44.380 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户成功，用户名: admin
+2025-08-20 09:56:44.557 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 用户登录成功，用户名: admin
+2025-08-20 09:56:44.624 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:56:44.627 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:56:46.645 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:56:46.650 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 09:56:51.249 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 09:56:51.254 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:02:13.503 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 用户登录，用户名: admin
+2025-08-20 10:02:13.510 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户成功，用户名: admin
+2025-08-20 10:02:13.612 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 用户登录成功，用户名: admin
+2025-08-20 10:02:13.686 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:02:13.690 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:05:39.706 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:05:39.718 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:05:51.484 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:05:51.488 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:06:04.778 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:06:04.789 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:07:27.255 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 初始化用户密码，用户数量: 1, 是否指定用户: true
+2025-08-20 10:07:27.359 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 开始初始化用户密码，用户数量: 1, 是否指定用户: true
+2025-08-20 10:07:27.390 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 用户密码初始化成功，影响用户数量: 1
+2025-08-20 10:08:02.282 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 初始化用户密码，用户数量: 所有用户, 是否指定用户: false
+2025-08-20 10:08:02.380 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 开始初始化用户密码，用户数量: 所有用户, 是否指定用户: false
+2025-08-20 10:08:02.382 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 用户密码初始化成功，影响用户数量: 3
+2025-08-20 10:15:52.330 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:15:52.368 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:15:53.679 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:15:53.693 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:16:23.572 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:16:23.576 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:04.833 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:04.833 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:04.833 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:04.849 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:04.849 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:04.849 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:11.820 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:11.820 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:11.827 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:11.827 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:11.829 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:11.836 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:20.624 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:20.624 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:20.627 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:20.636 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:20.636 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:20.636 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:18:48.229 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:18:48.239 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:22:06.822 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:22:06.837 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:24:08.233 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:24:08.233 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:24:08.233 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:24:08.242 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:24:08.242 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:24:08.242 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:26:37.155 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:26:37.155 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:26:37.155 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:26:37.170 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:26:37.170 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:26:37.171 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:26:59.309 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:26:59.310 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:26:59.311 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:26:59.315 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:26:59.315 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:26:59.316 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:18.129 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:18.129 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:18.129 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:18.133 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:18.133 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:18.133 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:37.023 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:37.024 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:37.024 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:37.024 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:37.025 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:37.026 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:27:37.028 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:37.032 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:37.034 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:37.034 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:37.036 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:27:37.036 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:28:04.147 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:28:04.166 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:28:08.720 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 50, 用户名搜索: null
+2025-08-20 10:28:08.724 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:28:11.334 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:28:11.338 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:28:18.974 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:28:18.979 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:48:26.829 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 用户登录，用户名: admin
+2025-08-20 10:48:26.847 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户成功，用户名: admin
+2025-08-20 10:48:26.972 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 用户登录成功，用户名: admin
+2025-08-20 10:48:27.064 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:48:27.073 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:48:37.517 [http-nio-8080-exec-9] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:48:37.523 [http-nio-8080-exec-9] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:48:42.054 [http-nio-8080-exec-7] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:48:42.060 [http-nio-8080-exec-7] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:49:23.217 [http-nio-8080-exec-8] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:49:23.217 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:49:23.229 [http-nio-8080-exec-8] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:49:23.238 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:52:08.700 [http-nio-8080-exec-2] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:52:08.706 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:52:08.713 [http-nio-8080-exec-2] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:52:08.713 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:52:18.504 [http-nio-8080-exec-1] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:52:18.504 [http-nio-8080-exec-10] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:52:18.508 [http-nio-8080-exec-10] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:52:18.508 [http-nio-8080-exec-1] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:52:18.570 [http-nio-8080-exec-4] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:52:18.570 [http-nio-8080-exec-5] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 10:52:18.594 [http-nio-8080-exec-4] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 10:52:18.597 [http-nio-8080-exec-5] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 11:02:02.890 [http-nio-8080-exec-6] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 11:02:02.897 [http-nio-8080-exec-6] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
+2025-08-20 11:02:08.618 [http-nio-8080-exec-3] INFO  c.a.controller.UserController - 查询用户列表，页码: 1, 每页大小: 10, 用户名搜索: null
+2025-08-20 11:02:08.622 [http-nio-8080-exec-3] INFO  c.a.service.impl.UserServiceImpl - 查询用户列表成功，总数: 3
