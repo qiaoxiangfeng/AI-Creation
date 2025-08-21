@@ -1,5 +1,6 @@
 ### IntelliJ IDEA ###
 out/
+logs/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
@@ -27,6 +28,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+.idea/
 
 ### Maven ###
 target/
@@ -62,3 +64,6 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+### IntelliJ IDEA module files ###
+*.iml
