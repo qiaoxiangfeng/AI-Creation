@@ -230,7 +230,8 @@ start_backend() {
     
     # 启动后端（后台运行）
     print_info "启动Spring Boot应用..."
-    nohup mvn spring-boot:run > backend.log 2>&1 &
+    mkdir -p logs
+    nohup mvn spring-boot:run > logs/backend.out.log 2>&1 &
     BACKEND_PID=$!
     
     # 等待后端启动
@@ -289,7 +290,7 @@ start_frontend() {
     
     # 启动前端（后台运行）
     print_info "启动Vue前端应用..."
-    nohup npm run dev > ../frontend.log 2>&1 &
+    nohup npm run dev > ../logs/frontend.out.log 2>&1 &
     FRONTEND_PID=$!
     
     # 回到根目录

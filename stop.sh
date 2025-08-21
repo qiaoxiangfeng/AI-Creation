@@ -105,14 +105,14 @@ stop_frontend() {
 cleanup_logs() {
     print_info "清理日志文件..."
     
-    if [ -f "backend.log" ]; then
-        rm backend.log
-        print_info "已删除 backend.log"
+    if [ -f "logs/backend.out.log" ]; then
+        rm "logs/backend.out.log"
+        print_info "已删除 logs/backend.out.log"
     fi
     
-    if [ -f "frontend.log" ]; then
-        rm frontend.log
-        print_info "已删除 frontend.log"
+    if [ -f "logs/frontend.out.log" ]; then
+        rm "logs/frontend.out.log"
+        print_info "已删除 logs/frontend.out.log"
     fi
     
     print_success "日志清理完成"
