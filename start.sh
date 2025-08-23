@@ -5,6 +5,11 @@
 
 set -e  # 遇到错误时退出
 
+# 预置用户级 Node 安装路径，确保脚本内使用到正确的 Node 版本
+export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+export N_PREFIX="$HOME/.n"
+export PATH="$N_PREFIX/bin:$NPM_CONFIG_PREFIX/bin:$PATH"
+
 # 环境变量配置（可通过export设置）
 # CLEAN_MAVEN_CACHE=true    # 是否清理Maven本地仓库缓存（默认false）
 # CLEAN_NODE_MODULES=true   # 是否清理node_modules重新安装（默认false）
@@ -66,6 +71,23 @@ check_requirements() {
     # 检查npm
     if ! command -v npm &> /dev/null; then
         print_error "npm未安装，请先安装npm"
+        exit 1
+    fi
+    
+    # 检查Node.js版本 (Vite 要求 Node 20.19+ 或 22.12+)
+    NODE_VERSION=$(node -v | sed 's/v//')
+    NODE_MAJOR=${NODE_VERSION%%.*}
+    NODE_MINOR=$(echo "$NODE_VERSION" | cut -d '.' -f2)
+    if [ "$NODE_MAJOR" -lt 20 ]; then
+        print_error "Node.js 版本过低 (当前: $NODE_VERSION)，请安装 Node 20.19+ 或 22.12+"
+        exit 1
+    fi
+    if [ "$NODE_MAJOR" -eq 20 ] && [ "$NODE_MINOR" -lt 19 ]; then
+        print_error "Node.js 20 次版本过低 (当前: $NODE_VERSION)，请升级至 >= 20.19"
+        exit 1
+    fi
+    if [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 12 ]; then
+        print_error "Node.js 22 次版本过低 (当前: $NODE_VERSION)，请升级至 >= 22.12"
         exit 1
     fi
     
@@ -264,16 +286,7 @@ start_frontend() {
     # 进入前端目录
     cd frontend
     
-    # 清理node_modules（可选，通过环境变量控制）
-    if [ "$CLEAN_NODE_MODULES" = "true" ]; then
-        print_info "清理node_modules，重新安装依赖..."
-        rm -rf node_modules package-lock.json
-        print_info "重新安装前端依赖..."
-        if ! npm install --silent; then
-            print_error "前端依赖安装失败"
-            return 1
-        fi
-    fi
+    # 取消清理 node_modules（依赖包清理逻辑已禁用）
     
     # 清理构建缓存
     print_info "清理构建缓存..."

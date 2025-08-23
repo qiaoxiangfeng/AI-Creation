@@ -9,9 +9,15 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface UserConverter {
+
+	/**
+	 * 提供 MapStruct 的默认实例，便于在非 Spring 上下文中直接使用
+	 */
+	UserConverter INSTANCE = Mappers.getMapper(UserConverter.class);
 
     UserBo toUserBo(UserCreateReqDto request);
 

@@ -63,9 +63,10 @@ public class ArticleController {
 
     @Operation(summary = "查询文章列表", description = "分页查询文章列表，支持按名称、音色和发布状态筛选")
     @PostMapping("/list")
-    public PageRespDto<ArticleListRespDto> getArticleList(
+    public BaseResponse<PageRespDto<ArticleListRespDto>> getArticleList(
             @Parameter(description = "文章列表查询请求") @Valid @RequestBody ArticleListReqDto request) {
-        return articleService.getArticleList(request);
+        PageRespDto<ArticleListRespDto> page = articleService.getArticleList(request);
+        return BaseResponse.success(page);
     }
 
     @Operation(summary = "更新文章发布状态", description = "更新文章的发布状态")

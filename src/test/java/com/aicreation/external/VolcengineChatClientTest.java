@@ -25,6 +25,12 @@ class VolcengineChatClientTest {
                 "}";
         douBaoClient.chatCompletions(content);
     }
+
+
+    @Test
+    void test2(){
+        System.out.println("测试撒啊啊");
+    }
 }
 
 

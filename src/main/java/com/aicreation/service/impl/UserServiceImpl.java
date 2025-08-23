@@ -38,9 +38,6 @@ public class UserServiceImpl implements IUserService {
     private UserMapper userMapper;
 
     @Autowired
-    private UserConverter userConverter;
-    
-    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     @Override
@@ -60,7 +57,7 @@ public class UserServiceImpl implements IUserService {
         }
         
         log.info("查询用户成功，用户ID: {}, 用户名: {}", userId, user.getUserName());
-        return userConverter.toUserRespDto(user);
+        return UserConverter.INSTANCE.toUserRespDto(user);
     }
 
     @Override
@@ -109,7 +106,7 @@ public class UserServiceImpl implements IUserService {
         }
         
         // DTO -> BO 转换
-        UserBo userBo = userConverter.toUserBo(request);
+        UserBo userBo = UserConverter.INSTANCE.toUserBo(request);
 
         // 创建用户实体
         User user = new User();
@@ -158,7 +155,7 @@ public class UserServiceImpl implements IUserService {
         }
         
         // DTO -> BO 转换
-        UserBo userBo = userConverter.toUserBo(request);
+        UserBo userBo = UserConverter.INSTANCE.toUserBo(request);
 
         // 更新用户信息
         User user = new User();
@@ -233,7 +230,7 @@ public class UserServiceImpl implements IUserService {
         
         log.info("查询用户列表成功，总数: {}", userList.size());
         PageInfo<User> pageInfo = new PageInfo<>(userList);
-        return PageRespDto.of(pageInfo).convert(userConverter::toUserRespDto);
+        return PageRespDto.of(pageInfo).convert(UserConverter.INSTANCE::toUserRespDto);
     }
 
     @Override
@@ -263,7 +260,7 @@ public class UserServiceImpl implements IUserService {
         userMapper.updateByPrimaryKeySelective(user);
         
         log.info("用户登录成功，用户名: {}", request.getUserName());
-        return userConverter.toUserRespDto(user);
+        return UserConverter.INSTANCE.toUserRespDto(user);
     }
 
     @Override

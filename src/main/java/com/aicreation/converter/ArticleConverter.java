@@ -8,6 +8,7 @@ import com.aicreation.entity.po.Article;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.factory.Mappers;
 
 /**
  * 文章对象转换器
@@ -16,8 +17,13 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
  * @date 2024/01/01
  * @version 1.0.0
  */
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ArticleConverter {
+
+	/**
+	 * 提供 MapStruct 的默认实例，便于在非 Spring 上下文中直接使用
+	 */
+	ArticleConverter INSTANCE = Mappers.getMapper(ArticleConverter.class);
 
     /**
      * 创建请求DTO转换为业务对象

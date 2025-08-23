@@ -35,9 +35,6 @@ public class ArticleServiceImpl implements IArticleService {
     @Autowired
     private ArticleMapper articleMapper;
 
-    @Autowired
-    private ArticleConverter articleConverter;
-
     @Override
     public ArticleRespDto getArticleById(ArticleQueryReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getArticleId())) {
@@ -50,7 +47,7 @@ public class ArticleServiceImpl implements IArticleService {
             return null;
         }
 
-        return articleConverter.toArticleRespDto(article);
+        return ArticleConverter.INSTANCE.toArticleRespDto(article);
     }
 
     @Override
@@ -65,7 +62,7 @@ public class ArticleServiceImpl implements IArticleService {
             return null;
         }
 
-        return articleConverter.toArticleRespDto(article);
+        return ArticleConverter.INSTANCE.toArticleRespDto(article);
     }
 
     @Override
@@ -83,14 +80,14 @@ public class ArticleServiceImpl implements IArticleService {
         }
 
         // 转换为业务对象
-        ArticleBo articleBo = articleConverter.toArticleBo(request);
+        ArticleBo articleBo = ArticleConverter.INSTANCE.toArticleBo(request);
         articleBo.setResState(1);
         articleBo.setPublishStatus(ArticleStatus.UNPUBLISHED); // 默认未发布
         articleBo.setCreateTime(LocalDateTime.now());
         articleBo.setUpdateTime(LocalDateTime.now());
 
         // 转换为持久化对象
-        Article article = articleConverter.toArticle(articleBo);
+        Article article = ArticleConverter.INSTANCE.toArticle(articleBo);
 
         // 保存到数据库
         int result = articleMapper.insert(article);
@@ -127,7 +124,7 @@ public class ArticleServiceImpl implements IArticleService {
         }
 
         // 转换为持久化对象
-        Article article = articleConverter.toArticle(request);
+        Article article = ArticleConverter.INSTANCE.toArticle(request);
         article.setUpdateTime(LocalDateTime.now());
 
         // 更新数据库

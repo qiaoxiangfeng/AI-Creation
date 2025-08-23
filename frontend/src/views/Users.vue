@@ -227,7 +227,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { http } from '../lib/http/client';
-import type { PageRespDto } from '../lib/types/base';
+import type { BaseResponse, PageRespDto } from '../lib/types/base';
 
 interface UserRespDto {
   id: number;
@@ -276,15 +276,16 @@ onMounted(() => {
 const loadUsers = async () => {
   loading.value = true;
   try {
-    const resp = await http.post<PageRespDto<UserRespDto>>('/api/users/list', {
+    const resp = await http.post<BaseResponse<PageRespDto<UserRespDto>>>('/api/users/list', {
       pageNo: currentPage.value,
       pageSize: pageSize.value,
       userName: searchKeyword.value.trim() || undefined,
     });
-    users.value = resp.data.list || [];
-    total.value = resp.data.total || 0;
+    const page = resp.data.data;
+    users.value = page?.list || [];
+    total.value = page?.total || 0;
     // 使用后端返回的分页信息更新当前页
-    currentPage.value = resp.data.pageNo || 1;
+    currentPage.value = page?.pageNo || 1;
   } catch (error: any) {
     console.error('加载用户列表失败:', error);
     const errorMessage = error.message || '加载用户列表失败，请稍后重试';
@@ -317,7 +318,7 @@ const handlePageSizeChange = () => {
 
 const createUser = async () => {
   try {
-    await http.post('/api/users/create', newUser.value);
+    await http.post('/api/users', newUser.value);
     showCreateModal.value = false;
     newUser.value = { userName: '', userEmail: '', userPhone: '', userPassword: '' };
     loadUsers();

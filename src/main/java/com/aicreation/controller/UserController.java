@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -88,7 +87,7 @@ public class UserController {
         
         Long userId = request.getUserId();
         log.info("更新用户信息，用户ID: {}", userId);
-        Boolean result = userService.updateUser(request);
+        userService.updateUser(request);
         return BaseResponse.success(true);
     }
 
@@ -106,7 +105,7 @@ public class UserController {
         
         Long userId = request.getUserId();
         log.info("删除用户，用户ID: {}", userId);
-        Boolean result = userService.deleteUser(request);
+        userService.deleteUser(request);
         return BaseResponse.success(true);
     }
 
@@ -118,12 +117,13 @@ public class UserController {
      */
     @Operation(summary = "查询用户列表", description = "分页查询用户列表，支持用户名搜索")
     @PostMapping("/list")
-    public PageRespDto<UserRespDto> getUserList(
+    public BaseResponse<PageRespDto<UserRespDto>> getUserList(
             @Parameter(description = "分页参数", required = true)
             @Valid @RequestBody UserListReqDto request) {
         
         log.info("查询用户列表，页码: {}, 每页大小: {}, 用户名搜索: {}", request.getPageNum(), request.getPageSize(), request.getUserName());
-        return userService.getUserList(request);
+        PageRespDto<UserRespDto> page = userService.getUserList(request);
+        return BaseResponse.success(page);
     }
 
     /**

@@ -256,7 +256,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { http } from '../lib/http/client';
-import type { PageRespDto } from '../lib/types/base';
+import type { BaseResponse, PageRespDto } from '../lib/types/base';
 
 interface ArticleRespDto {
   id: number;
@@ -305,14 +305,15 @@ onMounted(() => {
 const loadArticles = async () => {
   loading.value = true;
   try {
-    const resp = await http.post<PageRespDto<ArticleRespDto>>('/api/articles/list', {
+    const resp = await http.post<BaseResponse<PageRespDto<ArticleRespDto>>>('/api/articles/list', {
       pageNo: currentPage.value,
       pageSize: pageSize.value,
       articleName: searchKeyword.value.trim() || undefined,
       voiceTone: searchVoiceTone.value || undefined,
     });
-    articles.value = resp.data.list || [];
-    total.value = resp.data.total || 0;
+    const page = resp.data.data;
+    articles.value = page?.list || [];
+    total.value = page?.total || 0;
   } catch (error: any) {
     console.error('加载文章列表失败:', error);
     const errorMessage = error.message || '加载文章列表失败，请稍后重试';
