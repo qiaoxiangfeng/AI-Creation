@@ -54,8 +54,9 @@ public class ArticleContentGenerationTask {
     /**
      * 定时任务：每15分钟执行一次文章内容生成
      * 如果上次执行未完成，则丢弃本次调度
+     * 暂时关闭：注释掉@Scheduled注解
      */
-    @Scheduled(cron = "0 */15 * * * ?") // 每15分钟执行一次
+    // @Scheduled(cron = "0 */15 * * * ?") // 每15分钟执行一次 - 暂时关闭
     @Transactional(rollbackFor = Exception.class)
     public void generateArticleContents() {
         // 检查任务是否正在执行，如果是则跳过本次执行
