@@ -22,6 +22,8 @@ import java.util.List;
 /**
  * 文章内容生成定时任务
  * 根据章节基本信息生成章节具体内容
+ * 采用实时落表策略，确保生成过程不会因中断丢失已生成内容
+ * 每次只处理少量章节，避免单次运行时间过长
  *
  * @author AI-Creation Team
  * @date 2024/01/01
@@ -69,6 +71,7 @@ public class ArticleContentGenerationTask {
 
         try {
             // 查询需要生成内容的章节（chapter_content为空的章节）
+            // 按文章ID和章节号排序，确保同一篇文章的章节按顺序处理
             List<ArticleChapter> chaptersToProcess = articleChapterMapper.selectChaptersWithoutContent();
 
             if (chaptersToProcess == null || chaptersToProcess.isEmpty()) {
@@ -76,10 +79,18 @@ public class ArticleContentGenerationTask {
                 return;
             }
 
+            // 限制单次处理的数量，避免运行时间过长
+            int maxProcessCount = 5; // 每次最多处理5个章节
+            List<ArticleChapter> chaptersToProcessLimited = chaptersToProcess.size() > maxProcessCount
+                ? chaptersToProcess.subList(0, maxProcessCount)
+                : chaptersToProcess;
+
+            log.info("本次将处理{}个章节（总待处理：{}个）", chaptersToProcessLimited.size(), chaptersToProcess.size());
+
             int successCount = 0;
             int failCount = 0;
 
-            for (ArticleChapter chapter : chaptersToProcess) {
+            for (ArticleChapter chapter : chaptersToProcessLimited) {
                 try {
                     generateContentForChapter(chapter);
                     successCount++;
@@ -91,10 +102,13 @@ public class ArticleContentGenerationTask {
                 } catch (Exception e) {
                     log.error("生成章节[ID:{}]内容失败：{}", chapter.getId(), e.getMessage(), e);
                     failCount++;
+
+                    // 即使失败也继续处理其他章节，确保部分成功
                 }
             }
 
-            log.info("文章内容生成定时任务完成：成功{}个，失败{}个", successCount, failCount);
+            log.info("文章内容生成定时任务完成：成功{}个，失败{}个，剩余待处理{}个",
+                successCount, failCount, Math.max(0, chaptersToProcess.size() - chaptersToProcessLimited.size()));
         } catch (Exception e) {
             log.error("文章内容生成定时任务执行失败：{}", e.getMessage(), e);
         } finally {
@@ -104,8 +118,12 @@ public class ArticleContentGenerationTask {
 
     /**
      * 为单个章节生成内容
+     * 采用实时落表策略，确保生成过程不会因中断丢失数据
      */
     private void generateContentForChapter(ArticleChapter chapter) {
+        String originalContent = chapter.getChapterContent(); // 保存原始内容，用于回滚
+        boolean contentGenerated = false;
+
         try {
             // 获取文章信息
             Article article = articleMapper.selectByPrimaryKey(chapter.getArticleId());
@@ -114,22 +132,52 @@ public class ArticleContentGenerationTask {
                 return;
             }
 
+            // 检查文章是否处于生成中状态，如果不是则设置为生成中
+            if (article.getGenerationStatus() != 1) {
+                article.setGenerationStatus(1); // 1-生成中
+                article.setUpdateTime(LocalDateTime.now());
+                articleMapper.updateByPrimaryKey(article);
+                log.info("文章[{}]状态已更新为生成中", article.getArticleName());
+            }
+
             // 获取文章生成配置
             ArticleGenerationConfig config = findArticleGenerationConfig(article);
 
             // 获取本章的伏笔信息
             List<Plot> chapterPlots = plotMapper.selectByChapterId(chapter.getId());
 
-            // 生成章节内容
+            log.info("开始生成章节[ID:{}]内容，当前内容长度：{}", chapter.getId(),
+                chapter.getChapterContent() != null ? chapter.getChapterContent().length() : 0);
+
+            // 生成章节内容 - 这是最耗时的操作
             String chapterContent = generateChapterContent(article, chapter, config, chapterPlots);
 
-            // 更新章节内容
+            // 内容生成成功，立即落表
             chapter.setChapterContent(chapterContent);
             chapter.setUpdateTime(LocalDateTime.now());
             articleChapterMapper.updateByPrimaryKey(chapter);
+            contentGenerated = true;
+
+            log.info("章节[ID:{}]内容生成并保存成功，内容长度：{} 字符", chapter.getId(), chapterContent.length());
+
+            // 检查是否所有章节都已完成，如果是则更新文章状态为已完成
+            checkAndUpdateArticleCompletionStatus(article);
 
         } catch (Exception e) {
             log.error("生成章节[ID:{}]内容时发生异常：{}", chapter.getId(), e.getMessage(), e);
+
+            // 如果内容已经生成但保存失败，尝试重新保存
+            if (contentGenerated && chapter.getChapterContent() != null) {
+                try {
+                    log.info("尝试重新保存章节[ID:{}]的内容", chapter.getId());
+                    articleChapterMapper.updateByPrimaryKey(chapter);
+                    log.info("章节[ID:{}]内容重新保存成功", chapter.getId());
+                } catch (Exception saveException) {
+                    log.error("章节[ID:{}]内容重新保存失败：{}", chapter.getId(), saveException.getMessage());
+                    // 可以考虑将内容保存到临时文件或日志中，以便后续恢复
+                }
+            }
+
             throw e;
         }
     }
@@ -230,6 +278,39 @@ public class ArticleContentGenerationTask {
             log.warn("查找文章生成配置失败：{}", e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * 检查并更新文章完成状态
+     * 如果所有章节都有内容，则将文章状态更新为已完成
+     */
+    private void checkAndUpdateArticleCompletionStatus(Article article) {
+        try {
+            // 查询文章的所有章节
+            List<ArticleChapter> allChapters = articleChapterMapper.selectByArticleId(article.getId());
+
+            if (allChapters == null || allChapters.isEmpty()) {
+                log.warn("文章[{}]没有章节数据", article.getArticleName());
+                return;
+            }
+
+            // 检查是否所有章节都有内容
+            boolean allCompleted = allChapters.stream()
+                .allMatch(chapter -> chapter.getChapterContent() != null &&
+                           !chapter.getChapterContent().trim().isEmpty());
+
+            if (allCompleted && article.getGenerationStatus() != 2) {
+                // 更新文章状态为已完成
+                article.setGenerationStatus(2); // 2-已完成
+                article.setUpdateTime(LocalDateTime.now());
+                articleMapper.updateByPrimaryKey(article);
+
+                log.info("文章[{}]所有章节内容生成完成，状态更新为已完成", article.getArticleName());
+            }
+        } catch (Exception e) {
+            log.error("检查文章[{}]完成状态时发生异常：{}", article.getArticleName(), e.getMessage(), e);
+            // 不抛出异常，避免影响主要流程
+        }
     }
 
     /**

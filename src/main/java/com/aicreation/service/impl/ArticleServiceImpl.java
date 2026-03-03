@@ -375,6 +375,14 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "请先设置文章的总字数预估和每章节字数预估");
         }
 
+        // 更新文章状态为生成中
+        if (article.getGenerationStatus() != 1) {
+            article.setGenerationStatus(1); // 1-生成中
+            article.setUpdateTime(LocalDateTime.now());
+            articleMapper.updateByPrimaryKey(article);
+            log.info("文章[{}]状态已更新为生成中", article.getArticleName());
+        }
+
         // 检查是否有章节需要生成内容
         List<ArticleChapter> chaptersWithoutContent = articleChapterMapper.selectChaptersWithoutContentByArticleId(articleId);
         if (chaptersWithoutContent == null || chaptersWithoutContent.isEmpty()) {

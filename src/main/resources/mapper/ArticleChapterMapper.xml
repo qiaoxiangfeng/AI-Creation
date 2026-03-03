@@ -90,7 +90,7 @@
         AND core_plot IS NOT NULL
         AND word_count_estimate IS NOT NULL
         AND res_state = 1
-        ORDER BY article_id, chapter_no ASC
+        ORDER BY article_id ASC, chapter_no ASC
     </select>
 
     <!-- 根据文章ID查询没有内容的章节列表 -->
