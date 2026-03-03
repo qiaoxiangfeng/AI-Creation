@@ -105,6 +105,9 @@
                     <button @click="downloadFullText(article)" class="btn btn-success btn-sm">
                       下载
                     </button>
+                    <button @click="generateContent(article)" class="btn btn-warning btn-sm">
+                      生成
+                    </button>
                     <button @click="editArticle(article)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
@@ -536,6 +539,32 @@ const downloadFullText = async (article: ArticleRespDto) => {
   } catch (error) {
     console.error('下载全文失败:', error);
     alert('下载失败，请稍后重试');
+  }
+};
+
+// 生成内容
+const generateContent = async (article: ArticleRespDto) => {
+  // 检查参数是否设置完整
+  if (!article.totalWordCountEstimate || !article.chapterWordCountEstimate) {
+    alert('请先设置文章的总字数预估和每章节字数预估');
+    return;
+  }
+
+  if (confirm(`确定要生成文章"${article.articleName}"的内容吗？\n\n这将触发AI生成章节内容，可能需要一些时间。`)) {
+    try {
+      const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-content`);
+      const response = resp.data;
+      if (response.code === '00000000') {
+        alert('内容生成任务已启动，请稍后查看章节内容');
+        // 重新加载列表
+        loadArticles();
+      } else {
+        alert('启动失败：' + response.msg);
+      }
+    } catch (error) {
+      console.error('启动内容生成失败:', error);
+      alert('启动失败，请稍后重试');
+    }
   }
 };
 

@@ -93,5 +93,18 @@
         ORDER BY article_id, chapter_no ASC
     </select>
 
+    <!-- 根据文章ID查询没有内容的章节列表 -->
+    <select id="selectChaptersWithoutContentByArticleId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_chapter
+        WHERE article_id = #{articleId,jdbcType=BIGINT}
+        AND (chapter_content IS NULL OR chapter_content = '')
+        AND core_plot IS NOT NULL
+        AND word_count_estimate IS NOT NULL
+        AND res_state = 1
+        ORDER BY chapter_no ASC
+    </select>
+
 </mapper>
 

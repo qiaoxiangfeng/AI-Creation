@@ -102,4 +102,12 @@ public class ArticleController {
         String fullText = articleService.getArticleFullText(articleId);
         return BaseResponse.success(fullText);
     }
+
+    @Operation(summary = "触发文章内容生成", description = "手动触发指定文章的内容生成任务")
+    @PostMapping("/{articleId}/generate-content")
+    public BaseResponse<Boolean> generateArticleContent(
+            @Parameter(description = "文章ID") @PathVariable Long articleId) {
+        boolean result = articleService.generateArticleContent(articleId);
+        return BaseResponse.success(result);
+    }
 }

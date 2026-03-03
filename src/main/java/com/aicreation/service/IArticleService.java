@@ -85,4 +85,12 @@ public interface IArticleService {
      * @return 包含所有章节的完整文本
      */
     String getArticleFullText(Long articleId);
+
+    /**
+     * 触发文章内容生成
+     *
+     * @param articleId 文章ID
+     * @return 是否成功启动生成任务
+     */
+    boolean generateArticleContent(Long articleId);
 }

@@ -28,4 +28,9 @@ public interface ArticleChapterMapper {
      * 查询没有内容的章节列表（用于内容生成）
      */
     List<ArticleChapter> selectChaptersWithoutContent();
+
+    /**
+     * 根据文章ID查询没有内容的章节列表
+     */
+    List<ArticleChapter> selectChaptersWithoutContentByArticleId(@Param("articleId") Long articleId);
 }
