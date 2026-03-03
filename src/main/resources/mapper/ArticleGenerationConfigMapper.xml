@@ -12,6 +12,8 @@
         <result column="character_type" jdbcType="VARCHAR" property="characterType"/>
         <result column="style" jdbcType="VARCHAR" property="style"/>
         <result column="additional_characteristics" jdbcType="VARCHAR" property="additionalCharacteristics"/>
+        <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
+        <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
         <result column="pending_count" jdbcType="INTEGER" property="pendingCount"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -20,7 +22,7 @@
 
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
-        id, theme, gender, genre, plot, character_type, style, additional_characteristics, pending_count, res_state, create_time, update_time
+        id, theme, gender, genre, plot, character_type, style, additional_characteristics, total_word_count_estimate, chapter_word_count_estimate, pending_count, res_state, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章生成配置 -->
@@ -56,10 +58,11 @@
     <!-- 插入文章生成配置 -->
     <insert id="insert" parameterType="com.aicreation.entity.po.ArticleGenerationConfig" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article_generation_config (
-            theme, gender, genre, plot, character_type, style, additional_characteristics, pending_count, res_state, create_time, update_time
+            theme, gender, genre, plot, character_type, style, additional_characteristics, total_word_count_estimate, chapter_word_count_estimate, pending_count, res_state, create_time, update_time
         ) VALUES (
             #{theme,jdbcType=VARCHAR}, #{gender,jdbcType=VARCHAR}, #{genre,jdbcType=VARCHAR}, #{plot,jdbcType=VARCHAR},
             #{characterType,jdbcType=VARCHAR}, #{style,jdbcType=VARCHAR}, #{additionalCharacteristics,jdbcType=VARCHAR},
+            #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER},
             #{pendingCount,jdbcType=INTEGER}, #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
@@ -75,6 +78,8 @@
             <if test="characterType != null">character_type = #{characterType,jdbcType=VARCHAR},</if>
             <if test="style != null">style = #{style,jdbcType=VARCHAR},</if>
             <if test="additionalCharacteristics != null">additional_characteristics = #{additionalCharacteristics,jdbcType=VARCHAR},</if>
+            <if test="totalWordCountEstimate != null">total_word_count_estimate = #{totalWordCountEstimate,jdbcType=INTEGER},</if>
+            <if test="chapterWordCountEstimate != null">chapter_word_count_estimate = #{chapterWordCountEstimate,jdbcType=INTEGER},</if>
             <if test="pendingCount != null">pending_count = #{pendingCount,jdbcType=INTEGER},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
             update_time = #{updateTime,jdbcType=TIMESTAMP}

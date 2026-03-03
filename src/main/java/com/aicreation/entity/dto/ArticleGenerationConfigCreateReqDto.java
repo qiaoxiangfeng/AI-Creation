@@ -48,6 +48,14 @@ public class ArticleGenerationConfigCreateReqDto extends BaseDto {
     @Size(max = 1000, message = "附加特点不能超过1000个字符")
     private String additionalCharacteristics;
 
+    @Schema(description = "总字数预估", example = "100000")
+    @Min(value = 1000, message = "总字数预估不能小于1000")
+    private Integer totalWordCountEstimate;
+
+    @Schema(description = "每章节字数预估", example = "5000")
+    @Min(value = 500, message = "每章节字数预估不能小于500")
+    private Integer chapterWordCountEstimate;
+
     @Schema(description = "待生成数量", example = "10")
     @Min(value = 0, message = "待生成数量不能小于0")
     private Integer pendingCount;
@@ -107,6 +115,22 @@ public class ArticleGenerationConfigCreateReqDto extends BaseDto {
 
     public void setAdditionalCharacteristics(String additionalCharacteristics) {
         this.additionalCharacteristics = additionalCharacteristics;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
     public Integer getPendingCount() {

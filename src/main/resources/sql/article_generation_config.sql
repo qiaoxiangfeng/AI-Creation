@@ -11,6 +11,8 @@ CREATE TABLE article_generation_config (
     character_type VARCHAR(100),
     style VARCHAR(100),
     additional_characteristics TEXT,
+    total_word_count_estimate INTEGER DEFAULT 100000,
+    chapter_word_count_estimate INTEGER DEFAULT 5000,
     pending_count INTEGER DEFAULT 0,
     res_state SMALLINT DEFAULT 1,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -34,6 +36,8 @@ COMMENT ON COLUMN article_generation_config.plot IS '情节分类（升级、学
 COMMENT ON COLUMN article_generation_config.character_type IS '角色分类';
 COMMENT ON COLUMN article_generation_config.style IS '风格分类';
 COMMENT ON COLUMN article_generation_config.additional_characteristics IS '附加特点（逗号分隔）';
+COMMENT ON COLUMN article_generation_config.total_word_count_estimate IS '总字数预估（默认100000）';
+COMMENT ON COLUMN article_generation_config.chapter_word_count_estimate IS '每章节字数预估（默认5000）';
 COMMENT ON COLUMN article_generation_config.pending_count IS '待生成数量';
 COMMENT ON COLUMN article_generation_config.res_state IS '删除标记（1-有效，0-无效）';
 COMMENT ON COLUMN article_generation_config.create_time IS '创建时间';

@@ -47,6 +47,8 @@
                 <th>角色</th>
                 <th>风格</th>
                 <th>附加特点</th>
+                <th>总字数预估</th>
+                <th>每章字数预估</th>
                 <th>待生成数量</th>
                 <th>创建时间</th>
                 <th>操作</th>
@@ -72,6 +74,8 @@
                     </span>
                   </div>
                 </td>
+                <td>{{ config.totalWordCountEstimate || 100000 }}</td>
+                <td>{{ config.chapterWordCountEstimate || 5000 }}</td>
                 <td>{{ config.pendingCount }}</td>
                 <td>{{ formatDate(config.createTime) }}</td>
                 <td>
@@ -218,6 +222,19 @@
               </div>
             </div>
 
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">总字数预估</label>
+                <input v-model.number="newConfig.totalWordCountEstimate" type="number" class="form-input" min="1000" placeholder="100000" />
+                <small class="form-hint">默认 100000 字</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label">每章节字数预估</label>
+                <input v-model.number="newConfig.chapterWordCountEstimate" type="number" class="form-input" min="500" placeholder="5000" />
+                <small class="form-hint">默认 5000 字</small>
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label">待生成数量</label>
               <input v-model.number="newConfig.pendingCount" type="number" class="form-input" min="0" />
@@ -322,6 +339,19 @@
               </div>
             </div>
 
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">总字数预估</label>
+                <input v-model.number="editingConfig.totalWordCountEstimate" type="number" class="form-input" min="1000" placeholder="100000" />
+                <small class="form-hint">默认 100000 字</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label">每章节字数预估</label>
+                <input v-model.number="editingConfig.chapterWordCountEstimate" type="number" class="form-input" min="500" placeholder="5000" />
+                <small class="form-hint">默认 5000 字</small>
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label">待生成数量</label>
               <input v-model.number="editingConfig.pendingCount" type="number" class="form-input" min="0" />
@@ -353,6 +383,8 @@ interface ArticleGenerationConfigListRespDto {
   characterType?: string;
   style?: string;
   additionalCharacteristics?: string;
+  totalWordCountEstimate?: number;
+  chapterWordCountEstimate?: number;
   pendingCount: number;
   createTime: string;
 }
@@ -365,6 +397,8 @@ interface ArticleGenerationConfigCreateReqDto {
   characterType?: string;
   style?: string;
   additionalCharacteristics?: string;
+  totalWordCountEstimate?: number;
+  chapterWordCountEstimate?: number;
   pendingCount?: number;
 }
 
@@ -377,6 +411,8 @@ interface ArticleGenerationConfigUpdateReqDto {
   characterType?: string;
   style?: string;
   additionalCharacteristics?: string;
+  totalWordCountEstimate?: number;
+  chapterWordCountEstimate?: number;
   pendingCount?: number;
 }
 
@@ -418,6 +454,8 @@ const newConfig = ref<ArticleGenerationConfigCreateReqDto>({
   characterType: '',
   style: '',
   additionalCharacteristics: '',
+  totalWordCountEstimate: 100000,
+  chapterWordCountEstimate: 5000,
   pendingCount: 0
 });
 

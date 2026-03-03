@@ -55,6 +55,16 @@ public class ArticleGenerationConfig implements Serializable {
     private String additionalCharacteristics;
 
     /**
+     * 总字数预估
+     */
+    private Integer totalWordCountEstimate;
+
+    /**
+     * 每章节字数预估
+     */
+    private Integer chapterWordCountEstimate;
+
+    /**
      * 待生成数量
      */
     private Integer pendingCount;
@@ -139,6 +149,22 @@ public class ArticleGenerationConfig implements Serializable {
         this.additionalCharacteristics = additionalCharacteristics;
     }
 
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
+    }
+
     public Integer getPendingCount() {
         return pendingCount;
     }
@@ -182,6 +208,8 @@ public class ArticleGenerationConfig implements Serializable {
                 ", characterType='" + characterType + '\'' +
                 ", style='" + style + '\'' +
                 ", additionalCharacteristics='" + additionalCharacteristics + '\'' +
+                ", totalWordCountEstimate=" + totalWordCountEstimate +
+                ", chapterWordCountEstimate=" + chapterWordCountEstimate +
                 ", pendingCount=" + pendingCount +
                 ", resState=" + resState +
                 ", createTime=" + createTime +
