@@ -418,12 +418,11 @@ public class AiCreationApplication implements CommandLineRunner {
             jdbcTemplate.execute("ALTER TABLE article_generation_config ADD COLUMN IF NOT EXISTS plot VARCHAR(200);");
             jdbcTemplate.execute("ALTER TABLE article_generation_config ADD COLUMN IF NOT EXISTS character_type VARCHAR(100);");
             jdbcTemplate.execute("ALTER TABLE article_generation_config ADD COLUMN IF NOT EXISTS style VARCHAR(100);");
-            jdbcTemplate.execute("ALTER TABLE article_generation_config ADD COLUMN IF NOT EXISTS total_word_count_estimate INTEGER DEFAULT 100000;");
-            jdbcTemplate.execute("ALTER TABLE article_generation_config ADD COLUMN IF NOT EXISTS chapter_word_count_estimate INTEGER DEFAULT 5000;");
+            // 注意：字数预估字段通过独立的SQL脚本管理
 
             // 3. 为article表添加字段
             jdbcTemplate.execute("ALTER TABLE article ADD COLUMN IF NOT EXISTS image_desc TEXT;");
-            jdbcTemplate.execute("ALTER TABLE article ADD COLUMN IF NOT EXISTS generation_status SMALLINT DEFAULT 0;");
+            // 注意：其他字段通过独立的SQL脚本管理
 
             // 4. 数据迁移：将content_generated字段的数据迁移到generation_status
             migrateContentGeneratedData();
@@ -435,8 +434,7 @@ public class AiCreationApplication implements CommandLineRunner {
             jdbcTemplate.execute("COMMENT ON COLUMN article_generation_config.plot IS '情节分类（升级、学院、人生赢家等）';");
             jdbcTemplate.execute("COMMENT ON COLUMN article_generation_config.character_type IS '角色分类';");
             jdbcTemplate.execute("COMMENT ON COLUMN article_generation_config.style IS '风格分类';");
-            jdbcTemplate.execute("COMMENT ON COLUMN article_generation_config.total_word_count_estimate IS '总字数预估（默认100000）';");
-            jdbcTemplate.execute("COMMENT ON COLUMN article_generation_config.chapter_word_count_estimate IS '每章节字数预估（默认5000）';");
+            // 注意：字数预估字段的注释通过独立的SQL脚本管理
             jdbcTemplate.execute("COMMENT ON COLUMN article.image_desc IS '形象描述';");
             jdbcTemplate.execute("COMMENT ON COLUMN article.content_generated IS '内容生成状态（0-未生成，1-已生成）';");
 
