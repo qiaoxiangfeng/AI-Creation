@@ -8,6 +8,7 @@ import ArticleDetail from '@/views/ArticleDetail.vue';
 import ArticleTypes from '@/views/ArticleTypes.vue';
 import ArticleGenerationConfigs from '@/views/ArticleGenerationConfigs.vue';
 import Dictionaries from '@/views/Dictionaries.vue';
+import Dashboard from '@/views/Dashboard.vue';
 
 const routes = [
   {
@@ -54,6 +55,11 @@ const routes = [
         path: '/dictionaries',
         name: 'dictionaries',
         component: Dictionaries
+      },
+      {
+        path: '/dashboard',
+        name: 'dashboard',
+        component: Dashboard
       }
     ]
   }

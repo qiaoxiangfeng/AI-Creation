@@ -21,6 +21,7 @@
         <result column="content_generated" jdbcType="INTEGER" property="contentGenerated"/>
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
+        <result column="generation_status" jdbcType="INTEGER" property="generationStatus"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -45,6 +46,7 @@
         <result column="content_generated" jdbcType="INTEGER" property="contentGenerated"/>
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
+        <result column="generation_status" jdbcType="INTEGER" property="generationStatus"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -52,7 +54,7 @@
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
         id, article_name, article_outline, story_background, image_desc, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, content_generated, total_word_count_estimate, chapter_word_count_estimate, res_state, create_time, update_time
+        video_link, video_file_path, publish_status, content_generated, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章 -->
@@ -101,13 +103,13 @@
     <insert id="insert" parameterType="com.aicreation.entity.po.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article (
             article_name, article_outline, story_background, image_desc, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
-            video_link, video_file_path, publish_status, content_generated, total_word_count_estimate, chapter_word_count_estimate, res_state, create_time, update_time
+            video_link, video_file_path, publish_status, content_generated, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
         ) VALUES (
             #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{storyBackground,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleType,jdbcType=VARCHAR}, #{articleCharacteristics,jdbcType=VARCHAR}, #{articleContent,jdbcType=VARCHAR},
             #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR},
             #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR},
             #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT}, #{contentGenerated,jdbcType=INTEGER},
-            #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER},
+            #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER}, #{generationStatus,jdbcType=INTEGER},
             #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
@@ -132,6 +134,7 @@
             <if test="contentGenerated != null">content_generated = #{contentGenerated,jdbcType=INTEGER},</if>
             <if test="totalWordCountEstimate != null">total_word_count_estimate = #{totalWordCountEstimate,jdbcType=INTEGER},</if>
             <if test="chapterWordCountEstimate != null">chapter_word_count_estimate = #{chapterWordCountEstimate,jdbcType=INTEGER},</if>
+            <if test="generationStatus != null">generation_status = #{generationStatus,jdbcType=INTEGER},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
             update_time = #{updateTime,jdbcType=TIMESTAMP}
         </set>

@@ -65,6 +65,9 @@ public class ArticleRespDto extends BaseDto {
     @Schema(description = "每章节字数预估")
     private Integer chapterWordCountEstimate;
 
+    @Schema(description = "生成状态：0-未开始，1-生成中，2-已完成，3-失败")
+    private Integer generationStatus;
+
     @Schema(description = "删除标记：1-有效，0-无效")
     private Integer resState;
 

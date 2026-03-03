@@ -110,4 +110,12 @@ public class ArticleController {
         boolean result = articleService.generateArticleContent(articleId);
         return BaseResponse.success(result);
     }
+
+    @Operation(summary = "获取文章生成进度", description = "获取指定文章的生成进度信息")
+    @GetMapping("/{articleId}/progress")
+    public BaseResponse<ArticleProgressDto> getArticleProgress(
+            @Parameter(description = "文章ID") @PathVariable Long articleId) {
+        ArticleProgressDto progress = articleService.getArticleProgress(articleId);
+        return BaseResponse.success(progress);
+    }
 }

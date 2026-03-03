@@ -397,4 +397,59 @@ public class ArticleServiceImpl implements IArticleService {
             return false;
         }
     }
+
+    @Override
+    public ArticleProgressDto getArticleProgress(Long articleId) {
+        if (articleId == null || articleId <= 0) {
+            log.warn("获取文章生成进度失败：文章ID无效，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+        }
+
+        // 获取文章信息
+        Article article = articleMapper.selectByPrimaryKey(articleId);
+        if (article == null) {
+            log.warn("获取文章生成进度失败：文章不存在，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
+        }
+
+        // 获取文章的所有章节
+        List<ArticleChapter> chapters = articleChapterMapper.selectByArticleId(articleId);
+
+        // 计算进度
+        int totalChapters = chapters.size();
+        int completedChapters = (int) chapters.stream()
+            .filter(chapter -> chapter.getChapterContent() != null && !chapter.getChapterContent().trim().isEmpty())
+            .count();
+
+        // 计算字数进度
+        int currentWordCount = chapters.stream()
+            .filter(chapter -> chapter.getChapterContent() != null)
+            .mapToInt(chapter -> chapter.getChapterContent().length())
+            .sum();
+
+        // 计算进度百分比
+        int progressPercent = totalChapters > 0 ? (completedChapters * 100) / totalChapters : 0;
+
+        // 如果所有章节都有内容，标记为已完成
+        if (progressPercent == 100 && article.getGenerationStatus() != 2) {
+            article.setGenerationStatus(2); // 已完成
+            article.setUpdateTime(LocalDateTime.now());
+            articleMapper.updateByPrimaryKey(article);
+        }
+
+        // 构建进度DTO
+        ArticleProgressDto progress = new ArticleProgressDto();
+        progress.setArticleId(article.getId());
+        progress.setArticleName(article.getArticleName());
+        progress.setGenerationStatus(article.getGenerationStatus());
+        progress.setTotalChapters(totalChapters);
+        progress.setCompletedChapters(completedChapters);
+        progress.setProgressPercent(progressPercent);
+        progress.setTotalWordCountEstimate(article.getTotalWordCountEstimate());
+        progress.setCurrentWordCount(currentWordCount);
+        progress.setCreateTime(article.getCreateTime().toString());
+        progress.setUpdateTime(article.getUpdateTime().toString());
+
+        return progress;
+    }
 }

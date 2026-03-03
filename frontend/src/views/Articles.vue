@@ -320,6 +320,9 @@ interface ArticleRespDto {
   voiceFilePath?: string;
   videoLink?: string;
   videoFilePath?: string;
+  totalWordCountEstimate?: number;
+  chapterWordCountEstimate?: number;
+  generationStatus?: number;
   resState: number;
   createTime: string;
   updateTime: string;

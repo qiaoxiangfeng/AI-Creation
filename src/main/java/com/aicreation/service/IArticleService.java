@@ -93,4 +93,12 @@ public interface IArticleService {
      * @return 是否成功启动生成任务
      */
     boolean generateArticleContent(Long articleId);
+
+    /**
+     * 获取文章生成进度
+     *
+     * @param articleId 文章ID
+     * @return 文章生成进度信息
+     */
+    ArticleProgressDto getArticleProgress(Long articleId);
 }

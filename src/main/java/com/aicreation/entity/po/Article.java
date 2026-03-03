@@ -101,6 +101,11 @@ public class Article implements Serializable {
     private Integer chapterWordCountEstimate;
 
     /**
+     * 生成状态：0-未开始，1-生成中，2-已完成，3-失败
+     */
+    private Integer generationStatus;
+
+    /**
      * 删除标记：1-有效，0-无效
      */
     private Integer resState;
@@ -251,6 +256,14 @@ public class Article implements Serializable {
 
     public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
         this.chapterWordCountEstimate = chapterWordCountEstimate;
+    }
+
+    public Integer getGenerationStatus() {
+        return generationStatus;
+    }
+
+    public void setGenerationStatus(Integer generationStatus) {
+        this.generationStatus = generationStatus;
     }
 
     public Integer getResState() {
