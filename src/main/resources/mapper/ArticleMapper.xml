@@ -176,8 +176,8 @@
         SELECT DISTINCT a.id, a.article_name, a.article_outline, a.story_background, a.image_desc,
                a.article_type, a.article_characteristics, a.article_content, a.voice_tone,
                a.voice_link, a.voice_file_path, a.video_link, a.video_file_path,
-               a.publish_status, a.content_generated, a.total_word_count_estimate,
-               a.chapter_word_count_estimate, a.res_state, a.create_time, a.update_time
+               a.publish_status, a.total_word_count_estimate,
+               a.chapter_word_count_estimate, a.generation_status, a.res_state, a.create_time, a.update_time
         FROM article a
         LEFT JOIN article_chapter ac ON a.id = ac.article_id AND ac.res_state = 1
         WHERE a.res_state = 1

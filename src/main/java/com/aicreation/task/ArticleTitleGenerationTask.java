@@ -100,9 +100,16 @@ public class ArticleTitleGenerationTask {
 
         int successCount = 0;
         int failCount = 0;
+        boolean hasTransactionError = false;
 
         for (int i = 0; i < articleType.getPendingCount(); i++) {
             try {
+                // 如果之前有事务错误，停止处理
+                if (hasTransactionError) {
+                    log.warn("由于之前的数据库事务错误，停止处理剩余的文章生成任务");
+                    break;
+                }
+
                 // 生成文章标题和大纲
                 GeneratedContent content = generateArticleContent(articleType);
 
@@ -119,17 +126,35 @@ public class ArticleTitleGenerationTask {
                 Thread.sleep(1000);
 
             } catch (Exception e) {
-                log.error("生成文章标题失败：主题={}, 错误={}", articleType.getTheme(), e.getMessage());
+                log.error("生成文章标题失败：主题={}, 错误={}", articleType.getTheme(), e.getMessage(), e);
+
+                // 检查是否是数据库事务相关错误
+                if (e.getMessage() != null &&
+                    (e.getMessage().contains("current transaction is aborted") ||
+                     e.getMessage().contains("duplicate key value"))) {
+                    hasTransactionError = true;
+                    log.error("检测到数据库事务错误，将停止当前批次的处理");
+                }
+
                 failCount++;
             }
         }
 
-        // 更新待生成数量
-        int remainingCount = Math.max(0, articleType.getPendingCount() - successCount);
-        updatePendingCount(articleType.getId(), remainingCount);
-
-        log.info("文章主题[{}]标题生成完成：成功{}个，失败{}个，剩余待生成{}个",
-                articleType.getTheme(), successCount, failCount, remainingCount);
+        // 只有在没有事务错误的情况下才更新待生成数量
+        if (!hasTransactionError) {
+            try {
+                int remainingCount = Math.max(0, articleType.getPendingCount() - successCount);
+                updatePendingCount(articleType.getId(), remainingCount);
+                log.info("文章主题[{}]标题生成完成：成功{}个，失败{}个，剩余待生成{}个",
+                        articleType.getTheme(), successCount, failCount, remainingCount);
+            } catch (Exception e) {
+                log.error("更新待生成数量失败：articleTypeId={}, newCount={}, 错误={}",
+                        articleType.getId(), articleType.getPendingCount() - successCount, e.getMessage(), e);
+                // 不抛出异常，避免影响其他任务
+            }
+        } else {
+            log.warn("由于数据库事务错误，跳过待生成数量的更新，建议手动检查数据一致性");
+        }
     }
 
     /**
