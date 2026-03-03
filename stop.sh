@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # AI智造项目停止脚本
-# 只停止前后端服务，保持数据库和Redis运行
+# 只停止前后端服务，保持数据库运行（项目未使用 Redis）
 
 set -e
 
@@ -143,19 +143,14 @@ show_status() {
         print_warning "⚠️  PostgreSQL: 未运行"
     fi
     
-    # 检查Redis
-    if redis-cli ping >/dev/null 2>&1; then
-        print_success "✅ Redis: 仍在运行 (保持运行)"
-    else
-        print_warning "⚠️  Redis: 未运行"
-    fi
+    # 项目未使用 Redis，跳过检查
 }
 
 # 主函数
 main() {
     print_info "🛑 AI智造项目停止脚本"
     print_info "================================"
-    print_info "只停止前后端服务，保持数据库和Redis运行"
+    print_info "只停止前后端服务，保持数据库运行（无 Redis）"
     print_info "================================"
     
     stop_backend

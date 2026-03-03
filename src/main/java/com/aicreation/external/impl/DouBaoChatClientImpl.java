@@ -5,13 +5,15 @@ import com.aicreation.external.VolcengineChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
- * @DESCRITION DouBaoClientImpl
+ * @DESCRITION DouBaoChatClientImpl
  * @AUTHOR qiaoxiangfeng
  * @DATA 2025/8/20 17:07
  **/
 @Service
-public class DouBaoClientImpl implements DouBaoClient {
+public class DouBaoChatClientImpl implements DouBaoClient {
 
 
     @Autowired
@@ -23,7 +25,7 @@ public class DouBaoClientImpl implements DouBaoClient {
 
     @Override
     public void chatCompletions(String content) {
+        List<String> contents=volcengineChatClient.chatCompletions(DOUBAO_SEED_1_6_URL,DOUBAO_SEED_1_6__MODEL,content);
 
-        volcengineChatClient.chatCompletions(DOUBAO_SEED_1_6_URL,DOUBAO_SEED_1_6__MODEL,content);
     }
 }

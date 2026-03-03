@@ -47,6 +47,8 @@
                 <th>ID</th>
                 <th>文章名称</th>
                 <th>文章简介</th>
+                <th>文章类型</th>
+                <th>文章特点</th>
                 <th>音色</th>
                 <th>语音链接</th>
                 <th>视频链接</th>
@@ -62,6 +64,18 @@
                 <td class="outline-cell">
                   <div class="outline-text" :title="article.articleOutline || ''">
                     {{ truncateText(article.articleOutline || '', 50) }}
+                  </div>
+                </td>
+                <td>{{ article.articleType || '-' }}</td>
+                <td>
+                  <div class="characteristics-tags">
+                    <span
+                      v-for="char in article.articleCharacteristics?.split(',') || []"
+                      :key="char"
+                      class="tag"
+                    >
+                      {{ char }}
+                    </span>
                   </div>
                 </td>
                 <td>{{ getVoiceToneText(article.voiceTone) }}</td>
@@ -85,12 +99,18 @@
                 <td>{{ formatDate(article.createTime) }}</td>
                 <td>
                   <div class="flex gap-2">
+                    <button @click="viewArticle(article)" class="btn btn-outline btn-sm">
+                      查看
+                    </button>
+                    <button @click="downloadFullText(article)" class="btn btn-success btn-sm">
+                      下载
+                    </button>
                     <button @click="editArticle(article)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
-                    <button 
-                      v-if="article.publishStatus !== 2" 
-                      @click="publishArticle(article)" 
+                    <button
+                      v-if="article.publishStatus !== 2"
+                      @click="publishArticle(article)"
                       class="btn btn-primary btn-sm"
                     >
                       发布
@@ -166,6 +186,18 @@
               <textarea v-model="newArticle.articleOutline" class="form-textarea" rows="4" placeholder="请输入文章简介..."></textarea>
             </div>
             <div class="form-group">
+              <label class="form-label">故事背景</label>
+              <textarea v-model="newArticle.storyBackground" class="form-textarea" rows="4" placeholder="请输入故事背景..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">文章类型</label>
+              <input v-model="newArticle.articleType" class="form-input" placeholder="请输入文章类型" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">文章特点</label>
+              <input v-model="newArticle.articleCharacteristics" class="form-input" placeholder="请输入文章特点，用逗号分隔" />
+            </div>
+            <div class="form-group">
               <label class="form-label">音色</label>
               <select v-model="newArticle.voiceTone" class="form-select">
                 <option value="">请选择音色</option>
@@ -217,6 +249,18 @@
               <textarea v-model="editingArticle.articleOutline" class="form-textarea" rows="4" placeholder="请输入文章简介..."></textarea>
             </div>
             <div class="form-group">
+              <label class="form-label">故事背景</label>
+              <textarea v-model="editingArticle.storyBackground" class="form-textarea" rows="4" placeholder="请输入故事背景..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">文章类型</label>
+              <input v-model="editingArticle.articleType" class="form-input" placeholder="请输入文章类型" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">文章特点</label>
+              <input v-model="editingArticle.articleCharacteristics" class="form-input" placeholder="请输入文章特点，用逗号分隔" />
+            </div>
+            <div class="form-group">
               <label class="form-label">音色</label>
               <select v-model="editingArticle.voiceTone" class="form-select">
                 <option value="">请选择音色</option>
@@ -255,13 +299,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { http } from '../lib/http/client';
 import type { BaseResponse, PageRespDto } from '../lib/types/base';
+
+const router = useRouter();
 
 interface ArticleRespDto {
   id: number;
   articleName: string;
   articleOutline?: string;
+  storyBackground?: string;
+  articleType?: string;
+  articleCharacteristics?: string;
   voiceTone?: string;
   voiceLink?: string;
   voiceFilePath?: string;
@@ -287,6 +337,9 @@ const showEditModal = ref(false);
 const newArticle = ref({
   articleName: '',
   articleOutline: '',
+  storyBackground: '',
+  articleType: '',
+  articleCharacteristics: '',
   voiceTone: '',
   voiceLink: '',
   voiceFilePath: '',
@@ -352,6 +405,9 @@ const createArticle = async () => {
     newArticle.value = {
       articleName: '',
       articleOutline: '',
+      storyBackground: '',
+      articleType: '',
+      articleCharacteristics: '',
       voiceTone: '',
       voiceLink: '',
       voiceFilePath: '',
@@ -380,6 +436,8 @@ const updateArticle = async () => {
       articleId: editingArticle.value.id,
       articleName: editingArticle.value.articleName,
       articleOutline: editingArticle.value.articleOutline,
+      storyBackground: editingArticle.value.storyBackground,
+      articleType: editingArticle.value.articleType,
       voiceTone: editingArticle.value.voiceTone,
       voiceLink: editingArticle.value.voiceLink,
       voiceFilePath: editingArticle.value.voiceFilePath,
@@ -448,6 +506,37 @@ const getVoiceToneText = (tone: string | undefined) => {
   if (tone === 'alex') return 'Alex';
   if (tone === 'anna') return 'Anna';
   return tone;
+};
+
+// 查看文章详情
+const viewArticle = (article: ArticleRespDto) => {
+  // 跳转到文章详情页面
+  router.push(`/articles/${article.id}`);
+};
+
+// 下载全文
+const downloadFullText = async (article: ArticleRespDto) => {
+  try {
+    const resp = await http.get<BaseResponse<string>>(`/api/articles/${article.id}/full-text`);
+    const response = resp.data;
+    if (response.code === '00000000') {
+      const fullText = response.data;
+      const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${article.articleName}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      alert('下载失败：' + response.msg);
+    }
+  } catch (error) {
+    console.error('下载全文失败:', error);
+    alert('下载失败，请稍后重试');
+  }
 };
 
 const truncateText = (text: string, maxLength: number) => {
@@ -688,5 +777,22 @@ const truncateText = (text: string, maxLength: number) => {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 文章特点标签样式 */
+.characteristics-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--primary-light, #e0f2fe);
+  color: var(--primary, #2563eb);
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--primary-light, #bae6fd);
 }
 </style>

@@ -4,6 +4,7 @@ import com.aicreation.entity.dto.*;
 import com.aicreation.entity.dto.base.BaseResponse;
 import com.aicreation.entity.dto.base.PageRespDto;
 import com.aicreation.service.IArticleService;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -84,5 +85,21 @@ public class ArticleController {
             @Parameter(description = "文章名称") @PathVariable String articleName) {
         ArticleRespDto article = articleService.getArticleByArticleName(articleName);
         return BaseResponse.success(article);
+    }
+
+    @Operation(summary = "获取文章章节列表", description = "根据文章ID获取该文章的所有章节列表")
+    @GetMapping("/{articleId}/chapters")
+    public BaseResponse<List<ArticleChapterRespDto>> getArticleChapters(
+            @Parameter(description = "文章ID") @PathVariable Long articleId) {
+        List<ArticleChapterRespDto> chapters = articleService.getArticleChapters(articleId);
+        return BaseResponse.success(chapters);
+    }
+
+    @Operation(summary = "获取文章完整文本", description = "根据文章ID获取包含所有章节的完整文本内容")
+    @GetMapping("/{articleId}/full-text")
+    public BaseResponse<String> getArticleFullText(
+            @Parameter(description = "文章ID") @PathVariable Long articleId) {
+        String fullText = articleService.getArticleFullText(articleId);
+        return BaseResponse.success(fullText);
     }
 }

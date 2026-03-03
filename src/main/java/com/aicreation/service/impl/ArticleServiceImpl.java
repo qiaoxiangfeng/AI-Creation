@@ -1,14 +1,17 @@
 package com.aicreation.service.impl;
 
-import com.aicreation.common.ArticleStatus;
-import com.aicreation.common.BusinessException;
-import com.aicreation.common.ErrorCode;
+import com.aicreation.enums.ArticleStatusEnum;
+import com.aicreation.enums.ErrorCodeEnum;
+import com.aicreation.exception.BusinessException;
 import com.aicreation.converter.ArticleConverter;
 import com.aicreation.entity.bo.ArticleBo;
 import com.aicreation.entity.dto.*;
 import com.aicreation.entity.dto.base.PageRespDto;
 import com.aicreation.entity.po.Article;
+import com.aicreation.entity.po.ArticleChapter;
+import java.util.List;
 import com.aicreation.mapper.ArticleMapper;
+import com.aicreation.mapper.ArticleChapterMapper;
 import com.aicreation.service.IArticleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -35,11 +38,14 @@ public class ArticleServiceImpl implements IArticleService {
     @Autowired
     private ArticleMapper articleMapper;
 
+    @Autowired
+    private ArticleChapterMapper articleChapterMapper;
+
     @Override
     public ArticleRespDto getArticleById(ArticleQueryReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getArticleId())) {
             log.warn("查询文章失败：文章ID为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         Article article = articleMapper.selectByPrimaryKey(request.getArticleId());
@@ -54,7 +60,7 @@ public class ArticleServiceImpl implements IArticleService {
     public ArticleRespDto getArticleByArticleName(String articleName) {
         if (!StringUtils.hasText(articleName)) {
             log.warn("查询文章失败：文章名称为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         Article article = articleMapper.selectByArticleName(articleName);
@@ -69,20 +75,20 @@ public class ArticleServiceImpl implements IArticleService {
     public Long createArticle(ArticleCreateReqDto request) {
         if (Objects.isNull(request) || !StringUtils.hasText(request.getArticleName())) {
             log.warn("创建文章失败：请求参数无效");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         // 检查文章名称是否已存在
         Article existingArticle = articleMapper.selectByArticleName(request.getArticleName());
         if (Objects.nonNull(existingArticle)) {
             log.warn("创建文章失败：文章名称已存在，articleName={}", request.getArticleName());
-            throw new BusinessException(ErrorCode.DUPLICATE_DATA);
+            throw new BusinessException(ErrorCodeEnum.DUPLICATE_DATA);
         }
 
         // 转换为业务对象
         ArticleBo articleBo = ArticleConverter.INSTANCE.toArticleBo(request);
         articleBo.setResState(1);
-        articleBo.setPublishStatus(ArticleStatus.UNPUBLISHED); // 默认未发布
+        articleBo.setPublishStatus(ArticleStatusEnum.UNPUBLISHED.getCode()); // 默认未发布
         articleBo.setCreateTime(LocalDateTime.now());
         articleBo.setUpdateTime(LocalDateTime.now());
 
@@ -93,7 +99,7 @@ public class ArticleServiceImpl implements IArticleService {
         int result = articleMapper.insert(article);
         if (result <= 0) {
             log.error("创建文章失败：数据库插入失败");
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
 
         return article.getId();
@@ -103,14 +109,14 @@ public class ArticleServiceImpl implements IArticleService {
     public Boolean updateArticle(ArticleUpdateReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getArticleId())) {
             log.warn("更新文章失败：请求参数无效");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         // 检查文章是否存在
         Article existingArticle = articleMapper.selectByPrimaryKey(request.getArticleId());
         if (Objects.isNull(existingArticle)) {
             log.warn("更新文章失败：文章不存在，articleId={}", request.getArticleId());
-            throw new BusinessException(ErrorCode.DATA_NOT_FOUND);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
 
         // 如果更新文章名称，检查是否与其他文章重复
@@ -119,7 +125,7 @@ public class ArticleServiceImpl implements IArticleService {
             Article duplicateArticle = articleMapper.selectByArticleName(request.getArticleName());
             if (Objects.nonNull(duplicateArticle)) {
                 log.warn("更新文章失败：文章名称已存在，articleName={}", request.getArticleName());
-                throw new BusinessException(ErrorCode.DUPLICATE_DATA);
+                throw new BusinessException(ErrorCodeEnum.DUPLICATE_DATA);
             }
         }
 
@@ -131,7 +137,7 @@ public class ArticleServiceImpl implements IArticleService {
         int result = articleMapper.updateByPrimaryKey(article);
         if (result <= 0) {
             log.error("更新文章失败：数据库更新失败");
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
 
         return true;
@@ -141,21 +147,21 @@ public class ArticleServiceImpl implements IArticleService {
     public Boolean deleteArticle(ArticleDeleteReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getArticleId())) {
             log.warn("删除文章失败：请求参数无效");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         // 检查文章是否存在
         Article existingArticle = articleMapper.selectByPrimaryKey(request.getArticleId());
         if (Objects.isNull(existingArticle)) {
             log.warn("删除文章失败：文章不存在，articleId={}", request.getArticleId());
-            throw new BusinessException(ErrorCode.DATA_NOT_FOUND);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
 
         // 软删除文章
         int result = articleMapper.deleteByPrimaryKey(request.getArticleId());
         if (result <= 0) {
             log.error("删除文章失败：数据库更新失败");
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
 
         return true;
@@ -165,17 +171,21 @@ public class ArticleServiceImpl implements IArticleService {
     public PageRespDto<ArticleListRespDto> getArticleList(ArticleListReqDto request) {
         if (Objects.isNull(request)) {
             log.warn("查询文章列表失败：请求参数为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
+
+
+
 
         // 设置分页
         PageHelper.startPage(request.getPageNo(), request.getPageSize());
 
         // 查询文章列表
         List<Article> articles = articleMapper.selectArticleList(
-            request.getArticleName(), 
+            request.getArticleName(),
             request.getVoiceTone(),
-            request.getPublishStatus()
+            request.getPublishStatus(),
+            request.getArticleType()
         );
 
         // 获取分页信息
@@ -209,6 +219,7 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setId(article.getId());
         dto.setArticleName(article.getArticleName());
         dto.setArticleOutline(article.getArticleOutline());
+        dto.setArticleType(article.getArticleType());
         dto.setArticleContent(article.getArticleContent());
         dto.setVoiceTone(article.getVoiceTone());
         dto.setVoiceLink(article.getVoiceLink());
@@ -225,29 +236,122 @@ public class ArticleServiceImpl implements IArticleService {
     public Boolean updateArticlePublishStatus(Long articleId, Integer publishStatus) {
         if (Objects.isNull(articleId) || Objects.isNull(publishStatus)) {
             log.warn("更新文章发布状态失败：参数无效");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         // 验证发布状态值
-        if (!ArticleStatus.isValidStatus(publishStatus)) {
+        if (!ArticleStatusEnum.isValidStatus(publishStatus)) {
             log.warn("更新文章发布状态失败：发布状态值无效，publishStatus={}", publishStatus);
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
         // 检查文章是否存在
         Article existingArticle = articleMapper.selectByPrimaryKey(articleId);
         if (Objects.isNull(existingArticle)) {
             log.warn("更新文章发布状态失败：文章不存在，articleId={}", articleId);
-            throw new BusinessException(ErrorCode.DATA_NOT_FOUND);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
 
         // 更新发布状态
         int result = articleMapper.updatePublishStatus(articleId, publishStatus);
         if (result <= 0) {
             log.error("更新文章发布状态失败：数据库更新失败");
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
 
         return true;
+    }
+
+    @Override
+    public List<ArticleChapterRespDto> getArticleChapters(Long articleId) {
+        if (articleId == null || articleId <= 0) {
+            log.warn("查询文章章节失败：文章ID无效，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+        }
+
+        // 查询文章是否存在
+        Article article = articleMapper.selectByPrimaryKey(articleId);
+        if (article == null) {
+            log.warn("查询文章章节失败：文章不存在，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
+        }
+
+        // 查询文章章节列表
+        List<ArticleChapter> chapters = articleChapterMapper.selectByArticleId(articleId);
+
+        // 转换为响应DTO
+        return chapters.stream()
+                .map(this::convertToChapterRespDto)
+                .toList();
+    }
+
+    /**
+     * 转换为章节响应DTO
+     */
+    private ArticleChapterRespDto convertToChapterRespDto(ArticleChapter chapter) {
+        ArticleChapterRespDto dto = new ArticleChapterRespDto();
+        dto.setId(chapter.getId());
+        dto.setChapterNo(chapter.getChapterNo());
+        dto.setChapterTitle(chapter.getChapterTitle());
+        dto.setChapterContent(chapter.getChapterContent());
+        dto.setChapterVoiceLink(chapter.getChapterVoiceLink());
+        dto.setChapterVideoLink(chapter.getChapterVideoLink());
+        return dto;
+    }
+
+    @Override
+    public String getArticleFullText(Long articleId) {
+        if (articleId == null || articleId <= 0) {
+            log.warn("获取文章完整文本失败：文章ID无效，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+        }
+
+        // 获取文章信息
+        Article article = articleMapper.selectByPrimaryKey(articleId);
+        if (article == null) {
+            log.warn("获取文章完整文本失败：文章不存在，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
+        }
+
+        // 构建完整文本
+        StringBuilder fullText = new StringBuilder();
+
+        // 添加文章标题
+        fullText.append(article.getArticleName()).append("\n");
+        fullText.append("=".repeat(Math.max(0, article.getArticleName().length()))).append("\n\n");
+
+        // 添加文章简介
+        if (StringUtils.hasText(article.getArticleOutline())) {
+            fullText.append("【故事大纲】\n");
+            fullText.append(article.getArticleOutline()).append("\n\n");
+        }
+
+        // 获取并添加所有章节内容
+        List<ArticleChapter> chapters = articleChapterMapper.selectByArticleId(articleId);
+        if (chapters != null && !chapters.isEmpty()) {
+            // 按章节序号排序
+            chapters.sort((a, b) -> Integer.compare(a.getChapterNo(), b.getChapterNo()));
+
+            for (ArticleChapter chapter : chapters) {
+                fullText.append("第").append(chapter.getChapterNo()).append("章 ");
+                fullText.append(chapter.getChapterTitle()).append("\n");
+                fullText.append("-".repeat(Math.max(0, ("第" + chapter.getChapterNo() + "章 " + chapter.getChapterTitle()).length()))).append("\n\n");
+
+                if (StringUtils.hasText(chapter.getChapterContent())) {
+                    fullText.append(chapter.getChapterContent()).append("\n\n");
+                } else {
+                    fullText.append("【章节内容暂未生成】\n\n");
+                }
+            }
+        } else {
+            fullText.append("【暂无章节内容】\n");
+        }
+
+        // 添加生成信息
+        fullText.append("\n---\n");
+        fullText.append("本文由AI生成，仅供娱乐。\n");
+        fullText.append("生成时间：").append(java.time.LocalDateTime.now().toString()).append("\n");
+
+        return fullText.toString();
     }
 }

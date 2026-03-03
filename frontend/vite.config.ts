@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
 // 全局配置常量
 const APP_CONFIG = {
@@ -49,7 +50,7 @@ export default defineConfig({
   // 路径解析配置
   resolve: {
     alias: {
-      '@': './src',
+      '@': path.resolve(__dirname, './src'),
     },
   },
   

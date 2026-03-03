@@ -2,6 +2,7 @@ package com.aicreation.service;
 
 import com.aicreation.entity.dto.*;
 import com.aicreation.entity.dto.base.PageRespDto;
+import java.util.List;
 
 /**
  * 文章服务接口
@@ -62,10 +63,26 @@ public interface IArticleService {
 
     /**
      * 更新文章发布状态
-     * 
+     *
      * @param articleId 文章ID
      * @param publishStatus 发布状态
      * @return 是否更新成功
      */
     Boolean updateArticlePublishStatus(Long articleId, Integer publishStatus);
+
+    /**
+     * 获取文章章节列表
+     *
+     * @param articleId 文章ID
+     * @return 章节列表
+     */
+    List<ArticleChapterRespDto> getArticleChapters(Long articleId);
+
+    /**
+     * 获取文章完整文本
+     *
+     * @param articleId 文章ID
+     * @return 包含所有章节的完整文本
+     */
+    String getArticleFullText(Long articleId);
 }

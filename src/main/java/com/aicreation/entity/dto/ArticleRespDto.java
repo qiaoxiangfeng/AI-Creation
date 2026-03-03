@@ -26,8 +26,17 @@ public class ArticleRespDto extends BaseDto {
     @Schema(description = "文章简介")
     private String articleOutline;
 
+    @Schema(description = "故事背景")
+    private String storyBackground;
+
     @Schema(description = "形象描述")
     private String imageDesc;
+
+    @Schema(description = "文章类型")
+    private String articleType;
+
+    @Schema(description = "文章特点")
+    private String articleCharacteristics;
 
     @Schema(description = "文章内容")
     private String articleContent;
@@ -84,12 +93,36 @@ public class ArticleRespDto extends BaseDto {
         this.articleOutline = articleOutline;
     }
 
+    public String getStoryBackground() {
+        return storyBackground;
+    }
+
+    public void setStoryBackground(String storyBackground) {
+        this.storyBackground = storyBackground;
+    }
+
     public String getImageDesc() {
         return imageDesc;
     }
 
     public void setImageDesc(String imageDesc) {
         this.imageDesc = imageDesc;
+    }
+
+    public String getArticleType() {
+        return articleType;
+    }
+
+    public void setArticleType(String articleType) {
+        this.articleType = articleType;
+    }
+
+    public String getArticleCharacteristics() {
+        return articleCharacteristics;
+    }
+
+    public void setArticleCharacteristics(String articleCharacteristics) {
+        this.articleCharacteristics = articleCharacteristics;
     }
 
     public String getArticleContent() {

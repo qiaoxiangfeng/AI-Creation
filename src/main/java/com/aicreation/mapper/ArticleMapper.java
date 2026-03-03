@@ -34,15 +34,17 @@ public interface ArticleMapper {
 
     /**
      * 查询文章列表
-     * 
+     *
      * @param articleName 文章名称（可选）
      * @param voiceTone 音色（可选）
      * @param publishStatus 发布状态（可选）
+     * @param articleType 文章类型（可选）
      * @return 文章列表
      */
-    List<Article> selectArticleList(@Param("articleName") String articleName, 
+    List<Article> selectArticleList(@Param("articleName") String articleName,
                                    @Param("voiceTone") String voiceTone,
-                                   @Param("publishStatus") Integer publishStatus);
+                                   @Param("publishStatus") Integer publishStatus,
+                                   @Param("articleType") String articleType);
 
     /**
      * 插入文章
@@ -70,10 +72,25 @@ public interface ArticleMapper {
 
     /**
      * 更新文章发布状态
-     * 
+     *
      * @param id 文章ID
      * @param publishStatus 发布状态
      * @return 影响行数
      */
     int updatePublishStatus(@Param("id") Long id, @Param("publishStatus") Integer publishStatus);
+
+    /**
+     * 根据文章类型查询已存在的文章名称列表
+     *
+     * @param articleType 文章类型
+     * @return 文章名称列表
+     */
+    List<String> selectExistingTitlesByArticleType(@Param("articleType") String articleType);
+
+    /**
+     * 查询内容未生成的文章列表
+     *
+     * @return 文章列表
+     */
+    List<Article> selectArticlesWithoutContent();
 }

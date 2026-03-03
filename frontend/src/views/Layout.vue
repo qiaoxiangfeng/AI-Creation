@@ -5,6 +5,8 @@
       <nav class="nav">
         <router-link to="/users" class="nav-link">用户管理</router-link>
         <router-link to="/articles" class="nav-link">文章管理</router-link>
+        <router-link to="/article-generation-configs" class="nav-link">文章生成配置</router-link>
+        <router-link to="/dictionaries" class="nav-link">字典管理</router-link>
         <router-link to="/dashboard" class="nav-link">仪表盘</router-link>
       </nav>
     </aside>

@@ -1,15 +1,14 @@
--- 文章表
--- PostgreSQL数据库规范：
--- 1. 使用BIGSERIAL作为自增主键
--- 2. 时间字段使用TIMESTAMP类型
--- 3. 使用COMMENT ON语句添加表和字段注释
--- 4. 索引命名规范：idx_表名_字段名
--- 5. 使用IF NOT EXISTS避免重复创建
+-- 删除已存在的表
+DROP TABLE IF EXISTS article;
 
-CREATE TABLE IF NOT EXISTS article (
+-- 创建文章表
+CREATE TABLE article (
     id BIGSERIAL PRIMARY KEY,
     article_name VARCHAR(255) NOT NULL,
     article_outline TEXT,
+    story_background TEXT,
+    image_desc TEXT,
+    article_type VARCHAR(100),
     article_content TEXT,
     voice_tone VARCHAR(100),
     voice_link VARCHAR(500),
@@ -17,6 +16,7 @@ CREATE TABLE IF NOT EXISTS article (
     video_link VARCHAR(500),
     video_file_path VARCHAR(500),
     publish_status SMALLINT DEFAULT 1,
+    content_generated SMALLINT DEFAULT 0,
     res_state SMALLINT DEFAULT 1,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -35,6 +35,9 @@ COMMENT ON TABLE article IS '文章表';
 COMMENT ON COLUMN article.id IS '主键ID';
 COMMENT ON COLUMN article.article_name IS '文章名称';
 COMMENT ON COLUMN article.article_outline IS '文章简介';
+COMMENT ON COLUMN article.story_background IS '故事背景';
+COMMENT ON COLUMN article.image_desc IS '形象描述';
+COMMENT ON COLUMN article.article_type IS '文章类型';
 COMMENT ON COLUMN article.article_content IS '文章内容';
 COMMENT ON COLUMN article.voice_tone IS '音色';
 COMMENT ON COLUMN article.voice_link IS '语音链接';
@@ -42,13 +45,7 @@ COMMENT ON COLUMN article.voice_file_path IS '语音文件地址';
 COMMENT ON COLUMN article.video_link IS '视频链接';
 COMMENT ON COLUMN article.video_file_path IS '视频文件地址';
 COMMENT ON COLUMN article.publish_status IS '发布状态（1-未发布，2-已发布）';
+COMMENT ON COLUMN article.content_generated IS '内容生成状态（0-未生成，1-已生成）';
 COMMENT ON COLUMN article.res_state IS '删除标记（1-有效，0-无效）';
 COMMENT ON COLUMN article.create_time IS '创建时间';
 COMMENT ON COLUMN article.update_time IS '更新时间';
-
--- 创建序列（可选，BIGSERIAL会自动创建）
--- CREATE SEQUENCE IF NOT EXISTS article_id_seq OWNED BY article.id;
-
--- 添加约束（可选）
--- ALTER TABLE article ADD CONSTRAINT chk_res_state CHECK (res_state IN (0, 1));
--- ALTER TABLE article ADD CONSTRAINT chk_article_name_length CHECK (LENGTH(article_name) >= 1);

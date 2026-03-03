@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.ArticleGenerationConfigMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.ArticleGenerationConfig">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="theme" jdbcType="VARCHAR" property="theme"/>
+        <result column="gender" jdbcType="VARCHAR" property="gender"/>
+        <result column="genre" jdbcType="VARCHAR" property="genre"/>
+        <result column="plot" jdbcType="VARCHAR" property="plot"/>
+        <result column="character_type" jdbcType="VARCHAR" property="characterType"/>
+        <result column="style" jdbcType="VARCHAR" property="style"/>
+        <result column="additional_characteristics" jdbcType="VARCHAR" property="additionalCharacteristics"/>
+        <result column="pending_count" jdbcType="INTEGER" property="pendingCount"/>
+        <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, theme, gender, genre, plot, character_type, style, additional_characteristics, pending_count, res_state, create_time, update_time
+    </sql>
+
+    <!-- 根据ID查询文章生成配置 -->
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_generation_config
+        WHERE id = #{id,jdbcType=BIGINT}
+        AND res_state = 1
+    </select>
+
+    <!-- 根据文章生成配置主题查询文章生成配置 -->
+    <select id="selectByTheme" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_generation_config
+        WHERE theme = #{theme,jdbcType=VARCHAR}
+        AND res_state = 1
+    </select>
+
+    <!-- 查询文章生成配置列表 -->
+    <select id="selectArticleGenerationConfigList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_generation_config
+        WHERE res_state = 1
+        <if test="theme != null and theme != ''">
+            AND theme LIKE CONCAT('%', #{theme,jdbcType=VARCHAR}, '%')
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 插入文章生成配置 -->
+    <insert id="insert" parameterType="com.aicreation.entity.po.ArticleGenerationConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article_generation_config (
+            theme, gender, genre, plot, character_type, style, additional_characteristics, pending_count, res_state, create_time, update_time
+        ) VALUES (
+            #{theme,jdbcType=VARCHAR}, #{gender,jdbcType=VARCHAR}, #{genre,jdbcType=VARCHAR}, #{plot,jdbcType=VARCHAR},
+            #{characterType,jdbcType=VARCHAR}, #{style,jdbcType=VARCHAR}, #{additionalCharacteristics,jdbcType=VARCHAR},
+            #{pendingCount,jdbcType=INTEGER}, #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 更新文章生成配置 -->
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.ArticleGenerationConfig">
+        UPDATE article_generation_config
+        <set>
+            <if test="theme != null">theme = #{theme,jdbcType=VARCHAR},</if>
+            <if test="gender != null">gender = #{gender,jdbcType=VARCHAR},</if>
+            <if test="genre != null">genre = #{genre,jdbcType=VARCHAR},</if>
+            <if test="plot != null">plot = #{plot,jdbcType=VARCHAR},</if>
+            <if test="characterType != null">character_type = #{characterType,jdbcType=VARCHAR},</if>
+            <if test="style != null">style = #{style,jdbcType=VARCHAR},</if>
+            <if test="additionalCharacteristics != null">additional_characteristics = #{additionalCharacteristics,jdbcType=VARCHAR},</if>
+            <if test="pendingCount != null">pending_count = #{pendingCount,jdbcType=INTEGER},</if>
+            <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 根据ID删除文章生成配置（软删除） -->
+    <update id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        UPDATE article_generation_config
+        SET res_state = 0, update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 查询待生成数量大于0的文章生成配置列表 -->
+    <select id="selectPendingArticleGenerationConfigs" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_generation_config
+        WHERE res_state = 1
+        AND pending_count > 0
+        ORDER BY create_time ASC
+    </select>
+</mapper>

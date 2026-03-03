@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.DictionaryMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.Dictionary">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="dict_key" jdbcType="VARCHAR" property="dictKey"/>
+        <result column="dict_value" jdbcType="VARCHAR" property="dictValue"/>
+        <result column="sort_order" jdbcType="INTEGER" property="sortOrder"/>
+        <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, dict_key, dict_value, sort_order, res_state, create_time, update_time
+    </sql>
+
+    <!-- 根据ID查询字典 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dictionary
+        WHERE id = #{id,jdbcType=BIGINT}
+        AND res_state = 1
+    </select>
+
+    <!-- 根据字典键查询字典列表 -->
+    <select id="selectByDictKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dictionary
+        WHERE dict_key = #{dictKey,jdbcType=VARCHAR}
+        AND res_state = 1
+        ORDER BY sort_order ASC, create_time ASC
+    </select>
+
+    <!-- 查询字典列表 -->
+    <select id="selectDictionaryList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dictionary
+        <where>
+            res_state = 1
+            <if test="dictKey != null and dictKey != ''">
+                AND dict_key LIKE CONCAT('%', #{dictKey,jdbcType=VARCHAR}, '%')
+            </if>
+            <if test="dictValue != null and dictValue != ''">
+                AND dict_value LIKE CONCAT('%', #{dictValue,jdbcType=VARCHAR}, '%')
+            </if>
+        </where>
+        ORDER BY dict_key ASC, sort_order ASC, create_time ASC
+    </select>
+
+    <!-- 插入字典 -->
+    <insert id="insert" parameterType="com.aicreation.entity.po.Dictionary" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dictionary (
+            dict_key, dict_value, sort_order, res_state, create_time, update_time
+        ) VALUES (
+            #{dictKey,jdbcType=VARCHAR}, #{dictValue,jdbcType=VARCHAR}, #{sortOrder,jdbcType=INTEGER},
+            #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 更新字典 -->
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.Dictionary">
+        UPDATE dictionary
+        <set>
+            <if test="dictKey != null">dict_key = #{dictKey,jdbcType=VARCHAR},</if>
+            <if test="dictValue != null">dict_value = #{dictValue,jdbcType=VARCHAR},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder,jdbcType=INTEGER},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 根据ID删除字典（逻辑删除） -->
+    <update id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        UPDATE dictionary
+        SET res_state = 0, update_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

@@ -30,9 +30,21 @@ public class ArticleUpdateReqDto extends BaseDto {
     @Size(max = 2000, message = "文章简介不能超过2000个字符")
     private String articleOutline;
 
+    @Schema(description = "故事背景", example = "故事发生在一个充满科技幻想的未来城市...")
+    @Size(max = 5000, message = "故事背景不能超过5000个字符")
+    private String storyBackground;
+
     @Schema(description = "形象描述", example = "一个充满科技感的未来世界场景...")
     @Size(max = 2000, message = "形象描述不能超过2000个字符")
     private String imageDesc;
+
+    @Schema(description = "文章类型", example = "科技文章")
+    @Size(max = 100, message = "文章类型不能超过100个字符")
+    private String articleType;
+
+    @Schema(description = "文章特点", example = "搞笑,贴近生活")
+    @Size(max = 500, message = "文章特点不能超过500个字符")
+    private String articleCharacteristics;
 
     @Schema(description = "音色", example = "alex")
     @Size(max = 100, message = "音色不能超过100个字符")
@@ -82,12 +94,28 @@ public class ArticleUpdateReqDto extends BaseDto {
         this.articleOutline = articleOutline;
     }
 
+    public String getStoryBackground() {
+        return storyBackground;
+    }
+
+    public void setStoryBackground(String storyBackground) {
+        this.storyBackground = storyBackground;
+    }
+
     public String getImageDesc() {
         return imageDesc;
     }
 
     public void setImageDesc(String imageDesc) {
         this.imageDesc = imageDesc;
+    }
+
+    public String getArticleType() {
+        return articleType;
+    }
+
+    public void setArticleType(String articleType) {
+        this.articleType = articleType;
     }
 
     public String getVoiceTone() {
@@ -136,5 +164,13 @@ public class ArticleUpdateReqDto extends BaseDto {
 
     public void setPublishStatus(Integer publishStatus) {
         this.publishStatus = publishStatus;
+    }
+
+    public String getArticleCharacteristics() {
+        return articleCharacteristics;
+    }
+
+    public void setArticleCharacteristics(String articleCharacteristics) {
+        this.articleCharacteristics = articleCharacteristics;
     }
 }

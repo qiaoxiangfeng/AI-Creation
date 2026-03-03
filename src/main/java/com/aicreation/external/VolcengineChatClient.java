@@ -13,7 +13,7 @@ import java.util.Objects;
 public interface VolcengineChatClient {
 
 
-    void chatCompletions(String url, String model, Object content);
+    List<String> chatCompletions(String url, String model, Object content);
 }
 
 

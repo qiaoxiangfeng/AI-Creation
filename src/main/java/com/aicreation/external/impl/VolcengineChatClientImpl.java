@@ -8,13 +8,10 @@ import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
 import com.volcengine.ark.runtime.service.ArkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -26,7 +23,7 @@ public class VolcengineChatClientImpl implements VolcengineChatClient {
     private VolcengineProperties volcengineProperties;
 
     @Override
-    public void chatCompletions(String url,String model,Object content) {
+    public List<String> chatCompletions(String url,String model,Object content) {
 
         // 创建 ArkService 实例
         ArkService arkService = ArkService.builder().apiKey(volcengineProperties.getApiKey()).baseUrl(url).build();
@@ -53,15 +50,20 @@ public class VolcengineChatClientImpl implements VolcengineChatClient {
 
         // 发送聊天完成请求并打印响应
         try {
+            List<String> contents=new ArrayList<>();
             arkService.createChatCompletion(chatCompletionRequest)
                     .getChoices()
-                    .forEach(choice -> System.out.println(choice.getMessage().getContent()));
+                    .forEach(choice -> {
+                        contents.add(choice.getMessage().getContent().toString());
+                    });
+            return contents;
         } catch (Exception e) {
-            System.out.println("请求失败: " + e.getMessage());
+            log.error("请求失败", e);
         } finally {
             // 关闭服务执行器
             arkService.shutdownExecutor();
         }
+        return Collections.emptyList();
     }
 
 

@@ -7,7 +7,10 @@
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="article_name" jdbcType="VARCHAR" property="articleName"/>
         <result column="article_outline" jdbcType="VARCHAR" property="articleOutline"/>
+        <result column="story_background" jdbcType="VARCHAR" property="storyBackground"/>
         <result column="image_desc" jdbcType="VARCHAR" property="imageDesc"/>
+        <result column="article_type" jdbcType="VARCHAR" property="articleType"/>
+        <result column="article_characteristics" jdbcType="VARCHAR" property="articleCharacteristics"/>
         <result column="article_content" jdbcType="VARCHAR" property="articleContent"/>
         <result column="voice_tone" jdbcType="VARCHAR" property="voiceTone"/>
         <result column="voice_link" jdbcType="VARCHAR" property="voiceLink"/>
@@ -15,6 +18,7 @@
         <result column="video_link" jdbcType="VARCHAR" property="videoLink"/>
         <result column="video_file_path" jdbcType="VARCHAR" property="videoFilePath"/>
         <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
+        <result column="content_generated" jdbcType="INTEGER" property="contentGenerated"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -25,7 +29,10 @@
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="article_name" jdbcType="VARCHAR" property="articleName"/>
         <result column="article_outline" jdbcType="VARCHAR" property="articleOutline"/>
+        <result column="story_background" jdbcType="VARCHAR" property="storyBackground"/>
         <result column="image_desc" jdbcType="VARCHAR" property="imageDesc"/>
+        <result column="article_type" jdbcType="VARCHAR" property="articleType"/>
+        <result column="article_characteristics" jdbcType="VARCHAR" property="articleCharacteristics"/>
         <result column="article_content" jdbcType="VARCHAR" property="articleContent"/>
         <result column="voice_tone" jdbcType="VARCHAR" property="voiceTone"/>
         <result column="voice_link" jdbcType="VARCHAR" property="voiceLink"/>
@@ -33,14 +40,15 @@
         <result column="video_link" jdbcType="VARCHAR" property="videoLink"/>
         <result column="video_file_path" jdbcType="VARCHAR" property="videoFilePath"/>
         <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
+        <result column="content_generated" jdbcType="INTEGER" property="contentGenerated"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
-        id, article_name, article_outline, image_desc, article_content, voice_tone, voice_link, voice_file_path, 
-        video_link, video_file_path, publish_status, res_state, create_time, update_time
+        id, article_name, article_outline, story_background, image_desc, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
+        video_link, video_file_path, publish_status, content_generated, res_state, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章 -->
@@ -64,7 +72,7 @@
     <!-- 查询文章列表（用于显示，不包含删除状态） -->
     <select id="selectArticleList" resultMap="ListResultMap">
         SELECT
-        id, article_name, article_outline, image_desc, article_content, voice_tone, voice_link, voice_file_path, 
+        id, article_name, article_outline, story_background, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
         video_link, video_file_path, publish_status, create_time, update_time
         FROM article
         <where>
@@ -78,6 +86,9 @@
             <if test="publishStatus != null">
                 AND publish_status = #{publishStatus,jdbcType=SMALLINT}
             </if>
+            <if test="articleType != null and articleType != ''">
+                AND article_type = #{articleType,jdbcType=VARCHAR}
+            </if>
         </where>
         ORDER BY create_time DESC
     </select>
@@ -85,13 +96,13 @@
     <!-- 插入文章 -->
     <insert id="insert" parameterType="com.aicreation.entity.po.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article (
-            article_name, article_outline, image_desc, article_content, voice_tone, voice_link, voice_file_path,
-            video_link, video_file_path, publish_status, res_state, create_time, update_time
+            article_name, article_outline, story_background, image_desc, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
+            video_link, video_file_path, publish_status, content_generated, res_state, create_time, update_time
         ) VALUES (
-            #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleContent,jdbcType=VARCHAR},
-            #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR}, 
-            #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR}, 
-            #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT}, 
+            #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{storyBackground,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleType,jdbcType=VARCHAR}, #{articleCharacteristics,jdbcType=VARCHAR}, #{articleContent,jdbcType=VARCHAR},
+            #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR},
+            #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR},
+            #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT}, #{contentGenerated,jdbcType=INTEGER},
             #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
@@ -102,7 +113,10 @@
         <set>
             <if test="articleName != null">article_name = #{articleName,jdbcType=VARCHAR},</if>
             <if test="articleOutline != null">article_outline = #{articleOutline,jdbcType=VARCHAR},</if>
+            <if test="storyBackground != null">story_background = #{storyBackground,jdbcType=VARCHAR},</if>
             <if test="imageDesc != null">image_desc = #{imageDesc,jdbcType=VARCHAR},</if>
+            <if test="articleType != null">article_type = #{articleType,jdbcType=VARCHAR},</if>
+            <if test="articleCharacteristics != null">article_characteristics = #{articleCharacteristics,jdbcType=VARCHAR},</if>
             <if test="articleContent != null">article_content = #{articleContent,jdbcType=VARCHAR},</if>
             <if test="voiceTone != null">voice_tone = #{voiceTone,jdbcType=VARCHAR},</if>
             <if test="voiceLink != null">voice_link = #{voiceLink,jdbcType=VARCHAR},</if>
@@ -110,6 +124,7 @@
             <if test="videoLink != null">video_link = #{videoLink,jdbcType=VARCHAR},</if>
             <if test="videoFilePath != null">video_file_path = #{videoFilePath,jdbcType=VARCHAR},</if>
             <if test="publishStatus != null">publish_status = #{publishStatus,jdbcType=SMALLINT},</if>
+            <if test="contentGenerated != null">content_generated = #{contentGenerated,jdbcType=INTEGER},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
             update_time = #{updateTime,jdbcType=TIMESTAMP}
         </set>
@@ -129,5 +144,24 @@
         SET publish_status = #{publishStatus,jdbcType=SMALLINT}, update_time = NOW()
         WHERE id = #{id,jdbcType=BIGINT}
     </update>
+
+    <!-- 根据文章类型查询已存在的文章名称列表 -->
+    <select id="selectExistingTitlesByArticleType" resultType="java.lang.String">
+        SELECT article_name
+        FROM article
+        WHERE article_type = #{articleType,jdbcType=VARCHAR}
+        AND res_state = 1
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询内容未生成的文章列表 -->
+    <select id="selectArticlesWithoutContent" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article
+        WHERE (content_generated IS NULL OR content_generated = 0)
+        AND res_state = 1
+        ORDER BY create_time ASC
+    </select>
 
 </mapper>

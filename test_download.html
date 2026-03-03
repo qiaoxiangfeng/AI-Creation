@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>测试下载功能</title>
+</head>
+<body>
+    <h1>测试文章下载功能</h1>
+    <button onclick="testDownload()">测试下载文章1的全文</button>
+
+    <script>
+        async function testDownload() {
+            try {
+                const response = await fetch('http://localhost:8080/api/articles/1/full-text');
+                const result = await response.json();
+
+                if (result.code === '00000000') {
+                    const fullText = result.data;
+                    const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = '吃BUG的我杀穿互联网.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    alert('下载成功！');
+                } else {
+                    alert('下载失败：' + result.msg);
+                }
+            } catch (error) {
+                alert('下载失败：' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

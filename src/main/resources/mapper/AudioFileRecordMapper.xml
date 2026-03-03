@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.AudioFileRecordMapper">
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, req_id, file_name, file_path, file_size, file_type, voice_type, 
+        text_content, synthesis_type, status, error_message, 
+        create_time, update_time, created_by, updated_by
+    </sql>
+
+    <!-- 插入音频文件记录 -->
+    <insert id="insert" parameterType="com.aicreation.entity.po.AudioFileRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO audio_file_record (
+            req_id, file_name, file_path, file_size, file_type, voice_type,
+            text_content, synthesis_type, status, error_message,
+            create_time, update_time, created_by, updated_by
+        ) VALUES (
+            #{reqId}, #{fileName}, #{filePath}, #{fileSize}, #{fileType}, #{voiceType},
+            #{textContent}, #{synthesisType}, #{status}, #{errorMessage},
+            #{createTime}, #{updateTime}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <!-- 根据请求ID查询音频文件记录 -->
+    <select id="selectByReqId" parameterType="string" resultType="com.aicreation.entity.po.AudioFileRecord">
+        SELECT 
+        <include refid="Base_Column_List" />
+        FROM audio_file_record
+        WHERE req_id = #{reqId}
+    </select>
+
+    <!-- 根据请求ID更新音频文件记录 -->
+    <update id="updateByReqId" parameterType="com.aicreation.entity.po.AudioFileRecord">
+        UPDATE audio_file_record
+        <set>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
+            <if test="fileType != null">file_type = #{fileType},</if>
+            <if test="voiceType != null">voice_type = #{voiceType},</if>
+            <if test="textContent != null">text_content = #{textContent},</if>
+            <if test="synthesisType != null">synthesis_type = #{synthesisType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="errorMessage != null">error_message = #{errorMessage},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        WHERE req_id = #{reqId}
+    </update>
+
+    <!-- 根据请求ID删除音频文件记录 -->
+    <delete id="deleteByReqId" parameterType="string">
+        DELETE FROM audio_file_record
+        WHERE req_id = #{reqId}
+    </delete>
+
+    <!-- 根据请求ID更新状态 -->
+    <update id="updateStatusByReqId">
+        UPDATE audio_file_record
+        SET status = #{status},
+            error_message = #{errorMessage},
+            update_time = CURRENT_TIMESTAMP
+        WHERE req_id = #{reqId}
+    </update>
+
+</mapper>

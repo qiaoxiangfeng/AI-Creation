@@ -63,7 +63,7 @@ AI-Creation/
 ## 快速开始
 
 ### 环境要求
-- JDK 17+
+- JDK 24+
 - Maven 3.6+
 - PostgreSQL 15+
 - Redis 6.0+ (可选，用于缓存)

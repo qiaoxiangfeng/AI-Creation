@@ -1,7 +1,7 @@
 package com.aicreation.service.impl;
 
-import com.aicreation.common.BusinessException;
-import com.aicreation.common.ErrorCode;
+import com.aicreation.enums.ErrorCodeEnum;
+import com.aicreation.exception.BusinessException;
 import com.aicreation.converter.UserConverter;
 import com.aicreation.entity.bo.UserBo;
 import com.aicreation.entity.dto.*;
@@ -44,7 +44,7 @@ public class UserServiceImpl implements IUserService {
     public UserRespDto getUserById(UserQueryReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getUserId())) {
             log.warn("参数错误：用户ID为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         Long userId = request.getUserId();
@@ -53,7 +53,7 @@ public class UserServiceImpl implements IUserService {
         
         if (Objects.isNull(user)) {
             log.warn("用户不存在，用户ID: {}", userId);
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+            throw new BusinessException(ErrorCodeEnum.USER_NOT_FOUND);
         }
         
         log.info("查询用户成功，用户ID: {}, 用户名: {}", userId, user.getUserName());
@@ -84,25 +84,25 @@ public class UserServiceImpl implements IUserService {
     public Long createUser(UserCreateReqDto request) {
         if (Objects.isNull(request)) {
             log.warn("参数错误：创建用户请求为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         if (!StringUtils.hasText(request.getUserName())) {
             log.warn("参数错误：用户名为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         // 创建用户时密码必填
         if (!StringUtils.hasText(request.getUserPassword())) {
             log.warn("参数错误：密码为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         // 检查用户名是否已存在
         User existingUser = getUserByUserName(request.getUserName());
         if (Objects.nonNull(existingUser)) {
             log.warn("用户已存在，用户名:{}", request.getUserName());
-            throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
+            throw new BusinessException(ErrorCodeEnum.USER_ALREADY_EXISTS);
         }
         
         // DTO -> BO 转换
@@ -135,7 +135,7 @@ public class UserServiceImpl implements IUserService {
             return user.getId();
         } else {
             log.error("用户创建失败，用户名: {}", request.getUserName());
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
     }
 
@@ -144,14 +144,14 @@ public class UserServiceImpl implements IUserService {
     public Boolean updateUser(UserUpdateReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getUserId())) {
             log.warn("参数错误：更新请求或用户ID为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         // 检查用户是否存在
         User existingUser = userMapper.selectByPrimaryKey(request.getUserId());
         if (Objects.isNull(existingUser)) {
             log.warn("更新失败，用户不存在，用户ID:{}", request.getUserId());
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+            throw new BusinessException(ErrorCodeEnum.USER_NOT_FOUND);
         }
         
         // DTO -> BO 转换
@@ -184,7 +184,7 @@ public class UserServiceImpl implements IUserService {
         
         if (result <= 0) {
             log.error("用户信息更新失败，用户ID: {}", request.getUserId());
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
         log.info("用户信息更新成功，用户ID: {}", request.getUserId());
         return true;
@@ -195,7 +195,7 @@ public class UserServiceImpl implements IUserService {
     public Boolean deleteUser(UserDeleteReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getUserId())) {
             log.warn("参数错误：删除请求或用户ID为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         // 检查用户是否存在
@@ -203,7 +203,7 @@ public class UserServiceImpl implements IUserService {
         User existingUser = userMapper.selectByPrimaryKey(userId);
         if (Objects.isNull(existingUser)) {
             log.warn("删除失败，用户不存在，用户ID:{}", userId);
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+            throw new BusinessException(ErrorCodeEnum.USER_NOT_FOUND);
         }
         
         log.info("删除用户，用户ID: {}", userId);
@@ -211,7 +211,7 @@ public class UserServiceImpl implements IUserService {
         
         if (result <= 0) {
             log.error("用户删除失败，用户ID: {}", userId);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
         log.info("用户删除成功，用户ID: {}", userId);
         return true;
@@ -237,7 +237,7 @@ public class UserServiceImpl implements IUserService {
     public UserRespDto login(UserLoginReqDto request) {
         if (Objects.isNull(request) || !StringUtils.hasText(request.getUserName()) || !StringUtils.hasText(request.getPassword())) {
             log.warn("用户名或密码为空");
-            throw new BusinessException(ErrorCode.PARAM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
         
         log.debug("用户登录，用户名: {}", request.getUserName());
@@ -246,13 +246,13 @@ public class UserServiceImpl implements IUserService {
         User user = getUserByUserName(request.getUserName());
         if (Objects.isNull(user)) {
             log.warn("用户不存在，用户名: {}", request.getUserName());
-            throw new BusinessException(ErrorCode.USERNAME_OR_PASSWORD_ERROR);
+            throw new BusinessException(ErrorCodeEnum.USERNAME_OR_PASSWORD_ERROR);
         }
         
         // 验证密码（使用BCrypt验证）
         if (!passwordEncoder.matches(request.getPassword(), user.getUserPassword())) {
             log.warn("密码错误，用户名: {}", request.getUserName());
-            throw new BusinessException(ErrorCode.USERNAME_OR_PASSWORD_ERROR);
+            throw new BusinessException(ErrorCodeEnum.USERNAME_OR_PASSWORD_ERROR);
         }
         
         // 更新最后登录时间
@@ -283,7 +283,7 @@ public class UserServiceImpl implements IUserService {
         
         if (result <= 0) {
             log.warn("没有用户密码被更新");
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
         log.info("用户密码初始化成功，影响用户数量: {}", result);
         return result;

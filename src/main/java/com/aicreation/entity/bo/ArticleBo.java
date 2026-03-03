@@ -22,9 +22,19 @@ public class ArticleBo {
     private String articleOutline;
 
     /**
+     * 故事背景
+     */
+    private String storyBackground;
+
+    /**
      * 形象描述
      */
     private String imageDesc;
+
+    /**
+     * 文章类型
+     */
+    private String articleType;
 
     /**
      * 音色
@@ -88,12 +98,28 @@ public class ArticleBo {
         this.articleOutline = articleOutline;
     }
 
+    public String getStoryBackground() {
+        return storyBackground;
+    }
+
+    public void setStoryBackground(String storyBackground) {
+        this.storyBackground = storyBackground;
+    }
+
     public String getImageDesc() {
         return imageDesc;
     }
 
     public void setImageDesc(String imageDesc) {
         this.imageDesc = imageDesc;
+    }
+
+    public String getArticleType() {
+        return articleType;
+    }
+
+    public void setArticleType(String articleType) {
+        this.articleType = articleType;
     }
 
     public String getVoiceTone() {
