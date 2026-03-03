@@ -18,7 +18,6 @@
         <result column="video_link" jdbcType="VARCHAR" property="videoLink"/>
         <result column="video_file_path" jdbcType="VARCHAR" property="videoFilePath"/>
         <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
-        <result column="content_generated" jdbcType="INTEGER" property="contentGenerated"/>
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
         <result column="generation_status" jdbcType="INTEGER" property="generationStatus"/>
@@ -43,7 +42,6 @@
         <result column="video_link" jdbcType="VARCHAR" property="videoLink"/>
         <result column="video_file_path" jdbcType="VARCHAR" property="videoFilePath"/>
         <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
-        <result column="content_generated" jdbcType="INTEGER" property="contentGenerated"/>
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
         <result column="generation_status" jdbcType="INTEGER" property="generationStatus"/>
@@ -54,7 +52,7 @@
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
         id, article_name, article_outline, story_background, image_desc, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, content_generated, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
+        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章 -->
@@ -103,12 +101,12 @@
     <insert id="insert" parameterType="com.aicreation.entity.po.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article (
             article_name, article_outline, story_background, image_desc, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
-            video_link, video_file_path, publish_status, content_generated, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
+            video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
         ) VALUES (
             #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{storyBackground,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleType,jdbcType=VARCHAR}, #{articleCharacteristics,jdbcType=VARCHAR}, #{articleContent,jdbcType=VARCHAR},
             #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR},
             #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR},
-            #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT}, #{contentGenerated,jdbcType=INTEGER},
+            #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT},
             #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER}, #{generationStatus,jdbcType=INTEGER},
             #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
@@ -131,7 +129,6 @@
             <if test="videoLink != null">video_link = #{videoLink,jdbcType=VARCHAR},</if>
             <if test="videoFilePath != null">video_file_path = #{videoFilePath,jdbcType=VARCHAR},</if>
             <if test="publishStatus != null">publish_status = #{publishStatus,jdbcType=SMALLINT},</if>
-            <if test="contentGenerated != null">content_generated = #{contentGenerated,jdbcType=INTEGER},</if>
             <if test="totalWordCountEstimate != null">total_word_count_estimate = #{totalWordCountEstimate,jdbcType=INTEGER},</if>
             <if test="chapterWordCountEstimate != null">chapter_word_count_estimate = #{chapterWordCountEstimate,jdbcType=INTEGER},</if>
             <if test="generationStatus != null">generation_status = #{generationStatus,jdbcType=INTEGER},</if>
@@ -169,7 +166,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM article
-        WHERE (content_generated IS NULL OR content_generated = 0)
+        WHERE (generation_status IS NULL OR generation_status = 0)
         AND res_state = 1
         ORDER BY create_time ASC
     </select>

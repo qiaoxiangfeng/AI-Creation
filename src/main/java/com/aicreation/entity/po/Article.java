@@ -86,11 +86,6 @@ public class Article implements Serializable {
     private Integer publishStatus;
 
     /**
-     * 内容生成状态：0-未生成，1-已生成
-     */
-    private Integer contentGenerated;
-
-    /**
      * 总字数预估
      */
     private Integer totalWordCountEstimate;
@@ -232,14 +227,6 @@ public class Article implements Serializable {
 
     public void setPublishStatus(Integer publishStatus) {
         this.publishStatus = publishStatus;
-    }
-
-    public Integer getContentGenerated() {
-        return contentGenerated;
-    }
-
-    public void setContentGenerated(Integer contentGenerated) {
-        this.contentGenerated = contentGenerated;
     }
 
     public Integer getTotalWordCountEstimate() {
