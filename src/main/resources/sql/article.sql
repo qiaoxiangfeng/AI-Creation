@@ -17,6 +17,8 @@ CREATE TABLE article (
     video_file_path VARCHAR(500),
     publish_status SMALLINT DEFAULT 1,
     content_generated SMALLINT DEFAULT 0,
+    total_word_count_estimate INTEGER,
+    chapter_word_count_estimate INTEGER,
     res_state SMALLINT DEFAULT 1,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -46,6 +48,8 @@ COMMENT ON COLUMN article.video_link IS '视频链接';
 COMMENT ON COLUMN article.video_file_path IS '视频文件地址';
 COMMENT ON COLUMN article.publish_status IS '发布状态（1-未发布，2-已发布）';
 COMMENT ON COLUMN article.content_generated IS '内容生成状态（0-未生成，1-已生成）';
+COMMENT ON COLUMN article.total_word_count_estimate IS '总字数预估';
+COMMENT ON COLUMN article.chapter_word_count_estimate IS '每章节字数预估';
 COMMENT ON COLUMN article.res_state IS '删除标记（1-有效，0-无效）';
 COMMENT ON COLUMN article.create_time IS '创建时间';
 COMMENT ON COLUMN article.update_time IS '更新时间';

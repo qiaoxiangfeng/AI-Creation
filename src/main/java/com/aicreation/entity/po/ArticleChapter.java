@@ -25,6 +25,12 @@ public class ArticleChapter implements Serializable {
     /** 章节内容 */
     private String chapterContent;
 
+    /** 核心剧情 */
+    private String corePlot;
+
+    /** 字数预估 */
+    private Integer wordCountEstimate;
+
     /** 章节语音链接地址 */
     private String chapterVoiceLink;
 
@@ -78,6 +84,22 @@ public class ArticleChapter implements Serializable {
 
     public void setChapterContent(String chapterContent) {
         this.chapterContent = chapterContent;
+    }
+
+    public String getCorePlot() {
+        return corePlot;
+    }
+
+    public void setCorePlot(String corePlot) {
+        this.corePlot = corePlot;
+    }
+
+    public Integer getWordCountEstimate() {
+        return wordCountEstimate;
+    }
+
+    public void setWordCountEstimate(Integer wordCountEstimate) {
+        this.wordCountEstimate = wordCountEstimate;
     }
 
     public String getChapterVoiceLink() {

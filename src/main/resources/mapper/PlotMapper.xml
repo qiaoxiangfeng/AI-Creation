@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.PlotMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.Plot">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="article_id" jdbcType="BIGINT" property="articleId"/>
+        <result column="chapter_id" jdbcType="BIGINT" property="chapterId"/>
+        <result column="plot_name" jdbcType="VARCHAR" property="plotName"/>
+        <result column="plot_content" jdbcType="VARCHAR" property="plotContent"/>
+        <result column="recovery_chapter_id" jdbcType="BIGINT" property="recoveryChapterId"/>
+        <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, article_id, chapter_id, plot_name, plot_content, recovery_chapter_id, res_state, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM plot
+        WHERE id = #{id,jdbcType=BIGINT}
+        AND res_state = 1
+    </select>
+
+    <select id="selectByArticleId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM plot
+        WHERE article_id = #{articleId,jdbcType=BIGINT}
+        AND res_state = 1
+        ORDER BY chapter_id, create_time
+    </select>
+
+    <select id="selectByChapterId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM plot
+        WHERE chapter_id = #{chapterId,jdbcType=BIGINT}
+        AND res_state = 1
+        ORDER BY create_time
+    </select>
+
+    <select id="selectByRecoveryChapterId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM plot
+        WHERE recovery_chapter_id = #{recoveryChapterId,jdbcType=BIGINT}
+        AND res_state = 1
+        ORDER BY create_time
+    </select>
+
+    <select id="selectByArticleIdAndChapterId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM plot
+        WHERE article_id = #{articleId,jdbcType=BIGINT}
+        AND chapter_id = #{chapterId,jdbcType=BIGINT}
+        AND res_state = 1
+        ORDER BY create_time
+    </select>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.Plot" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO plot (
+            article_id, chapter_id, plot_name, plot_content, recovery_chapter_id, res_state, create_time, update_time
+        ) VALUES (
+            #{articleId,jdbcType=BIGINT}, #{chapterId,jdbcType=BIGINT}, #{plotName,jdbcType=VARCHAR}, #{plotContent,jdbcType=VARCHAR},
+            #{recoveryChapterId,jdbcType=BIGINT}, #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.Plot">
+        UPDATE plot
+        <set>
+            <if test="articleId != null">article_id = #{articleId,jdbcType=BIGINT},</if>
+            <if test="chapterId != null">chapter_id = #{chapterId,jdbcType=BIGINT},</if>
+            <if test="plotName != null">plot_name = #{plotName,jdbcType=VARCHAR},</if>
+            <if test="plotContent != null">plot_content = #{plotContent,jdbcType=VARCHAR},</if>
+            <if test="recoveryChapterId != null">recovery_chapter_id = #{recoveryChapterId,jdbcType=BIGINT},</if>
+            <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        UPDATE plot
+        SET res_state = 0, update_time = NOW()
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

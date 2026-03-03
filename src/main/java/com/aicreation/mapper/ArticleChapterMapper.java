@@ -23,4 +23,9 @@ public interface ArticleChapterMapper {
     int updateByPrimaryKey(ArticleChapter record);
 
     int deleteByPrimaryKey(@Param("id") Long id);
+
+    /**
+     * 查询没有内容的章节列表（用于内容生成）
+     */
+    List<ArticleChapter> selectChaptersWithoutContent();
 }

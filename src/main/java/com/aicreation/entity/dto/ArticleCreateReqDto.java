@@ -70,6 +70,12 @@ public class ArticleCreateReqDto extends BaseDto {
     @Schema(description = "发布状态：1-未发布，2-已发布", example = "1")
     private Integer publishStatus;
 
+    @Schema(description = "总字数预估", example = "80000")
+    private Integer totalWordCountEstimate;
+
+    @Schema(description = "每章节字数预估", example = "4000")
+    private Integer chapterWordCountEstimate;
+
     // Getter and Setter methods
     public String getArticleName() {
         return articleName;
@@ -165,6 +171,22 @@ public class ArticleCreateReqDto extends BaseDto {
 
     public void setPublishStatus(Integer publishStatus) {
         this.publishStatus = publishStatus;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
     public String getArticleCharacteristics() {

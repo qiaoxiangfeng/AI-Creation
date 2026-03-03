@@ -59,6 +59,12 @@ public class ArticleRespDto extends BaseDto {
     @Schema(description = "发布状态：1-未发布，2-已发布")
     private Integer publishStatus;
 
+    @Schema(description = "总字数预估")
+    private Integer totalWordCountEstimate;
+
+    @Schema(description = "每章节字数预估")
+    private Integer chapterWordCountEstimate;
+
     @Schema(description = "删除标记：1-有效，0-无效")
     private Integer resState;
 
@@ -179,6 +185,22 @@ public class ArticleRespDto extends BaseDto {
 
     public void setPublishStatus(Integer publishStatus) {
         this.publishStatus = publishStatus;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
     public Integer getResState() {

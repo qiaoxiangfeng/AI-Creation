@@ -8,6 +8,8 @@ CREATE TABLE article_chapter (
     article_id BIGINT NOT NULL,
     chapter_title VARCHAR(255),
     chapter_content TEXT,
+    core_plot TEXT,
+    word_count_estimate INTEGER,
     chapter_voice_link VARCHAR(500),
     chapter_video_link VARCHAR(500),
     res_state SMALLINT DEFAULT 1,
@@ -41,6 +43,8 @@ COMMENT ON COLUMN article_chapter.chapter_no IS '章节序号（第一章填1）
 COMMENT ON COLUMN article_chapter.article_id IS '文章ID，关联 article.id';
 COMMENT ON COLUMN article_chapter.chapter_title IS '章节标题';
 COMMENT ON COLUMN article_chapter.chapter_content IS '章节内容';
+COMMENT ON COLUMN article_chapter.core_plot IS '核心剧情';
+COMMENT ON COLUMN article_chapter.word_count_estimate IS '字数预估';
 COMMENT ON COLUMN article_chapter.chapter_voice_link IS '章节语音链接地址';
 COMMENT ON COLUMN article_chapter.chapter_video_link IS '章节视频链接地址';
 COMMENT ON COLUMN article_chapter.res_state IS '删除标记（1-有效，0-无效）';

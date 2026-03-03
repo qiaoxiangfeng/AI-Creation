@@ -3,9 +3,11 @@ package com.aicreation.task;
 import com.aicreation.entity.po.Article;
 import com.aicreation.entity.po.ArticleChapter;
 import com.aicreation.entity.po.ArticleGenerationConfig;
+import com.aicreation.entity.po.Plot;
 import com.aicreation.mapper.ArticleChapterMapper;
 import com.aicreation.mapper.ArticleGenerationConfigMapper;
 import com.aicreation.mapper.ArticleMapper;
+import com.aicreation.mapper.PlotMapper;
 import com.aicreation.external.DouBaoClient;
 import com.aicreation.external.VolcengineChatClient;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +19,12 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * 文章章节生成定时任务
- * 根据文章标题和大纲生成章节内容
+ * 根据文章的总字数预估和每章节字数预估生成章节基本信息（不包含内容）
+ * 生成内容：章节名称、字数预估、核心剧情、伏笔列表
  *
  * @author AI-Creation Team
  * @date 2024/01/01
@@ -38,6 +42,9 @@ public class ArticleChapterGenerationTask {
 
     @Autowired
     private ArticleGenerationConfigMapper articleGenerationConfigMapper;
+
+    @Autowired
+    private PlotMapper plotMapper;
 
     @Autowired
     private VolcengineChatClient volcengineChatClient;
@@ -63,8 +70,8 @@ public class ArticleChapterGenerationTask {
         log.info("开始执行文章章节生成定时任务");
 
         try {
-            // 查询需要生成章节的文章（content_generated = 0）
-            List<Article> articlesToProcess = articleMapper.selectArticlesWithoutContent();
+            // 查询需要生成章节的文章（没有章节的文章）
+            List<Article> articlesToProcess = articleMapper.selectArticlesWithoutChapters();
 
             if (articlesToProcess == null || articlesToProcess.isEmpty()) {
                 log.info("没有需要生成章节的文章");
@@ -77,19 +84,14 @@ public class ArticleChapterGenerationTask {
             for (Article article : articlesToProcess) {
                 try {
                     generateChaptersForArticle(article);
-                    // 标记文章内容已生成
-                    article.setContentGenerated(1);
-                    article.setUpdateTime(LocalDateTime.now());
-                    articleMapper.updateByPrimaryKey(article);
                     successCount++;
-
-                    log.info("文章[{}]章节生成完成", article.getArticleName());
+                    log.info("文章[{}]章节基本信息生成完成", article.getArticleName());
 
                     // 添加短暂延迟，避免API调用过于频繁
                     Thread.sleep(2000);
 
                 } catch (Exception e) {
-                    log.error("生成文章[{}]章节失败：{}", article.getArticleName(), e.getMessage());
+                    log.error("生成文章[{}]章节失败：{}", article.getArticleName(), e.getMessage(), e);
                     failCount++;
                 }
             }
@@ -104,48 +106,83 @@ public class ArticleChapterGenerationTask {
     }
 
     /**
-     * 为单篇文章生成章节
+     * 为单篇文章生成章节基本信息（不包含内容）
+     * 根据总字数预估和每章节字数预估计算章节数量
      */
     private void generateChaptersForArticle(Article article) {
-        // 根据文章类型确定章节数量（这里假设生成10章）
-        int totalChapters = 10;
+        try {
+            // 计算章节数量
+            Integer totalWordCount = article.getTotalWordCountEstimate();
+            Integer chapterWordCount = article.getChapterWordCountEstimate();
 
-        // 获取文章的生成配置（如果有关联的话）
-        ArticleGenerationConfig config = findArticleGenerationConfig(article);
-
-        for (int i = 1; i <= totalChapters; i++) {
-            try {
-                // 检查章节是否已存在
-                ArticleChapter existingChapter = articleChapterMapper.selectByArticleIdAndChapterNo(article.getId(), i);
-                if (existingChapter != null) {
-                    log.info("文章[{}]第{}章已存在，跳过", article.getArticleName(), i);
-                    continue;
-                }
-
-                // 生成章节内容
-                ChapterContent chapterContent = generateChapterContent(article, config, i, totalChapters);
-
-                // 创建章节记录
-                ArticleChapter chapter = new ArticleChapter();
-                chapter.setArticleId(article.getId());
-                chapter.setChapterNo(i);
-                chapter.setChapterTitle(chapterContent.getTitle());
-                chapter.setChapterContent(chapterContent.getContent());
-                chapter.setResState(1);
-                chapter.setCreateTime(LocalDateTime.now());
-                chapter.setUpdateTime(LocalDateTime.now());
-
-                articleChapterMapper.insert(chapter);
-
-                log.info("文章[{}]第{}章生成完成：{}", article.getArticleName(), i, chapterContent.getTitle());
-
-                // 添加延迟
-                Thread.sleep(1000);
-
-            } catch (Exception e) {
-                log.error("生成文章[{}]第{}章失败：{}", article.getArticleName(), i, e.getMessage());
-                // 继续处理下一章
+            if (totalWordCount == null || chapterWordCount == null || chapterWordCount <= 0) {
+                log.warn("文章[{}]字数预估信息不完整，跳过章节生成", article.getArticleName());
+                return;
             }
+
+            int totalChapters = Math.max(1, (int) Math.ceil((double) totalWordCount / chapterWordCount));
+            log.info("文章[{}]预计生成{}章，总字数{}，每章约{}字", article.getArticleName(), totalChapters, totalWordCount, chapterWordCount);
+
+            // 获取文章的生成配置
+            ArticleGenerationConfig config = findArticleGenerationConfig(article);
+
+            // 生成所有章节的基本信息
+            ChaptersInfo chaptersInfo = generateChaptersInfo(article, config, totalChapters);
+
+            // 保存章节信息和伏笔信息
+            for (int i = 0; i < chaptersInfo.getChapters().size(); i++) {
+                ChapterBasicInfo chapterInfo = chaptersInfo.getChapters().get(i);
+                int chapterNo = i + 1;
+
+                try {
+                    // 检查章节是否已存在
+                    ArticleChapter existingChapter = articleChapterMapper.selectByArticleIdAndChapterNo(article.getId(), chapterNo);
+                    if (existingChapter != null) {
+                        log.info("文章[{}]第{}章已存在，跳过", article.getArticleName(), chapterNo);
+                        continue;
+                    }
+
+                    // 创建章节记录
+                    ArticleChapter chapter = new ArticleChapter();
+                    chapter.setArticleId(article.getId());
+                    chapter.setChapterNo(chapterNo);
+                    chapter.setChapterTitle(chapterInfo.getChapterTitle());
+                    chapter.setCorePlot(chapterInfo.getCorePlot());
+                    chapter.setWordCountEstimate(chapterInfo.getWordCountEstimate());
+                    chapter.setResState(1);
+                    chapter.setCreateTime(LocalDateTime.now());
+                    chapter.setUpdateTime(LocalDateTime.now());
+
+                    articleChapterMapper.insert(chapter);
+                    Long chapterId = chapter.getId();
+
+                    // 保存伏笔信息
+                    if (chapterInfo.getPlots() != null && !chapterInfo.getPlots().isEmpty()) {
+                        for (PlotInfo plotInfo : chapterInfo.getPlots()) {
+                            Plot plot = new Plot();
+                            plot.setArticleId(article.getId());
+                            plot.setChapterId(chapterId);
+                            plot.setPlotName(plotInfo.getPlotName());
+                            plot.setPlotContent(plotInfo.getPlotContent());
+                            plot.setRecoveryChapterId(plotInfo.getRecoveryChapterId());
+                            plot.setResState(1);
+                            plot.setCreateTime(LocalDateTime.now());
+                            plot.setUpdateTime(LocalDateTime.now());
+
+                            plotMapper.insert(plot);
+                        }
+                    }
+
+                    log.info("文章[{}]第{}章基本信息生成完成：{}", article.getArticleName(), chapterNo, chapterInfo.getChapterTitle());
+
+                } catch (Exception e) {
+                    log.error("保存文章[{}]第{}章信息失败：{}", article.getArticleName(), chapterNo, e.getMessage(), e);
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("生成文章[{}]章节基本信息失败：{}", article.getArticleName(), e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -365,6 +402,201 @@ public class ArticleChapterGenerationTask {
     }
 
     /**
+     * 生成所有章节的基本信息
+     */
+    private ChaptersInfo generateChaptersInfo(Article article, ArticleGenerationConfig config, int totalChapters) {
+        String prompt = buildChaptersInfoPrompt(article, config, totalChapters);
+
+        log.info("=== AI章节基本信息生成请求 ===");
+        log.info("文章: {}", article.getArticleName());
+        log.info("预计章节数: {}", totalChapters);
+        log.info("AI提示词: {}", prompt);
+
+        try {
+            List<String> results = volcengineChatClient.chatCompletions(
+                "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
+                "doubao-seed-1-6-250615",
+                prompt
+            );
+
+            log.info("AI响应结果数量: {}", results != null ? results.size() : 0);
+
+            if (results != null && !results.isEmpty()) {
+                String generatedContent = results.get(0);
+                log.info("=== AI原始响应 ===");
+                log.info("AI响应内容: {}", generatedContent);
+
+                ChaptersInfo parsedInfo = parseChaptersInfo(generatedContent, totalChapters);
+                log.info("=== 解析结果 ===");
+                log.info("成功解析章节数: {}", parsedInfo.getChapters().size());
+
+                return parsedInfo;
+            } else {
+                log.warn("AI返回结果为空");
+                throw new RuntimeException("AI返回结果为空");
+            }
+        } catch (Exception e) {
+            log.error("调用AI生成章节基本信息失败：{}", e.getMessage(), e);
+            return getFallbackChaptersInfo(article, totalChapters);
+        }
+    }
+
+    /**
+     * 构建章节基本信息生成的AI提示词
+     */
+    private String buildChaptersInfoPrompt(Article article, ArticleGenerationConfig config, int totalChapters) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("请为小说《").append(article.getArticleName()).append("》生成章节基本信息。\n\n");
+
+        // 添加文章基本信息
+        if (StringUtils.hasText(article.getArticleOutline())) {
+            prompt.append("故事大纲：\n").append(article.getArticleOutline()).append("\n\n");
+        }
+
+        // 添加生成配置信息
+        if (config != null) {
+            if (StringUtils.hasText(config.getGender())) {
+                prompt.append("受众性别：").append(config.getGender()).append("\n");
+            }
+            if (StringUtils.hasText(config.getGenre())) {
+                prompt.append("题材类型：").append(config.getGenre()).append("\n");
+            }
+            if (StringUtils.hasText(config.getPlot())) {
+                prompt.append("情节类型：").append(config.getPlot()).append("\n");
+            }
+            if (StringUtils.hasText(config.getStyle())) {
+                prompt.append("写作风格：").append(config.getStyle()).append("\n");
+            }
+            if (StringUtils.hasText(config.getCharacterType())) {
+                prompt.append("角色类型：").append(config.getCharacterType()).append("\n");
+            }
+        }
+
+        prompt.append("\n预计总章节数：").append(totalChapters).append("章\n");
+        prompt.append("每章预估字数：").append(article.getChapterWordCountEstimate()).append("字\n\n");
+
+        prompt.append("请生成JSON格式的输出，包含以下内容：\n");
+        prompt.append("1. 章节名称\n");
+        prompt.append("2. 核心剧情（本章要发生什么，主角性格目标能力情绪，重要配角状态）\n");
+        prompt.append("3. 字数预估\n");
+        prompt.append("4. 伏笔列表（伏笔名称、伏笔内容、回收章节号）\n\n");
+
+        prompt.append("输出格式示例：\n");
+        prompt.append("{\n");
+        prompt.append("  \"chapters\": [\n");
+        prompt.append("    {\n");
+        prompt.append("      \"chapterTitle\": \"章节名称\",\n");
+        prompt.append("      \"corePlot\": \"核心剧情描述\",\n");
+        prompt.append("      \"wordCountEstimate\": 4000,\n");
+        prompt.append("      \"plots\": [\n");
+        prompt.append("        {\n");
+        prompt.append("          \"plotName\": \"伏笔名称\",\n");
+        prompt.append("          \"plotContent\": \"伏笔内容\",\n");
+        prompt.append("          \"recoveryChapterId\": 5\n");
+        prompt.append("        }\n");
+        prompt.append("      ]\n");
+        prompt.append("    }\n");
+        prompt.append("  ]\n");
+        prompt.append("}\n");
+
+        return prompt.toString();
+    }
+
+    /**
+     * 解析AI返回的章节信息
+     */
+    private ChaptersInfo parseChaptersInfo(String content, int expectedChapters) {
+        ChaptersInfo result = new ChaptersInfo();
+
+        try {
+            String cleanedContent = content.trim();
+            // 移除可能的markdown代码块标记
+            if (cleanedContent.startsWith("```json")) {
+                cleanedContent = cleanedContent.substring(7);
+            }
+            if (cleanedContent.endsWith("```")) {
+                cleanedContent = cleanedContent.substring(0, cleanedContent.length() - 3);
+            }
+            cleanedContent = cleanedContent.trim();
+
+            // 使用Jackson解析JSON
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+
+            com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(cleanedContent);
+
+            if (rootNode.has("chapters")) {
+                com.fasterxml.jackson.databind.JsonNode chaptersNode = rootNode.get("chapters");
+                if (chaptersNode.isArray()) {
+                    for (com.fasterxml.jackson.databind.JsonNode chapterNode : chaptersNode) {
+                        ChapterBasicInfo chapterInfo = new ChapterBasicInfo();
+
+                        if (chapterNode.has("chapterTitle")) {
+                            chapterInfo.setChapterTitle(chapterNode.get("chapterTitle").asText());
+                        }
+                        if (chapterNode.has("corePlot")) {
+                            chapterInfo.setCorePlot(chapterNode.get("corePlot").asText());
+                        }
+                        if (chapterNode.has("wordCountEstimate")) {
+                            chapterInfo.setWordCountEstimate(chapterNode.get("wordCountEstimate").asInt());
+                        }
+
+                        // 解析伏笔信息
+                        if (chapterNode.has("plots") && chapterNode.get("plots").isArray()) {
+                            List<PlotInfo> plots = new ArrayList<>();
+                            for (com.fasterxml.jackson.databind.JsonNode plotNode : chapterNode.get("plots")) {
+                                PlotInfo plotInfo = new PlotInfo();
+                                if (plotNode.has("plotName")) {
+                                    plotInfo.setPlotName(plotNode.get("plotName").asText());
+                                }
+                                if (plotNode.has("plotContent")) {
+                                    plotInfo.setPlotContent(plotNode.get("plotContent").asText());
+                                }
+                                if (plotNode.has("recoveryChapterId")) {
+                                    plotInfo.setRecoveryChapterId(plotNode.get("recoveryChapterId").asLong());
+                                }
+                                plots.add(plotInfo);
+                            }
+                            chapterInfo.setPlots(plots);
+                        }
+
+                        result.addChapter(chapterInfo);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("解析章节信息失败：{}", e.getMessage(), e);
+        }
+
+        // 如果解析失败或章节数不够，返回默认信息
+        if (result.getChapters().isEmpty() || result.getChapters().size() < expectedChapters) {
+            log.warn("AI返回的章节信息不完整，使用默认信息");
+            return getFallbackChaptersInfo(null, expectedChapters);
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取默认章节信息（当AI生成失败时使用）
+     */
+    private ChaptersInfo getFallbackChaptersInfo(Article article, int totalChapters) {
+        ChaptersInfo result = new ChaptersInfo();
+
+        for (int i = 1; i <= totalChapters; i++) {
+            ChapterBasicInfo chapterInfo = new ChapterBasicInfo();
+            chapterInfo.setChapterTitle("第" + i + "章");
+            chapterInfo.setCorePlot("主角在这一章中继续冒险，面对各种挑战，展现出成长。");
+            chapterInfo.setWordCountEstimate(4000);
+            chapterInfo.setPlots(new ArrayList<>());
+            result.addChapter(chapterInfo);
+        }
+
+        return result;
+    }
+
+    /**
      * 获取默认章节内容
      */
     private ChapterContent getFallbackChapterContent(Article article, int chapterNo) {
@@ -396,5 +628,62 @@ public class ArticleChapterGenerationTask {
         public void setContent(String content) {
             this.content = content;
         }
+    }
+
+    /**
+     * 章节基本信息
+     */
+    private static class ChapterBasicInfo {
+        private String chapterTitle;
+        private String corePlot;
+        private Integer wordCountEstimate;
+        private List<PlotInfo> plots;
+
+        // Getters and Setters
+        public String getChapterTitle() { return chapterTitle; }
+        public void setChapterTitle(String chapterTitle) { this.chapterTitle = chapterTitle; }
+
+        public String getCorePlot() { return corePlot; }
+        public void setCorePlot(String corePlot) { this.corePlot = corePlot; }
+
+        public Integer getWordCountEstimate() { return wordCountEstimate; }
+        public void setWordCountEstimate(Integer wordCountEstimate) { this.wordCountEstimate = wordCountEstimate; }
+
+        public List<PlotInfo> getPlots() { return plots; }
+        public void setPlots(List<PlotInfo> plots) { this.plots = plots; }
+    }
+
+    /**
+     * 伏笔信息
+     */
+    private static class PlotInfo {
+        private String plotName;
+        private String plotContent;
+        private Long recoveryChapterId;
+
+        // Getters and Setters
+        public String getPlotName() { return plotName; }
+        public void setPlotName(String plotName) { this.plotName = plotName; }
+
+        public String getPlotContent() { return plotContent; }
+        public void setPlotContent(String plotContent) { this.plotContent = plotContent; }
+
+        public Long getRecoveryChapterId() { return recoveryChapterId; }
+        public void setRecoveryChapterId(Long recoveryChapterId) { this.recoveryChapterId = recoveryChapterId; }
+    }
+
+    /**
+     * 所有章节信息
+     */
+    private static class ChaptersInfo {
+        private List<ChapterBasicInfo> chapters;
+
+        public ChaptersInfo() {
+            this.chapters = new ArrayList<>();
+        }
+
+        public List<ChapterBasicInfo> getChapters() { return chapters; }
+        public void setChapters(List<ChapterBasicInfo> chapters) { this.chapters = chapters; }
+        public void addChapter(ChapterBasicInfo chapter) { this.chapters.add(chapter); }
     }
 }

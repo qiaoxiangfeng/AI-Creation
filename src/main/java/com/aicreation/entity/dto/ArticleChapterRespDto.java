@@ -32,6 +32,12 @@ public class ArticleChapterRespDto implements Serializable {
     @Schema(description = "章节内容")
     private String chapterContent;
 
+    @Schema(description = "核心剧情")
+    private String corePlot;
+
+    @Schema(description = "字数预估")
+    private Integer wordCountEstimate;
+
     @Schema(description = "章节语音链接")
     private String chapterVoiceLink;
 

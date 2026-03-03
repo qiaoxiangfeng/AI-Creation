@@ -93,4 +93,11 @@ public interface ArticleMapper {
      * @return 文章列表
      */
     List<Article> selectArticlesWithoutContent();
+
+    /**
+     * 查询没有章节的文章列表（用于生成章节基本信息）
+     *
+     * @return 文章列表
+     */
+    List<Article> selectArticlesWithoutChapters();
 }

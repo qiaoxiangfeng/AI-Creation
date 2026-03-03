@@ -8,6 +8,8 @@
         <result column="article_id" jdbcType="BIGINT" property="articleId"/>
         <result column="chapter_title" jdbcType="VARCHAR" property="chapterTitle"/>
         <result column="chapter_content" jdbcType="VARCHAR" property="chapterContent"/>
+        <result column="core_plot" jdbcType="VARCHAR" property="corePlot"/>
+        <result column="word_count_estimate" jdbcType="INTEGER" property="wordCountEstimate"/>
         <result column="chapter_voice_link" jdbcType="VARCHAR" property="chapterVoiceLink"/>
         <result column="chapter_video_link" jdbcType="VARCHAR" property="chapterVideoLink"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
@@ -16,7 +18,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, chapter_no, article_id, chapter_title, chapter_content, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
+        id, chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -47,9 +49,10 @@
 
     <insert id="insert" parameterType="com.aicreation.entity.po.ArticleChapter" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article_chapter (
-            chapter_no, article_id, chapter_title, chapter_content, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
+            chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
         ) VALUES (
             #{chapterNo,jdbcType=INTEGER}, #{articleId,jdbcType=BIGINT}, #{chapterTitle,jdbcType=VARCHAR}, #{chapterContent,jdbcType=VARCHAR},
+            #{corePlot,jdbcType=VARCHAR}, #{wordCountEstimate,jdbcType=INTEGER},
             #{chapterVoiceLink,jdbcType=VARCHAR}, #{chapterVideoLink,jdbcType=VARCHAR},
             #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
@@ -62,6 +65,8 @@
             <if test="articleId != null">article_id = #{articleId,jdbcType=BIGINT},</if>
             <if test="chapterTitle != null">chapter_title = #{chapterTitle,jdbcType=VARCHAR},</if>
             <if test="chapterContent != null">chapter_content = #{chapterContent,jdbcType=VARCHAR},</if>
+            <if test="corePlot != null">core_plot = #{corePlot,jdbcType=VARCHAR},</if>
+            <if test="wordCountEstimate != null">word_count_estimate = #{wordCountEstimate,jdbcType=INTEGER},</if>
             <if test="chapterVoiceLink != null">chapter_voice_link = #{chapterVoiceLink,jdbcType=VARCHAR},</if>
             <if test="chapterVideoLink != null">chapter_video_link = #{chapterVideoLink,jdbcType=VARCHAR},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
@@ -75,6 +80,18 @@
         SET res_state = 0, update_time = NOW()
         WHERE id = #{id,jdbcType=BIGINT}
     </update>
+
+    <!-- 查询没有内容的章节列表 -->
+    <select id="selectChaptersWithoutContent" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_chapter
+        WHERE (chapter_content IS NULL OR chapter_content = '')
+        AND core_plot IS NOT NULL
+        AND word_count_estimate IS NOT NULL
+        AND res_state = 1
+        ORDER BY article_id, chapter_no ASC
+    </select>
 
 </mapper>
 

@@ -67,6 +67,16 @@ public class ArticleBo {
     private Integer publishStatus;
 
     /**
+     * 总字数预估
+     */
+    private Integer totalWordCountEstimate;
+
+    /**
+     * 每章节字数预估
+     */
+    private Integer chapterWordCountEstimate;
+
+    /**
      * 删除标记：1-有效，0-无效
      */
     private Integer resState;
@@ -168,6 +178,22 @@ public class ArticleBo {
 
     public void setPublishStatus(Integer publishStatus) {
         this.publishStatus = publishStatus;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
     public Integer getResState() {
