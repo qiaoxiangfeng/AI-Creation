@@ -331,6 +331,70 @@ public class AiCreationApplication implements CommandLineRunner {
         jdbcTemplate.execute("COMMENT ON COLUMN plot.update_time IS '更新时间';");
     }
 
+    /**
+     * 迁移content_generated字段的数据到generation_status字段
+     */
+    private void migrateContentGeneratedData() throws Exception {
+        try {
+            // 检查是否存在content_generated字段
+            boolean hasContentGeneratedColumn = jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'article' AND column_name = 'content_generated')",
+                Boolean.class
+            );
+
+            if (!hasContentGeneratedColumn) {
+                System.out.println("content_generated字段不存在，跳过数据迁移");
+                return;
+            }
+
+            System.out.println("开始迁移content_generated字段数据到generation_status字段...");
+
+            // 将content_generated = 1的记录设置为generation_status = 2（已完成）
+            int updatedCompleted = jdbcTemplate.update(
+                "UPDATE article SET generation_status = 2 WHERE content_generated = 1 AND (generation_status IS NULL OR generation_status = 0)"
+            );
+
+            // 将content_generated = 0的记录设置为generation_status = 0（未开始）
+            int updatedNotStarted = jdbcTemplate.update(
+                "UPDATE article SET generation_status = 0 WHERE content_generated = 0 AND generation_status IS NULL"
+            );
+
+            // 设置默认值：如果generation_status仍为NULL，则设为0
+            int updatedDefault = jdbcTemplate.update(
+                "UPDATE article SET generation_status = 0 WHERE generation_status IS NULL"
+            );
+
+            System.out.println("数据迁移完成：");
+            System.out.println("- 已完成文章: " + updatedCompleted);
+            System.out.println("- 未开始文章: " + updatedNotStarted);
+            System.out.println("- 默认设置: " + updatedDefault);
+
+            // 验证迁移结果
+            var stats = jdbcTemplate.queryForMap(
+                "SELECT " +
+                "COUNT(*) as total_articles, " +
+                "SUM(CASE WHEN generation_status = 0 THEN 1 ELSE 0 END) as not_started, " +
+                "SUM(CASE WHEN generation_status = 1 THEN 1 ELSE 0 END) as in_progress, " +
+                "SUM(CASE WHEN generation_status = 2 THEN 1 ELSE 0 END) as completed, " +
+                "SUM(CASE WHEN generation_status = 3 THEN 1 ELSE 0 END) as failed " +
+                "FROM article"
+            );
+
+            System.out.println("迁移结果统计:");
+            System.out.println("- 总文章数: " + stats.get("total_articles"));
+            System.out.println("- 未开始: " + stats.get("not_started"));
+            System.out.println("- 生成中: " + stats.get("in_progress"));
+            System.out.println("- 已完成: " + stats.get("completed"));
+            System.out.println("- 生成失败: " + stats.get("failed"));
+
+            System.out.println("数据迁移完成！可以安全删除content_generated字段。");
+
+        } catch (Exception e) {
+            System.err.println("数据迁移失败: " + e.getMessage());
+            throw e;
+        }
+    }
+
     @Override
     public void run(String... args) throws Exception {
         // 执行数据库迁移
@@ -357,7 +421,10 @@ public class AiCreationApplication implements CommandLineRunner {
 
             // 3. 为article表添加字段
             jdbcTemplate.execute("ALTER TABLE article ADD COLUMN IF NOT EXISTS image_desc TEXT;");
-            jdbcTemplate.execute("ALTER TABLE article ADD COLUMN IF NOT EXISTS content_generated SMALLINT DEFAULT 0;");
+            jdbcTemplate.execute("ALTER TABLE article ADD COLUMN IF NOT EXISTS generation_status SMALLINT DEFAULT 0;");
+
+            // 4. 数据迁移：将content_generated字段的数据迁移到generation_status
+            migrateContentGeneratedData();
 
             // 3. 更新字段注释
             jdbcTemplate.execute("COMMENT ON COLUMN article_generation_config.theme IS '文章主题（用户自定义输入）';");
