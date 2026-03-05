@@ -46,16 +46,6 @@ public class Article implements Serializable {
     private String articleType;
 
     /**
-     * 文章特点
-     */
-    private String articleCharacteristics;
-
-    /**
-     * 文章内容
-     */
-    private String articleContent;
-
-    /**
      * 音色
      */
     private String voiceTone;
@@ -115,6 +105,11 @@ public class Article implements Serializable {
      */
     private LocalDateTime updateTime;
 
+    /**
+     * Responses API的response_id，用于上下文管理
+     */
+    private String responseId;
+
     // Getter and Setter methods
     public Long getId() {
         return id;
@@ -165,21 +160,6 @@ public class Article implements Serializable {
         this.articleType = articleType;
     }
 
-    public String getArticleCharacteristics() {
-        return articleCharacteristics;
-    }
-
-    public void setArticleCharacteristics(String articleCharacteristics) {
-        this.articleCharacteristics = articleCharacteristics;
-    }
-
-    public String getArticleContent() {
-        return articleContent;
-    }
-
-    public void setArticleContent(String articleContent) {
-        this.articleContent = articleContent;
-    }
 
     public String getVoiceTone() {
         return voiceTone;
@@ -275,5 +255,13 @@ public class Article implements Serializable {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getResponseId() {
+        return responseId;
+    }
+
+    public void setResponseId(String responseId) {
+        this.responseId = responseId;
     }
 }

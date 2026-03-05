@@ -61,12 +61,6 @@
       <div class="section-header">
         <h2 class="text-xl font-semibold text-text">文章生成进度</h2>
         <div class="header-actions">
-          <button @click="cleanupStuckStatuses" class="btn btn-warning btn-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
-            </svg>
-            清理卡住状态
-          </button>
           <button @click="loadArticles" class="btn btn-outline btn-sm">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -336,24 +330,6 @@ const generateChapterContent = async (article: ArticleRespDto) => {
   }
 };
 
-// 清理卡住的任务状态
-const cleanupStuckStatuses = async () => {
-  if (confirm('确定要清理卡住的任务状态吗？这将重置长时间处于生成中的任务。')) {
-    try {
-      const resp = await http.post<BaseResponse<string>>('/api/articles/cleanup-stuck-statuses');
-      const response = resp.data;
-      if (response.code === '00000000') {
-        window.showNotification('任务状态清理完成', 'success');
-        loadArticles(); // 重新加载列表
-      } else {
-        window.showNotification('清理失败：' + response.msg, 'error');
-      }
-    } catch (error) {
-      console.error('清理任务状态失败:', error);
-      window.showNotification('清理失败，请稍后重试', 'error');
-    }
-  }
-};
 
 // 格式化日期
 const formatDate = (dateStr: string): string => {

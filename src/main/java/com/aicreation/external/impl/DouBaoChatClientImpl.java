@@ -20,12 +20,13 @@ public class DouBaoChatClientImpl implements DouBaoClient {
     private VolcengineChatClient volcengineChatClient;
 
 
-    private final String DOUBAO_SEED_1_6_URL="https://ark.cn-beijing.volces.com/api/v3/chat/completions";
-    private final String DOUBAO_SEED_1_6__MODEL="doubao-seed-1-6-lite-251015";
 
     @Override
     public void chatCompletions(String content) {
-        List<String> contents=volcengineChatClient.chatCompletions(DOUBAO_SEED_1_6_URL,DOUBAO_SEED_1_6__MODEL,content);
-
+        List<String> contents = volcengineChatClient.chatCompletions(content);
+        // 这里可以添加对返回结果的处理逻辑
+        if (contents != null && !contents.isEmpty()) {
+            System.out.println("AI Response: " + contents.get(0));
+        }
     }
 }

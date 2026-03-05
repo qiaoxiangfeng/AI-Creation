@@ -83,6 +83,12 @@
                     <button @click="editConfig(config)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
+                    <button @click="generateTitle(config)" class="btn btn-primary btn-sm" :disabled="generatingTitle">
+                      <svg v-if="generatingTitle && generatingConfigId === config.id" class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                      </svg>
+                      生成标题
+                    </button>
                     <button @click="deleteConfig(config)" class="btn btn-outline btn-sm text-error">
                       删除
                     </button>
@@ -441,6 +447,8 @@ const pageSize = ref(10);
 const total = ref(0);
 const loading = ref(false);
 const searchKeyword = ref('');
+const generatingTitle = ref(false);
+const generatingConfigId = ref<number | null>(null);
 
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
@@ -652,6 +660,45 @@ const clearSearch = () => {
   searchKeyword.value = '';
   currentPage.value = 1;
   loadConfigs();
+};
+
+// 生成标题
+const generateTitle = async (config: ArticleGenerationConfigListRespDto) => {
+  if (confirm(`确定要为配置"${config.theme}"生成一个新的文章标题吗？`)) {
+    generatingTitle.value = true;
+    generatingConfigId.value = config.id;
+
+    // 显示正在生成提示
+    window.showNotification('正在生成文章标题，请稍后查看结果...', 'info');
+
+    // 2秒后关闭按钮禁用状态
+    setTimeout(() => {
+      generatingTitle.value = false;
+      generatingConfigId.value = null;
+    }, 2000);
+
+    // 异步发送请求，不等待响应
+    http.post<BaseResponse<number>>(`/api/articles/generate-title/${config.id}`)
+      .then(resp => {
+        const response = resp.data;
+        if (response.code === '00000000') {
+          setTimeout(() => {
+            window.showNotification('文章标题生成成功', 'success');
+            loadConfigs(); // 刷新列表
+          }, 1000); // 延迟1秒显示成功消息
+        } else {
+          setTimeout(() => {
+            window.showNotification('生成失败：' + response.msg, 'error');
+          }, 1000);
+        }
+      })
+      .catch(error => {
+        console.error('生成标题失败:', error);
+        setTimeout(() => {
+          window.showNotification('生成失败，请稍后重试', 'error');
+        }, 1000);
+      });
+  }
 };
 
 // 改变页码

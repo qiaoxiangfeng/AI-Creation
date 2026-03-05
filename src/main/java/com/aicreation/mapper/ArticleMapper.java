@@ -108,4 +108,29 @@ public interface ArticleMapper {
      * @return 文章列表
      */
     List<Article> selectArticlesByGenerationStatus(@Param("generationStatus") Integer generationStatus);
+
+    /**
+     * 更新文章的response_id
+     *
+     * @param id 文章ID
+     * @param responseId Responses API的response_id
+     * @return 影响行数
+     */
+    int updateResponseId(@Param("id") Long id, @Param("responseId") String responseId);
+
+    /**
+     * 根据ID查询文章（带行级锁，用于并发控制）
+     *
+     * @param id 文章ID
+     * @return 文章信息
+     */
+    Article selectByPrimaryKeyForUpdate(@Param("id") Long id);
+
+    /**
+     * 根据文章类型查询文章名称列表
+     *
+     * @param articleType 文章类型
+     * @return 文章名称列表
+     */
+    List<String> selectArticleNamesByType(@Param("articleType") String articleType);
 }

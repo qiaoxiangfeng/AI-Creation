@@ -33,7 +33,7 @@ public class TraceIdInterceptor implements HandlerInterceptor {
         // 将链路ID添加到响应头，方便客户端查看
         response.setHeader("X-Trace-Id", traceId);
 
-        log.info("开始处理请求: {} {}, 链路ID: {}", request.getMethod(), request.getRequestURI(), traceId);
+        log.info("开始处理请求: {} {}", request.getMethod(), request.getRequestURI());
 
         return true;
     }
@@ -42,7 +42,7 @@ public class TraceIdInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // 请求完成后清理MDC
         String traceId = MDC.get(TRACE_ID_KEY);
-        log.info("完成处理请求: {} {}, 链路ID: {}", request.getMethod(), request.getRequestURI(), traceId);
+        log.info("完成处理请求: {} {}", request.getMethod(), request.getRequestURI());
         MDC.remove(TRACE_ID_KEY);
     }
 

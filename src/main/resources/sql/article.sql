@@ -9,7 +9,6 @@ CREATE TABLE article (
     story_background TEXT,
     image_desc TEXT,
     article_type VARCHAR(100),
-    article_content TEXT,
     voice_tone VARCHAR(100),
     voice_link VARCHAR(500),
     voice_file_path VARCHAR(500),
@@ -40,7 +39,6 @@ COMMENT ON COLUMN article.article_outline IS '文章简介';
 COMMENT ON COLUMN article.story_background IS '故事背景';
 COMMENT ON COLUMN article.image_desc IS '形象描述';
 COMMENT ON COLUMN article.article_type IS '文章类型';
-COMMENT ON COLUMN article.article_content IS '文章内容';
 COMMENT ON COLUMN article.voice_tone IS '音色';
 COMMENT ON COLUMN article.voice_link IS '语音链接';
 COMMENT ON COLUMN article.voice_file_path IS '语音文件地址';

@@ -34,7 +34,18 @@
               >
                 <span class="chapter-no">第{{ chapter.chapterNo }}章</span>
                 <span class="chapter-title">{{ chapter.chapterTitle }}</span>
-                <button @click.stop="deleteChapter(chapter)" class="delete-btn" title="删除章节">×</button>
+                <div class="chapter-actions">
+                  <button
+                    v-if="!chapter.chapterContent && chapter.generationStatus !== 1"
+                    @click.stop="generateChapterContent(chapter)"
+                    class="generate-btn"
+                    title="生成章节内容"
+                    :disabled="generatingChapters.has(chapter.id)"
+                  >
+                    {{ generatingChapters.has(chapter.id) ? '生成中...' : '生成内容' }}
+                  </button>
+                  <button @click.stop="deleteChapter(chapter)" class="delete-btn" title="删除章节">×</button>
+                </div>
               </div>
             </div>
           </div>
@@ -171,7 +182,6 @@ interface ArticleRespDto {
   articleName: string;
   articleOutline: string;
   articleType?: string;
-  articleCharacteristics?: string;
   voiceTone?: string;
   voiceLink?: string;
   videoLink?: string;
@@ -203,6 +213,7 @@ interface ArticleChapterRespDto {
   wordCountEstimate?: number;
   chapterVoiceLink?: string;
   chapterVideoLink?: string;
+  generationStatus?: number;
   plots?: PlotRespDto[];
 }
 
@@ -218,6 +229,9 @@ const selectedChapter = ref<ArticleChapterRespDto | null>(null);
 const editingCorePlot = ref(false);
 const editingWordCount = ref(false);
 const editingPlots = ref(false);
+
+// 生成状态跟踪
+const generatingChapters = ref<Set<number>>(new Set());
 
 // 编辑表单数据
 const editedCorePlot = ref('');
@@ -276,6 +290,38 @@ const formatChapterContent = (content: string) => {
   if (!content) return '暂无内容';
   // 将换行符转换为<br>标签
   return content.replace(/\n/g, '<br>');
+};
+
+// 生成章节内容
+const generateChapterContent = async (chapter: ArticleChapterRespDto) => {
+  if (generatingChapters.value.has(chapter.id)) return;
+
+  try {
+    generatingChapters.value.add(chapter.id);
+
+    // 显示正在生成提示
+    window.showNotification('正在生成章节内容，请稍候...', 'info');
+
+    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.value!.id}/generate-chapter-content/${chapter.id}`);
+    const response = resp.data;
+
+    if (response.code === '00000000') {
+      window.showNotification('章节内容生成成功', 'success');
+      // 重新获取章节列表以更新状态
+      await fetchArticleChapters(article.value!.id.toString());
+      // 重新选择当前章节
+      if (selectedChapterId.value === chapter.id) {
+        selectChapter(chapter);
+      }
+    } else {
+      window.showNotification('生成失败：' + response.msg, 'error');
+    }
+  } catch (error) {
+    console.error('生成章节内容失败：', error);
+    window.showNotification('生成失败，请稍后重试', 'error');
+  } finally {
+    generatingChapters.value.delete(chapter.id);
+  }
 };
 
 // 删除章节
@@ -570,6 +616,7 @@ onMounted(() => {
 .chapter-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0.75rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -620,6 +667,53 @@ onMounted(() => {
   border-radius: 50%;
   transition: all 0.2s ease;
   margin-left: 0.5rem;
+  opacity: 0;
+}
+
+.chapter-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.chapter-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chapter-item:hover .chapter-actions {
+  opacity: 1;
+}
+
+.generate-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: var(--success, #10b981);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.generate-btn:hover:not(:disabled) {
+  background-color: var(--success-dark, #059669);
+}
+
+.generate-btn:disabled {
+  background-color: var(--gray, #9ca3af);
+  cursor: not-allowed;
+}
+
+.delete-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  background-color: transparent;
+  color: var(--gray, #6b7280);
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
   opacity: 0;
 }
 

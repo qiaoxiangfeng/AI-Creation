@@ -158,11 +158,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Volcengine Ark Runtime SDK -->
+        <!-- Volcengine Ark SDK -->
+        <dependency>
+            <groupId>com.volcengine</groupId>
+            <artifactId>volcengine-java-sdk-ark</artifactId>
+            <version>1.0.13</version>
+        </dependency>
         <dependency>
             <groupId>com.volcengine</groupId>
             <artifactId>volcengine-java-sdk-ark-runtime</artifactId>
-            <version>0.2.27</version>
+            <version>1.0.13</version>
         </dependency>
 
         <!-- Javax Annotation API (for compatibility) -->

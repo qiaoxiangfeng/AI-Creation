@@ -32,9 +32,6 @@ public class ArticleListRespDto extends BaseDto {
     @Schema(description = "文章类型")
     private String articleType;
 
-    @Schema(description = "文章内容")
-    private String articleContent;
-
     @Schema(description = "音色")
     private String voiceTone;
 
@@ -109,13 +106,6 @@ public class ArticleListRespDto extends BaseDto {
         this.articleType = articleType;
     }
 
-    public String getArticleContent() {
-        return articleContent;
-    }
-
-    public void setArticleContent(String articleContent) {
-        this.articleContent = articleContent;
-    }
 
     public String getVoiceTone() {
         return voiceTone;

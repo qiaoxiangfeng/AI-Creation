@@ -156,26 +156,33 @@ start_backend() {
         JAVA_HOME="$JAVA_HOME" mvn clean -q
     fi
 
-    # 清理过期日志文件（超过7天的）
+    # 归档非当天的日志文件
     if [ "$CLEAN_LOGS" = "true" ]; then
-        print_info "清理过期日志文件（删除超过7天的日志文件）..."
+        print_info "归档非当天的日志文件到logs/bk目录..."
 
-        # 删除超过7天的日志文件
-        deleted_count=$(find . -maxdepth 1 -type f -name "*.log*" -mtime +7 -exec rm {} \; -print 2>/dev/null | wc -l)
-        deleted_count=$((deleted_count + $(find logs -maxdepth 1 -type f -name "*.log*" -mtime +7 -exec rm {} \; -print 2>/dev/null | wc -l)))
+        # 创建logs/bk目录（如果不存在）
+        mkdir -p logs/bk
 
-        # 删除所有归档的日志文件
+        # 归档根目录下的非当天日志文件（修改时间超过0天的文件）
+        root_moved_count=$(find . -maxdepth 1 -type f -name "*.log*" -mtime +0 -exec mv {} logs/bk/ \; -print 2>/dev/null | wc -l)
+
+        # 归档logs目录下的非当天日志文件（修改时间超过0天的文件）
+        logs_moved_count=$(find logs -maxdepth 1 -type f -name "*.log*" -mtime +0 -exec mv {} logs/bk/ \; -print 2>/dev/null | wc -l)
+
+        total_moved=$((root_moved_count + logs_moved_count))
+
+        # 清理空的归档目录（如果存在）
         if [ -d "logs/archive" ]; then
-            archived_deleted=$(find logs/archive -type f -name "*.log*" -exec rm {} \; -print 2>/dev/null | wc -l)
-            deleted_count=$((deleted_count + archived_deleted))
+            archive_moved=$(find logs/archive -type f -name "*.log*" -exec mv {} logs/bk/ \; -print 2>/dev/null | wc -l)
+            total_moved=$((total_moved + archive_moved))
             # 删除空的归档目录
             find logs/archive -type d -empty -delete 2>/dev/null || true
         fi
 
-        if [ "$deleted_count" -gt 0 ]; then
-            print_success "已清理 $deleted_count 个过期日志文件"
+        if [ "$total_moved" -gt 0 ]; then
+            print_success "已归档 $total_moved 个非当天日志文件到logs/bk目录"
         else
-            print_info "没有找到需要清理的过期日志文件"
+            print_info "没有找到需要归档的非当天日志文件"
         fi
     fi
 
@@ -333,13 +340,18 @@ start_log_cleanup_task() {
     cat > logs_cleanup_task.sh << 'EOF'
 #!/bin/bash
 while true; do
-    # 每小时检查一次，删除超过7天的日志文件
+    # 每小时检查一次，将非当天的日志文件归档到logs/bk目录
     sleep 3600  # 1小时 = 3600秒
 
-    # 删除超过7天的日志文件
+    # 创建logs/bk目录（如果不存在）
+    mkdir -p logs/bk
+
+    # 归档非当天的日志文件到logs/bk目录
     if [ -d "logs" ]; then
-        find logs -name "*.log*" -type f -mtime +7 -delete 2>/dev/null || true
-        find . -maxdepth 1 -name "*.log*" -type f -mtime +7 -delete 2>/dev/null || true
+        # 归档logs目录下的非当天日志文件
+        find logs -maxdepth 1 -name "*.log*" -type f -mtime +0 -exec mv {} logs/bk/ \; 2>/dev/null || true
+        # 归档根目录下的非当天日志文件
+        find . -maxdepth 1 -name "*.log*" -type f -mtime +0 -exec mv {} logs/bk/ \; 2>/dev/null || true
     fi
 done
 EOF

@@ -9,6 +9,7 @@ import com.aicreation.mapper.ArticleGenerationConfigMapper;
 import com.aicreation.mapper.ArticleMapper;
 import com.aicreation.mapper.PlotMapper;
 import com.aicreation.external.VolcengineChatClient;
+import com.aicreation.service.ResponseIdManager;
 import com.aicreation.util.TraceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,12 @@ public class ArticleContentGenerationTask {
     @Autowired
     private VolcengineChatClient volcengineChatClient;
 
+    @Autowired
+    private ResponseIdManager responseIdManager;
+
+    @Autowired
+    private com.aicreation.generate.ArticleContentGenerator articleContentGenerator;
+
     /**
      * 任务执行状态标记，避免并发执行
      */
@@ -61,7 +68,7 @@ public class ArticleContentGenerationTask {
      */
     @Transactional(rollbackFor = Exception.class)
     public void generateChapterContentManually(ArticleChapter chapter) {
-        generateContentForChapter(chapter);
+        articleContentGenerator.generateChapterContent(chapter.getId());
     }
 
     /**
@@ -266,11 +273,10 @@ public class ArticleContentGenerationTask {
         log.debug("{}", prompt);
 
         try {
-            // 使用流式响应调用豆包AI生成内容
-            log.info("开始流式调用AI生成章节内容...");
-            String generatedContent = callAIWithStreaming(
-                "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-                "doubao-seed-1-6-lite-251015",
+            // 使用Responses API生成内容，支持上下文管理和多任务隔离
+            log.info("开始使用Responses API生成章节内容...");
+            String generatedContent = callAIWithResponsesAPI(
+                article,
                 prompt
             );
 
@@ -292,32 +298,15 @@ public class ArticleContentGenerationTask {
             return cleanContent;
         } catch (Exception e) {
             log.error("调用AI生成章节内容失败：{}", e.getMessage(), e);
-            return getFallbackChapterContent(article, chapter);
+            throw new RuntimeException("AI生成章节内容失败: " + e.getMessage(), e);
         }
     }
 
     /**
-     * 使用流式响应调用AI并返回完整内容
+     * 使用Responses API调用AI，支持上下文管理和多任务隔离
      */
-    private String callAIWithStreaming(String url, String model, String prompt) {
-        StringBuilder fullContent = new StringBuilder();
-
-        try {
-            volcengineChatClient.streamChatCompletion(url, model, prompt, chunk -> {
-                if (chunk != null && !chunk.startsWith("[ERROR]")) {
-                    fullContent.append(chunk);
-                } else if (chunk != null && chunk.startsWith("[ERROR]")) {
-                    log.error("流式响应错误: {}", chunk);
-                }
-            });
-
-            log.info("流式响应完成，总内容长度: {}", fullContent.length());
-            return fullContent.toString();
-
-        } catch (Exception e) {
-            log.error("流式调用AI失败", e);
-            throw new RuntimeException("AI调用失败: " + e.getMessage(), e);
-        }
+    private String callAIWithResponsesAPI(Article article, String prompt) {
+        return responseIdManager.callAIWithResponsesAPI(article, prompt);
     }
 
     /**
@@ -560,16 +549,6 @@ public class ArticleContentGenerationTask {
         }
     }
 
-    /**
-     * 获取默认章节内容（当AI生成失败时使用）
-     */
-    private String getFallbackChapterContent(Article article, ArticleChapter chapter) {
-        return "【章节内容生成中...】\n\n" +
-               "本章标题：" + chapter.getChapterTitle() + "\n\n" +
-               "（由于AI生成服务暂时不可用，本章内容将在稍后自动生成）\n\n" +
-               "核心剧情：" + chapter.getCorePlot() + "\n\n" +
-               "字数预估：" + chapter.getWordCountEstimate() + "字";
-    }
 
 
 }

@@ -59,6 +59,9 @@ public class ArticleServiceImpl implements IArticleService {
     @Autowired
     private com.aicreation.task.ArticleChapterGenerationTask articleChapterGenerationTask;
 
+    @Autowired
+    private com.aicreation.generate.ArticleChapterGenerator articleChapterGenerator;
+
     @Override
     public ArticleRespDto getArticleById(ArticleQueryReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getArticleId())) {
@@ -175,12 +178,32 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
 
+        // 获取文章的所有章节
+        List<ArticleChapterRespDto> chapters = getArticleChapters(request.getArticleId());
+        if (chapters != null && !chapters.isEmpty()) {
+            log.info("删除文章[{}]时发现{}个关联章节，将级联删除", request.getArticleId(), chapters.size());
+
+            // 删除所有关联的章节（会级联删除伏笔）
+            for (ArticleChapterRespDto chapter : chapters) {
+                try {
+                    deleteChapter(chapter.getId());
+                    log.debug("级联删除章节[{}]成功", chapter.getId());
+                } catch (Exception e) {
+                    log.warn("级联删除章节[{}]失败：{}", chapter.getId(), e.getMessage());
+                    // 继续删除其他章节，不因为单个章节失败而停止
+                }
+            }
+        }
+
         // 软删除文章
         int result = articleMapper.deleteByPrimaryKey(request.getArticleId());
         if (result <= 0) {
             log.error("删除文章失败：数据库更新失败");
             throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
         }
+
+        log.info("文章[{}]删除完成，包含{}个关联章节", request.getArticleId(),
+                chapters != null ? chapters.size() : 0);
 
         return true;
     }
@@ -238,7 +261,6 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setArticleName(article.getArticleName());
         dto.setArticleOutline(article.getArticleOutline());
         dto.setArticleType(article.getArticleType());
-        dto.setArticleContent(article.getArticleContent());
         dto.setVoiceTone(article.getVoiceTone());
         dto.setVoiceLink(article.getVoiceLink());
         dto.setVoiceFilePath(article.getVoiceFilePath());
@@ -320,6 +342,7 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setWordCountEstimate(chapter.getWordCountEstimate());
         dto.setChapterVoiceLink(chapter.getChapterVoiceLink());
         dto.setChapterVideoLink(chapter.getChapterVideoLink());
+        dto.setGenerationStatus(chapter.getGenerationStatus());
 
         // 获取章节的伏笔信息
         List<PlotRespDto> plots = getChapterPlots(chapter.getId());
@@ -576,7 +599,7 @@ public class ArticleServiceImpl implements IArticleService {
             }
 
             // 异步调用章节生成任务
-            articleChapterGenerationTask.generateChaptersForArticle(article);
+            articleChapterGenerator.generateChaptersForArticle(articleId);
 
             log.info("文章{}章节生成任务已启动", articleId);
             return true;

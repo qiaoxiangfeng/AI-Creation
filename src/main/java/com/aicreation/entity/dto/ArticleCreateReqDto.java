@@ -39,14 +39,6 @@ public class ArticleCreateReqDto extends BaseDto {
     @Size(max = 100, message = "文章类型不能超过100个字符")
     private String articleType;
 
-    @Schema(description = "文章特点", example = "搞笑,贴近生活")
-    @Size(max = 500, message = "文章特点不能超过500个字符")
-    private String articleCharacteristics;
-
-    @Schema(description = "文章内容", example = "人工智能（AI）技术正在快速发展...")
-    @Size(max = 10000, message = "文章内容不能超过10000个字符")
-    private String articleContent;
-
     @Schema(description = "音色", example = "alex")
     @Size(max = 100, message = "音色不能超过100个字符")
     private String voiceTone;
@@ -118,14 +110,6 @@ public class ArticleCreateReqDto extends BaseDto {
 
     public void setArticleType(String articleType) {
         this.articleType = articleType;
-    }
-
-    public String getArticleContent() {
-        return articleContent;
-    }
-
-    public void setArticleContent(String articleContent) {
-        this.articleContent = articleContent;
     }
 
     public String getVoiceTone() {
@@ -200,11 +184,4 @@ public class ArticleCreateReqDto extends BaseDto {
         this.generationStatus = generationStatus;
     }
 
-    public String getArticleCharacteristics() {
-        return articleCharacteristics;
-    }
-
-    public void setArticleCharacteristics(String articleCharacteristics) {
-        this.articleCharacteristics = articleCharacteristics;
-    }
 }

@@ -68,15 +68,6 @@
                 </td>
                 <td>{{ article.articleType || '-' }}</td>
                 <td>
-                  <div class="characteristics-tags">
-                    <span
-                      v-for="char in article.articleCharacteristics?.split(',') || []"
-                      :key="char"
-                      class="tag"
-                    >
-                      {{ char }}
-                    </span>
-                  </div>
                 </td>
                 <td>{{ getVoiceToneText(article.voiceTone) }}</td>
                 <td>
@@ -191,10 +182,6 @@
               <input v-model="newArticle.articleType" class="form-input" placeholder="请输入文章类型" />
             </div>
             <div class="form-group">
-              <label class="form-label">文章特点</label>
-              <input v-model="newArticle.articleCharacteristics" class="form-input" placeholder="请输入文章特点，用逗号分隔" />
-            </div>
-            <div class="form-group">
               <label class="form-label">音色</label>
               <select v-model="newArticle.voiceTone" class="form-select">
                 <option value="">请选择音色</option>
@@ -252,10 +239,6 @@
             <div class="form-group">
               <label class="form-label">文章类型</label>
               <input v-model="editingArticle.articleType" class="form-input" placeholder="请输入文章类型" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">文章特点</label>
-              <input v-model="editingArticle.articleCharacteristics" class="form-input" placeholder="请输入文章特点，用逗号分隔" />
             </div>
             <div class="form-group">
               <label class="form-label">音色</label>
@@ -349,8 +332,6 @@ interface ArticleRespDto {
   storyBackground?: string;
   imageDesc?: string;
   articleType?: string;
-  articleCharacteristics?: string;
-  articleContent?: string;
   voiceTone?: string;
   voiceLink?: string;
   voiceFilePath?: string;
@@ -381,7 +362,6 @@ const newArticle = ref({
   articleOutline: '',
   storyBackground: '',
   articleType: '',
-  articleCharacteristics: '',
   voiceTone: '',
   voiceLink: '',
   voiceFilePath: '',
@@ -449,7 +429,6 @@ const createArticle = async () => {
       articleOutline: '',
       storyBackground: '',
       articleType: '',
-      articleCharacteristics: '',
       voiceTone: '',
       voiceLink: '',
       voiceFilePath: '',

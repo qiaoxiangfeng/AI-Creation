@@ -5,7 +5,7 @@ import com.aicreation.entity.dto.base.BaseResponse;
 import com.aicreation.entity.dto.base.PageRespDto;
 import com.aicreation.entity.dto.ArticleQueryReqDto;
 import com.aicreation.service.IArticleService;
-import com.aicreation.service.TaskStatusCleanupService;
+import com.aicreation.generate.ArticleTitleGenerator;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +31,10 @@ public class ArticleController {
     private IArticleService articleService;
 
     @Autowired
-    private TaskStatusCleanupService taskStatusCleanupService;
+    private ArticleTitleGenerator articleTitleGenerator;
+
+    @Autowired
+    private com.aicreation.generate.ArticleContentGenerator articleContentGenerator;
 
     @Operation(summary = "查询文章列表", description = "分页查询文章列表，支持按名称、类型、发布状态筛选")
     @PostMapping("/list")
@@ -124,14 +127,29 @@ public class ArticleController {
         return BaseResponse.success(result);
     }
 
-    @Operation(summary = "清理卡住的任务状态", description = "清理因系统重启等原因导致的卡住任务状态")
-    @PostMapping("/cleanup-stuck-statuses")
-    public BaseResponse<String> cleanupStuckStatuses() {
+    @Operation(summary = "生成单个章节内容", description = "为指定章节生成内容")
+    @PostMapping("/{articleId}/generate-chapter-content/{chapterId}")
+    public BaseResponse<Boolean> generateChapterContent(
+            @Parameter(description = "文章ID") @PathVariable Long articleId,
+            @Parameter(description = "章节ID") @PathVariable Long chapterId) {
         try {
-            taskStatusCleanupService.cleanupAllStuckStatuses();
-            return BaseResponse.success("任务状态清理完成");
+            articleContentGenerator.generateChapterContent(chapterId);
+            return BaseResponse.success(true);
         } catch (Exception e) {
-            return BaseResponse.error("67999999", "清理失败: " + e.getMessage());
+            return BaseResponse.error("67999999", "生成章节内容失败: " + e.getMessage());
         }
     }
+
+    @Operation(summary = "生成单个文章标题", description = "根据文章生成配置生成一个新的文章标题")
+    @PostMapping("/generate-title/{configId}")
+    public BaseResponse<Long> generateSingleTitle(
+            @Parameter(description = "文章生成配置ID") @PathVariable Long configId) {
+        try {
+            Long articleId = articleTitleGenerator.generateSingleTitle(configId);
+            return BaseResponse.success(articleId);
+        } catch (Exception e) {
+            return BaseResponse.error("67999999", "生成文章标题失败: " + e.getMessage());
+        }
+    }
+
 }

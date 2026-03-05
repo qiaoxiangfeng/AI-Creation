@@ -45,6 +45,9 @@ public class ArticleChapterRespDto implements Serializable {
     @Schema(description = "章节视频链接")
     private String chapterVideoLink;
 
+    @Schema(description = "生成状态（0-未开始，1-生成中，2-已完成，3-生成失败）")
+    private Integer generationStatus;
+
     @Schema(description = "章节伏笔列表")
     private List<PlotRespDto> plots;
 }
