@@ -21,7 +21,7 @@ public class DouBaoChatClientImpl implements DouBaoClient {
 
 
     private final String DOUBAO_SEED_1_6_URL="https://ark.cn-beijing.volces.com/api/v3/chat/completions";
-    private final String DOUBAO_SEED_1_6__MODEL="doubao-seed-1-6-250615";
+    private final String DOUBAO_SEED_1_6__MODEL="doubao-seed-1-6-lite-251015";
 
     @Override
     public void chatCompletions(String content) {

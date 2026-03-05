@@ -46,6 +46,12 @@ public class ArticleChapter implements Serializable {
     /** 更新时间 */
     private LocalDateTime updateTime;
 
+    /** 生成状态（0-未开始，1-生成中，2-已完成，3-失败） */
+    private Integer generationStatus;
+
+    /** 故事完结标识（true-故事已完结，false-故事未完结，可以继续续写） */
+    private Boolean storyComplete;
+
     public Long getId() {
         return id;
     }
@@ -140,6 +146,22 @@ public class ArticleChapter implements Serializable {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Integer getGenerationStatus() {
+        return generationStatus;
+    }
+
+    public void setGenerationStatus(Integer generationStatus) {
+        this.generationStatus = generationStatus;
+    }
+
+    public Boolean getStoryComplete() {
+        return storyComplete;
+    }
+
+    public void setStoryComplete(Boolean storyComplete) {
+        this.storyComplete = storyComplete;
     }
 }
 

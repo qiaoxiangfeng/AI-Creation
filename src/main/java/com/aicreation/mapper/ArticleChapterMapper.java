@@ -33,4 +33,17 @@ public interface ArticleChapterMapper {
      * 根据文章ID查询没有内容的章节列表
      */
     List<ArticleChapter> selectChaptersWithoutContentByArticleId(@Param("articleId") Long articleId);
+
+    /**
+     * 查询没有内容的章节，排除文章状态为生成中的章节
+     */
+    List<ArticleChapter> selectChaptersWithoutContentExcludingGenerating();
+
+    /**
+     * 根据生成状态查询章节列表
+     *
+     * @param generationStatus 生成状态
+     * @return 章节列表
+     */
+    List<ArticleChapter> selectChaptersByGenerationStatus(@Param("generationStatus") Integer generationStatus);
 }

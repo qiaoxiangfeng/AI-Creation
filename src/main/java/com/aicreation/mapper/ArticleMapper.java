@@ -100,4 +100,12 @@ public interface ArticleMapper {
      * @return 文章列表
      */
     List<Article> selectArticlesWithoutChapters();
+
+    /**
+     * 根据生成状态查询文章列表
+     *
+     * @param generationStatus 生成状态
+     * @return 文章列表
+     */
+    List<Article> selectArticlesByGenerationStatus(@Param("generationStatus") Integer generationStatus);
 }

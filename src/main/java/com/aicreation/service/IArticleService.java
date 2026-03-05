@@ -101,4 +101,37 @@ public interface IArticleService {
      * @return 文章生成进度信息
      */
     ArticleProgressDto getArticleProgress(Long articleId);
+
+    /**
+     * 更新章节信息（核心剧情、字数预估、伏笔）
+     *
+     * @param chapterId 章节ID
+     * @param corePlot 核心剧情
+     * @param wordCountEstimate 字数预估
+     * @param plots 伏笔列表
+     * @return 是否更新成功
+     */
+    Boolean updateChapterInfo(Long chapterId, String corePlot, Integer wordCountEstimate, List<PlotReqDto> plots);
+
+
+    /**
+     * 删除章节
+     * @param chapterId 章节ID
+     * @return 是否删除成功
+     */
+    Boolean deleteChapter(Long chapterId);
+
+    /**
+     * 生成文章章节
+     * @param articleId 文章ID
+     * @return 是否启动成功
+     */
+    Boolean generateArticleChapters(Long articleId);
+
+    /**
+     * 生成文章章节内容
+     * @param articleId 文章ID
+     * @return 是否启动成功
+     */
+    Boolean generateArticleChapterContent(Long articleId);
 }

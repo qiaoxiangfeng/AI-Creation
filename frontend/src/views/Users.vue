@@ -289,7 +289,7 @@ const loadUsers = async () => {
   } catch (error: any) {
     console.error('加载用户列表失败:', error);
     const errorMessage = error.message || '加载用户列表失败，请稍后重试';
-    alert(errorMessage);
+    window.showNotification(errorMessage, 'error');
   } finally {
     loading.value = false;
   }
@@ -358,7 +358,6 @@ const updateUser = async () => {
 };
 
 const deleteUser = async (user: UserRespDto) => {
-  if (!confirm('确定要删除这个用户吗？')) return;
   
   try {
     await http.post('/api/users/delete', { userId: user.id });
@@ -376,17 +375,17 @@ const initPassword = async (user: UserRespDto) => {
       userIds: [user.id],
       newPassword: '123456'
     });
-    alert('密码初始化成功！');
+    window.showNotification('密码初始化成功！', 'success');
   } catch (error: any) {
     console.error('初始化密码失败:', error);
     const errorMessage = error.message || '初始化密码失败，请稍后重试';
-    alert(errorMessage);
+    window.showNotification(errorMessage, 'error');
   }
 };
 
 const resetPasswords = async () => {
   if (newPassword.value !== confirmPassword.value) {
-    alert('两次输入的密码不一致');
+    window.showNotification('两次输入的密码不一致', 'warning');
     return;
   }
   
@@ -398,11 +397,11 @@ const resetPasswords = async () => {
     showPasswordModal.value = false;
     newPassword.value = '';
     confirmPassword.value = '';
-    alert('密码重置成功');
+    window.showNotification('密码重置成功', 'success');
   } catch (error: any) {
     console.error('重置密码失败:', error);
     const errorMessage = error.message || '重置密码失败，请稍后重试';
-    alert(errorMessage);
+    window.showNotification(errorMessage, 'error');
   }
 };
 

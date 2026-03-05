@@ -46,6 +46,11 @@ public interface PlotMapper {
     int deleteByPrimaryKey(Long id);
 
     /**
+     * 根据章节ID删除伏笔（软删除）
+     */
+    int deleteByChapterId(Long chapterId);
+
+    /**
      * 根据文章ID和章节ID查询伏笔
      */
     List<Plot> selectByArticleIdAndChapterId(@Param("articleId") Long articleId, @Param("chapterId") Long chapterId);

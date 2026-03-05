@@ -102,12 +102,6 @@
                     <button @click="viewArticle(article)" class="btn btn-outline btn-sm">
                       查看
                     </button>
-                    <button @click="downloadFullText(article)" class="btn btn-success btn-sm">
-                      下载
-                    </button>
-                    <button @click="generateContent(article)" class="btn btn-warning btn-sm">
-                      生成
-                    </button>
                     <button @click="editArticle(article)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
@@ -287,6 +281,46 @@
               <label class="form-label">视频文件地址</label>
               <input v-model="editingArticle.videoFilePath" class="form-input" placeholder="/uploads/video/video.mp4" />
             </div>
+
+            <!-- 总字数预估 -->
+            <div class="form-group">
+              <label class="form-label">总字数预估 *</label>
+              <div class="input-with-buttons">
+                <button type="button" @click="adjustTotalWordCount(-1000)" class="btn-adjust">-</button>
+                <input
+                  v-model.number="editingArticle.totalWordCountEstimate"
+                  type="number"
+                  class="form-input form-input-number"
+                  min="1000"
+                  max="500000"
+                  step="1000"
+                  required
+                  placeholder="请输入总字数预估"
+                />
+                <button type="button" @click="adjustTotalWordCount(1000)" class="btn-adjust">+</button>
+              </div>
+              <div class="form-hint">每次调整1000字</div>
+            </div>
+
+            <!-- 每章节字数预估 -->
+            <div class="form-group">
+              <label class="form-label">每章节字数预估 *</label>
+              <div class="input-with-buttons">
+                <button type="button" @click="adjustChapterWordCount(-100)" class="btn-adjust">-</button>
+                <input
+                  v-model.number="editingArticle.chapterWordCountEstimate"
+                  type="number"
+                  class="form-input form-input-number"
+                  min="100"
+                  max="10000"
+                  step="100"
+                  required
+                  placeholder="请输入每章节字数预估"
+                />
+                <button type="button" @click="adjustChapterWordCount(100)" class="btn-adjust">+</button>
+              </div>
+              <div class="form-hint">每次调整100字</div>
+            </div>
             <div class="flex gap-2 justify-end">
               <button type="button" @click="showEditModal = false" class="btn btn-outline">
                 取消
@@ -313,20 +347,22 @@ interface ArticleRespDto {
   articleName: string;
   articleOutline?: string;
   storyBackground?: string;
+  imageDesc?: string;
   articleType?: string;
   articleCharacteristics?: string;
+  articleContent?: string;
   voiceTone?: string;
   voiceLink?: string;
   voiceFilePath?: string;
   videoLink?: string;
   videoFilePath?: string;
+  publishStatus: number;
   totalWordCountEstimate?: number;
   chapterWordCountEstimate?: number;
   generationStatus?: number;
   resState: number;
   createTime: string;
   updateTime: string;
-  publishStatus: number; // Added publishStatus
 }
 
 const articles = ref<ArticleRespDto[]>([]);
@@ -421,12 +457,28 @@ const createArticle = async () => {
       videoFilePath: ''
     };
     loadArticles();
-    alert('文章创建成功！');
+    window.showNotification('文章创建成功！', 'success');
   } catch (error: any) {
     console.error('创建文章失败:', error);
     const errorMessage = error.message || '创建文章失败，请稍后重试';
-    alert(errorMessage);
+    window.showNotification(errorMessage, 'error');
   }
+};
+
+// 调整总字数预估
+const adjustTotalWordCount = (delta: number) => {
+  if (!editingArticle.value) return;
+  const current = editingArticle.value.totalWordCountEstimate || 0;
+  const newValue = Math.max(1000, Math.min(500000, current + delta));
+  editingArticle.value.totalWordCountEstimate = newValue;
+};
+
+// 调整每章节字数预估
+const adjustChapterWordCount = (delta: number) => {
+  if (!editingArticle.value) return;
+  const current = editingArticle.value.chapterWordCountEstimate || 0;
+  const newValue = Math.max(100, Math.min(10000, current + delta));
+  editingArticle.value.chapterWordCountEstimate = newValue;
 };
 
 const editArticle = (article: ArticleRespDto) => {
@@ -448,14 +500,16 @@ const updateArticle = async () => {
       voiceLink: editingArticle.value.voiceLink,
       voiceFilePath: editingArticle.value.voiceFilePath,
       videoLink: editingArticle.value.videoLink,
-      videoFilePath: editingArticle.value.videoFilePath
+      videoFilePath: editingArticle.value.videoFilePath,
+      totalWordCountEstimate: editingArticle.value.totalWordCountEstimate,
+      chapterWordCountEstimate: editingArticle.value.chapterWordCountEstimate
     };
     
     await http.put('/api/articles', updateData);
     showEditModal.value = false;
     editingArticle.value = null;
     loadArticles();
-    alert('文章更新成功！');
+    window.showNotification('文章更新成功！', 'success');
   } catch (error: any) {
     console.error('更新文章失败:', error);
     const errorMessage = error.message || '更新文章失败，请稍后重试';
@@ -464,16 +518,15 @@ const updateArticle = async () => {
 };
 
 const deleteArticle = async (article: ArticleRespDto) => {
-  if (!confirm(`确定要删除文章 "${article.articleName}" 吗？`)) return;
   
   try {
     await http.delete('/api/articles', { data: { articleId: article.id } });
     loadArticles();
-    alert('文章删除成功！');
+    window.showNotification('文章删除成功！', 'success');
   } catch (error: any) {
     console.error('删除文章失败:', error);
     const errorMessage = error.message || '删除文章失败，请稍后重试';
-    alert(errorMessage);
+    window.showNotification(errorMessage, 'error');
   }
 };
 
@@ -481,12 +534,11 @@ const publishArticle = async (article: ArticleRespDto) => {
   const newStatus = article.publishStatus === 1 ? 2 : 1; // 1 for unpublished, 2 for published
   const actionText = newStatus === 2 ? '发布' : '取消发布';
   
-  if (!confirm(`确定要${actionText}文章 "${article.articleName}" 吗？`)) return;
   
   try {
     await http.put(`/api/articles/${article.id}/publish?publishStatus=${newStatus}`);
     loadArticles();
-    alert(`文章${actionText}成功！`);
+    window.showNotification(`文章${actionText}成功！`, 'success');
   } catch (error: any) {
     console.error(`${actionText}文章失败:`, error);
     const errorMessage = error.message || `${actionText}文章失败，请稍后重试`;
@@ -520,56 +572,6 @@ const viewArticle = (article: ArticleRespDto) => {
   router.push(`/articles/${article.id}`);
 };
 
-// 下载全文
-const downloadFullText = async (article: ArticleRespDto) => {
-  try {
-    const resp = await http.get<BaseResponse<string>>(`/api/articles/${article.id}/full-text`);
-    const response = resp.data;
-    if (response.code === '00000000') {
-      const fullText = response.data;
-      const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${article.articleName}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } else {
-      alert('下载失败：' + response.msg);
-    }
-  } catch (error) {
-    console.error('下载全文失败:', error);
-    alert('下载失败，请稍后重试');
-  }
-};
-
-// 生成内容
-const generateContent = async (article: ArticleRespDto) => {
-  // 检查参数是否设置完整
-  if (!article.totalWordCountEstimate || !article.chapterWordCountEstimate) {
-    alert('请先设置文章的总字数预估和每章节字数预估');
-    return;
-  }
-
-  if (confirm(`确定要生成文章"${article.articleName}"的内容吗？\n\n这将触发AI生成章节内容，可能需要一些时间。`)) {
-    try {
-      const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-content`);
-      const response = resp.data;
-      if (response.code === '00000000') {
-        alert('内容生成任务已启动，请稍后查看章节内容');
-        // 重新加载列表
-        loadArticles();
-      } else {
-        alert('启动失败：' + response.msg);
-      }
-    } catch (error) {
-      console.error('启动内容生成失败:', error);
-      alert('启动失败，请稍后重试');
-    }
-  }
-};
 
 const truncateText = (text: string, maxLength: number) => {
   if (!text) return '-';
@@ -702,6 +704,51 @@ const truncateText = (text: string, maxLength: number) => {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* 数字输入框样式 */
+.input-with-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-input-number {
+  flex: 1;
+  text-align: center;
+}
+
+.btn-adjust {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: white;
+  color: var(--primary);
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-adjust:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-adjust:active {
+  transform: scale(0.95);
+}
+
+.form-hint {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 
 .loading-container {

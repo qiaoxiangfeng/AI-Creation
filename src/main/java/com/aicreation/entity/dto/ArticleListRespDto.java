@@ -53,6 +53,15 @@ public class ArticleListRespDto extends BaseDto {
     @Schema(description = "发布状态：1-未发布，2-已发布")
     private Integer publishStatus;
 
+    @Schema(description = "总字数预估")
+    private Integer totalWordCountEstimate;
+
+    @Schema(description = "每章节字数预估")
+    private Integer chapterWordCountEstimate;
+
+    @Schema(description = "生成状态：0-未开始，1-生成中，2-已完成，3-失败")
+    private Integer generationStatus;
+
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
@@ -154,6 +163,30 @@ public class ArticleListRespDto extends BaseDto {
 
     public void setPublishStatus(Integer publishStatus) {
         this.publishStatus = publishStatus;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
+    }
+
+    public Integer getGenerationStatus() {
+        return generationStatus;
+    }
+
+    public void setGenerationStatus(Integer generationStatus) {
+        this.generationStatus = generationStatus;
     }
 
     public LocalDateTime getCreateTime() {

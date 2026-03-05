@@ -44,6 +44,8 @@ SCRIPTS=(
     "src/main/resources/sql/add_article_chapter_fields.sql"
     "src/main/resources/sql/add_article_generation_config_word_estimate_fields.sql"
     "src/main/resources/sql/remove_article_content_generated.sql"
+    "src/main/resources/sql/remove_plot_recovery_chapter_constraint.sql"
+    "src/main/resources/sql/init_generation_status.sql"
 )
 
 # 执行脚本

@@ -246,7 +246,7 @@ public class Article implements Serializable {
     }
 
     public Integer getGenerationStatus() {
-        return generationStatus;
+        return generationStatus != null ? generationStatus : 0;
     }
 
     public void setGenerationStatus(Integer generationStatus) {

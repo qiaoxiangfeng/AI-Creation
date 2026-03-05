@@ -11,6 +11,7 @@ import com.aicreation.exception.BusinessException;
 import com.aicreation.external.DouBaoClient;
 import com.aicreation.external.VolcengineChatClient;
 import com.aicreation.mapper.ArticleGenerationConfigMapper;
+import com.aicreation.util.TraceUtil;
 import com.aicreation.service.IArticleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,12 +57,21 @@ public class ArticleTitleGenerationTask {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     /**
-     * 定时任务：每分钟执行一次文章标题生成
+     * 定时任务：每月1号执行文章标题生成
      * 如果上次执行未完成，则丢弃本次调度
      */
-    @Scheduled(cron = "0 * * * * ?") // 每分钟执行一次
+    @Scheduled(cron = "0 0 0 1 * ?") // 每月1号0点0分0秒执行
     @Transactional(rollbackFor = Exception.class)
     public void generateArticleTitles() {
+        TraceUtil.executeWithTraceId(() -> {
+            executeArticleTitlesTask();
+        });
+    }
+
+    /**
+     * 执行文章标题生成任务的具体逻辑
+     */
+    private void executeArticleTitlesTask() {
         // 检查任务是否正在执行，如果是则跳过本次执行
         if (!isRunning.compareAndSet(false, true)) {
             log.info("文章标题生成定时任务正在执行中，跳过本次调度");
@@ -186,25 +196,48 @@ public class ArticleTitleGenerationTask {
         // 构建生成文章标题和大纲的提示词
         String prompt = buildTitleGenerationPrompt(articleType, existingTitles);
 
+        log.debug("=== AI标题生成提示词 ===");
+        log.debug("{}", prompt);
+
         try {
-            // 调用豆包AI生成内容
-            List<String> results = volcengineChatClient.chatCompletions(
+            // 使用流式响应调用豆包AI生成内容
+            log.info("开始流式调用AI生成文章标题和大纲...");
+            String generatedContent = callAIWithStreaming(
                 "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-                "doubao-seed-1-6-250615",
+                "doubao-seed-1-6-lite-251015",
                 prompt
             );
 
-            if (results != null && !results.isEmpty()) {
-                String generatedContent = results.get(0);
-                return parseGeneratedContent(generatedContent);
-            } else {
-                throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
-            }
+            return parseGeneratedContent(generatedContent);
 
         } catch (Exception e) {
             log.error("调用AI生成文章内容失败：{}", e.getMessage());
             // 返回默认内容作为降级方案
             return getFallbackContent(articleType.getTheme());
+        }
+    }
+
+    /**
+     * 使用流式响应调用AI并返回完整内容
+     */
+    private String callAIWithStreaming(String url, String model, String prompt) {
+        StringBuilder fullContent = new StringBuilder();
+
+        try {
+            volcengineChatClient.streamChatCompletion(url, model, prompt, chunk -> {
+                if (chunk != null && !chunk.startsWith("[ERROR]")) {
+                    fullContent.append(chunk);
+                } else if (chunk != null && chunk.startsWith("[ERROR]")) {
+                    log.error("流式响应错误: {}", chunk);
+                }
+            });
+
+            log.info("流式响应完成，总内容长度: {}", fullContent.length());
+            return fullContent.toString();
+
+        } catch (Exception e) {
+            log.error("流式调用AI失败", e);
+            throw new RuntimeException("AI调用失败: " + e.getMessage(), e);
         }
     }
 

@@ -9,15 +9,21 @@ import com.aicreation.entity.dto.*;
 import com.aicreation.entity.dto.base.PageRespDto;
 import com.aicreation.entity.po.Article;
 import com.aicreation.entity.po.ArticleChapter;
+import com.aicreation.entity.po.ArticleGenerationConfig;
+import com.aicreation.entity.po.Plot;
 import java.util.List;
+import java.util.ArrayList;
 import com.aicreation.mapper.ArticleMapper;
 import com.aicreation.mapper.ArticleChapterMapper;
+import com.aicreation.mapper.ArticleGenerationConfigMapper;
+import com.aicreation.mapper.PlotMapper;
 import com.aicreation.service.IArticleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -40,6 +46,18 @@ public class ArticleServiceImpl implements IArticleService {
 
     @Autowired
     private ArticleChapterMapper articleChapterMapper;
+
+    @Autowired
+    private PlotMapper plotMapper;
+
+    @Autowired
+    private ArticleGenerationConfigMapper articleGenerationConfigMapper;
+
+    @Autowired
+    private com.aicreation.task.ArticleContentGenerationTask articleContentGenerationTask;
+
+    @Autowired
+    private com.aicreation.task.ArticleChapterGenerationTask articleChapterGenerationTask;
 
     @Override
     public ArticleRespDto getArticleById(ArticleQueryReqDto request) {
@@ -227,6 +245,10 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setVideoLink(article.getVideoLink());
         dto.setVideoFilePath(article.getVideoFilePath());
         dto.setPublishStatus(article.getPublishStatus());
+        dto.setTotalWordCountEstimate(article.getTotalWordCountEstimate());
+        dto.setChapterWordCountEstimate(article.getChapterWordCountEstimate());
+        // 处理generationStatus为null的情况，默认为0（未开始）
+        dto.setGenerationStatus(article.getGenerationStatus() != null ? article.getGenerationStatus() : 0);
         dto.setCreateTime(article.getCreateTime());
         dto.setUpdateTime(article.getUpdateTime());
         return dto;
@@ -294,8 +316,52 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setChapterNo(chapter.getChapterNo());
         dto.setChapterTitle(chapter.getChapterTitle());
         dto.setChapterContent(chapter.getChapterContent());
+        dto.setCorePlot(chapter.getCorePlot());
+        dto.setWordCountEstimate(chapter.getWordCountEstimate());
         dto.setChapterVoiceLink(chapter.getChapterVoiceLink());
         dto.setChapterVideoLink(chapter.getChapterVideoLink());
+
+        // 获取章节的伏笔信息
+        List<PlotRespDto> plots = getChapterPlots(chapter.getId());
+        dto.setPlots(plots);
+
+        return dto;
+    }
+
+    /**
+     * 获取章节的伏笔信息
+     */
+    private List<PlotRespDto> getChapterPlots(Long chapterId) {
+        if (chapterId == null) {
+            return new java.util.ArrayList<>();
+        }
+
+        // 查询章节的伏笔信息
+        List<Plot> plots = plotMapper.selectByChapterId(chapterId);
+
+        return plots.stream()
+                .map(this::convertToPlotRespDto)
+                .toList();
+    }
+
+    /**
+     * 转换Plot为PlotRespDto
+     */
+    private PlotRespDto convertToPlotRespDto(Plot plot) {
+        PlotRespDto dto = new PlotRespDto();
+        dto.setId(plot.getId());
+        dto.setPlotName(plot.getPlotName());
+        dto.setPlotContent(plot.getPlotContent());
+        dto.setRecoveryChapterId(plot.getRecoveryChapterId());
+
+        // 如果有回收章节ID，查询对应的章节序号
+        if (plot.getRecoveryChapterId() != null) {
+            ArticleChapter recoveryChapter = articleChapterMapper.selectByPrimaryKey(plot.getRecoveryChapterId());
+            if (recoveryChapter != null) {
+                dto.setRecoveryChapterNo(recoveryChapter.getChapterNo());
+            }
+        }
+
         return dto;
     }
 
@@ -392,16 +458,30 @@ public class ArticleServiceImpl implements IArticleService {
 
         // 异步执行内容生成任务
         try {
-            // 这里可以直接调用内容生成逻辑，或者通过事件发布机制
-            // 为简化实现，我们可以记录日志表示任务已启动
-            // 实际的内容生成仍然通过定时任务执行
+            log.info("开始为文章[{}]执行内容生成，共{}个章节待生成内容", articleId, chaptersWithoutContent.size());
 
-            log.info("成功触发文章[{}]的内容生成，共{}个章节待生成内容", articleId, chaptersWithoutContent.size());
-            log.info("内容生成将通过定时任务自动执行，请稍后查看结果");
+            // 直接调用内容生成任务，为该文章的所有待生成章节生成内容
+            int processedCount = 0;
+            for (ArticleChapter chapter : chaptersWithoutContent) {
+                try {
+                    // 调用单个章节的内容生成方法
+                    articleContentGenerationTask.generateChapterContentManually(chapter);
+                    processedCount++;
+                    log.info("文章[{}]第{}章内容生成完成", articleId, chapter.getChapterNo());
+                } catch (Exception chapterException) {
+                    log.error("文章[{}]第{}章内容生成失败：{}", articleId, chapter.getChapterNo(), chapterException.getMessage());
+                    // 继续处理其他章节，不因为单个章节失败而停止整个任务
+                }
+            }
+
+            log.info("文章[{}]内容生成任务完成，共处理{}个章节", articleId, processedCount);
+
+            // 检查是否所有章节都已完成，如果是则更新文章状态
+            articleContentGenerationTask.checkAndUpdateArticleCompletionStatusManually(article);
 
             return true;
         } catch (Exception e) {
-            log.error("触发文章内容生成失败：{}", e.getMessage(), e);
+            log.error("文章[{}]内容生成失败：{}", articleId, e.getMessage(), e);
             return false;
         }
     }
@@ -439,7 +519,8 @@ public class ArticleServiceImpl implements IArticleService {
         int progressPercent = totalChapters > 0 ? (completedChapters * 100) / totalChapters : 0;
 
         // 如果所有章节都有内容，标记为已完成
-        if (progressPercent == 100 && article.getGenerationStatus() != 2) {
+        Integer currentStatus = article.getGenerationStatus() != null ? article.getGenerationStatus() : 0;
+        if (progressPercent == 100 && currentStatus != 2) {
             article.setGenerationStatus(2); // 已完成
             article.setUpdateTime(LocalDateTime.now());
             articleMapper.updateByPrimaryKey(article);
@@ -460,4 +541,147 @@ public class ArticleServiceImpl implements IArticleService {
 
         return progress;
     }
+
+    @Override
+    public Boolean deleteChapter(Long chapterId) {
+        log.info("开始删除章节，chapterId={}", chapterId);
+        try {
+            // 首先删除章节关联的伏笔信息
+            plotMapper.deleteByChapterId(chapterId);
+
+            // 删除章节本身
+            articleChapterMapper.deleteByPrimaryKey(chapterId);
+
+            log.info("章节删除成功，chapterId={}", chapterId);
+            return true;
+        } catch (Exception e) {
+            log.error("删除章节失败，chapterId={}：{}", chapterId, e.getMessage(), e);
+            throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public Boolean generateArticleChapters(Long articleId) {
+        log.info("开始为文章{}生成章节", articleId);
+        try {
+            // 获取文章信息
+            Article article = articleMapper.selectByPrimaryKey(articleId);
+            if (article == null) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
+            }
+
+            // 检查文章状态
+            if (article.getGenerationStatus() == 1) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章正在生成中，请等待完成后再操作");
+            }
+
+            // 异步调用章节生成任务
+            articleChapterGenerationTask.generateChaptersForArticle(article);
+
+            log.info("文章{}章节生成任务已启动", articleId);
+            return true;
+        } catch (Exception e) {
+            log.error("启动文章{}章节生成失败：{}", articleId, e.getMessage(), e);
+            throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public Boolean generateArticleChapterContent(Long articleId) {
+        log.info("开始为文章{}生成章节内容", articleId);
+        try {
+            // 获取文章信息
+            Article article = articleMapper.selectByPrimaryKey(articleId);
+            if (article == null) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
+            }
+
+            // 检查文章状态
+            if (article.getGenerationStatus() == 1) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章正在生成中，请等待完成后再操作");
+            }
+
+            // 获取文章的所有章节
+            List<ArticleChapter> chapters = articleChapterMapper.selectByArticleId(articleId);
+            // 按章节号排序
+            chapters.sort((a, b) -> Integer.compare(a.getChapterNo(), b.getChapterNo()));
+
+            if (chapters.isEmpty()) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章没有章节信息，请先生成章节");
+            }
+
+            // 异步调用内容生成任务
+            articleContentGenerationTask.generateContentsForArticle(article, chapters);
+
+            log.info("文章{}章节内容生成任务已启动", articleId);
+            return true;
+        } catch (Exception e) {
+            log.error("启动文章{}章节内容生成失败：{}", articleId, e.getMessage(), e);
+            throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public Boolean updateChapterInfo(Long chapterId, String corePlot, Integer wordCountEstimate, List<PlotReqDto> plots) {
+        if (chapterId == null || chapterId <= 0) {
+            log.warn("更新章节信息失败：章节ID无效，chapterId={}", chapterId);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+        }
+
+        // 获取章节信息
+        ArticleChapter chapter = articleChapterMapper.selectByPrimaryKey(chapterId);
+        if (chapter == null) {
+            log.warn("更新章节信息失败：章节不存在，chapterId={}", chapterId);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
+        }
+
+        // 更新章节信息
+        boolean chapterUpdated = false;
+        if (StringUtils.hasText(corePlot) || wordCountEstimate != null) {
+            if (StringUtils.hasText(corePlot)) {
+                chapter.setCorePlot(corePlot);
+            }
+            if (wordCountEstimate != null) {
+                chapter.setWordCountEstimate(wordCountEstimate);
+            }
+            chapter.setUpdateTime(LocalDateTime.now());
+            articleChapterMapper.updateByPrimaryKey(chapter);
+            chapterUpdated = true;
+            log.info("更新章节基本信息成功，chapterId={}", chapterId);
+        }
+
+        // 处理伏笔信息
+        if (plots != null) {
+            // 先删除现有的伏笔
+            plotMapper.deleteByChapterId(chapterId);
+
+            // 添加新的伏笔
+            for (PlotReqDto plotReq : plots) {
+                Plot plot = new Plot();
+                plot.setArticleId(chapter.getArticleId());
+                plot.setChapterId(chapterId);
+                plot.setPlotName(plotReq.getPlotName());
+                plot.setPlotContent(plotReq.getPlotContent());
+                plot.setRecoveryChapterId(plotReq.getRecoveryChapterId());
+                plot.setResState(1);
+                plot.setCreateTime(LocalDateTime.now());
+                plot.setUpdateTime(LocalDateTime.now());
+                plotMapper.insert(plot);
+            }
+            log.info("更新章节伏笔信息成功，chapterId={}，伏笔数量={}", chapterId, plots.size());
+        }
+
+        return true;
+    }
+
+
+
+
+
+
+
+
+
+
+
 }

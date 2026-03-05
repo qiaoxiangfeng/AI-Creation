@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 文章章节响应DTO
@@ -43,4 +44,7 @@ public class ArticleChapterRespDto implements Serializable {
 
     @Schema(description = "章节视频链接")
     private String chapterVideoLink;
+
+    @Schema(description = "章节伏笔列表")
+    private List<PlotRespDto> plots;
 }

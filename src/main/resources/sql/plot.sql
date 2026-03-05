@@ -41,16 +41,15 @@ BEGIN
     END IF;
 END $$;
 
+-- 移除外键约束（如果存在）
 DO $$
 BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (
         SELECT 1 FROM information_schema.table_constraints
         WHERE constraint_name = 'fk_plot_recovery_chapter_id'
           AND table_name = 'plot'
     ) THEN
-        ALTER TABLE plot
-            ADD CONSTRAINT fk_plot_recovery_chapter_id
-            FOREIGN KEY (recovery_chapter_id) REFERENCES article_chapter(id);
+        ALTER TABLE plot DROP CONSTRAINT fk_plot_recovery_chapter_id;
     END IF;
 END $$;
 

@@ -101,21 +101,10 @@ stop_frontend() {
     fi
 }
 
-# 清理日志文件
-cleanup_logs() {
-    print_info "清理日志文件..."
-    
-    if [ -f "logs/backend.out.log" ]; then
-        rm "logs/backend.out.log"
-        print_info "已删除 logs/backend.out.log"
-    fi
-    
-    if [ -f "logs/frontend.out.log" ]; then
-        rm "logs/frontend.out.log"
-        print_info "已删除 logs/frontend.out.log"
-    fi
-    
-    print_success "日志清理完成"
+# 保留日志文件（不再清理）
+keep_logs() {
+    print_info "保留日志文件..."
+    print_success "日志文件已保留"
 }
 
 # 显示服务状态
@@ -155,7 +144,7 @@ main() {
     
     stop_backend
     stop_frontend
-    cleanup_logs
+    keep_logs
     
     print_info ""
     show_status

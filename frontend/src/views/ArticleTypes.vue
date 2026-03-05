@@ -337,11 +337,11 @@ const formatDate = (dateString: string) => {
 };
 
 const showSuccess = (message: string) => {
-  alert(message);
+  window.showNotification(message, 'success');
 };
 
 const showError = (message: string) => {
-  alert('错误: ' + message);
+  window.showNotification('错误: ' + message, 'error');
 };
 </script>
 

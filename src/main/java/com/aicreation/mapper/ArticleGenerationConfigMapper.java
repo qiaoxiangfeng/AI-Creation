@@ -33,6 +33,14 @@ public interface ArticleGenerationConfigMapper {
     ArticleGenerationConfig selectByTheme(@Param("theme") String theme);
 
     /**
+     * 根据文章ID查询文章生成配置
+     *
+     * @param articleId 文章ID
+     * @return 文章生成配置信息
+     */
+    ArticleGenerationConfig selectByArticleId(@Param("articleId") Long articleId);
+
+    /**
      * 查询文章生成配置列表
      *
      * @param theme 文章生成配置主题（可选）

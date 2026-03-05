@@ -156,14 +156,27 @@ start_backend() {
         JAVA_HOME="$JAVA_HOME" mvn clean -q
     fi
 
-    # 归档历史日志
+    # 清理过期日志文件（超过7天的）
     if [ "$CLEAN_LOGS" = "true" ]; then
-        print_info "处理历史日志（归档到 logs/archive）..."
-        TS=$(date +%Y%m%d-%H%M%S)
-        mkdir -p logs/archive/$TS 2>/dev/null || true
-        find . -maxdepth 1 -type f -name "*.log*" -exec mv {} logs/archive/$TS/ \; 2>/dev/null || true
-        find logs -maxdepth 1 -type f -name "*.log*" -exec mv {} logs/archive/$TS/ \; 2>/dev/null || true
-        print_success "日志已归档到 logs/archive/$TS"
+        print_info "清理过期日志文件（删除超过7天的日志文件）..."
+
+        # 删除超过7天的日志文件
+        deleted_count=$(find . -maxdepth 1 -type f -name "*.log*" -mtime +7 -exec rm {} \; -print 2>/dev/null | wc -l)
+        deleted_count=$((deleted_count + $(find logs -maxdepth 1 -type f -name "*.log*" -mtime +7 -exec rm {} \; -print 2>/dev/null | wc -l)))
+
+        # 删除所有归档的日志文件
+        if [ -d "logs/archive" ]; then
+            archived_deleted=$(find logs/archive -type f -name "*.log*" -exec rm {} \; -print 2>/dev/null | wc -l)
+            deleted_count=$((deleted_count + archived_deleted))
+            # 删除空的归档目录
+            find logs/archive -type d -empty -delete 2>/dev/null || true
+        fi
+
+        if [ "$deleted_count" -gt 0 ]; then
+            print_success "已清理 $deleted_count 个过期日志文件"
+        else
+            print_info "没有找到需要清理的过期日志文件"
+        fi
     fi
 
     # 编译项目
@@ -218,7 +231,8 @@ start_frontend() {
     fi
 
     print_info "启动 Vue 前端应用..."
-    nohup ./node_modules/.bin/vite --port 5173 > ../logs/frontend.out.log 2>&1 &
+    TODAY=$(date +%Y-%m-%d)
+    nohup ./node_modules/.bin/vite --port 5173 > ../logs/frontend-${TODAY}.out.log 2>&1 &
     FRONTEND_PID=$!
 
     cd ..
@@ -311,6 +325,32 @@ show_status() {
     fi
 }
 
+# 启动后台日志清理任务
+start_log_cleanup_task() {
+    print_info "启动后台日志清理任务..."
+
+    # 创建后台日志清理脚本
+    cat > logs_cleanup_task.sh << 'EOF'
+#!/bin/bash
+while true; do
+    # 每小时检查一次，删除超过7天的日志文件
+    sleep 3600  # 1小时 = 3600秒
+
+    # 删除超过7天的日志文件
+    if [ -d "logs" ]; then
+        find logs -name "*.log*" -type f -mtime +7 -delete 2>/dev/null || true
+        find . -maxdepth 1 -name "*.log*" -type f -mtime +7 -delete 2>/dev/null || true
+    fi
+done
+EOF
+
+    chmod +x logs_cleanup_task.sh
+    nohup ./logs_cleanup_task.sh > /dev/null 2>&1 &
+    LOG_CLEANUP_PID=$!
+
+    print_success "日志清理任务已启动 (PID: $LOG_CLEANUP_PID)"
+}
+
 # 清理函数（Ctrl+C 时触发）
 cleanup() {
     print_info "清理资源..."
@@ -323,6 +363,12 @@ cleanup() {
     if [ -n "$FRONTEND_PID" ]; then
         print_info "停止前端服务 (PID: $FRONTEND_PID)..."
         kill $FRONTEND_PID 2>/dev/null || true
+    fi
+
+    if [ -n "$LOG_CLEANUP_PID" ]; then
+        print_info "停止日志清理任务 (PID: $LOG_CLEANUP_PID)..."
+        kill $LOG_CLEANUP_PID 2>/dev/null || true
+        rm -f logs_cleanup_task.sh
     fi
 
     print_success "清理完成"
@@ -340,6 +386,7 @@ main() {
     start_backend
     start_frontend
     show_status
+    start_log_cleanup_task
     open_browser
 
     print_success "🎉 所有服务启动完成！"

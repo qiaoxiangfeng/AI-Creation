@@ -60,12 +60,20 @@
     <div class="articles-section">
       <div class="section-header">
         <h2 class="text-xl font-semibold text-text">文章生成进度</h2>
-        <button @click="loadArticles" class="btn btn-outline btn-sm">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          刷新
-        </button>
+        <div class="header-actions">
+          <button @click="cleanupStuckStatuses" class="btn btn-warning btn-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+            </svg>
+            清理卡住状态
+          </button>
+          <button @click="loadArticles" class="btn btn-outline btn-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            刷新
+          </button>
+        </div>
       </div>
 
       <div class="articles-grid">
@@ -120,6 +128,20 @@
               class="btn btn-primary btn-sm"
             >
               开始生成
+            </button>
+            <button
+              v-if="article.generationStatus !== 1"
+              @click="generateChapters(article)"
+              class="btn btn-secondary btn-sm"
+            >
+              生成章节
+            </button>
+            <button
+              v-if="article.generationStatus !== 1"
+              @click="generateChapterContent(article)"
+              class="btn btn-secondary btn-sm"
+            >
+              生成章节内容
             </button>
           </div>
         </div>
@@ -265,19 +287,70 @@ const viewArticle = (article: ArticleRespDto) => {
 
 // 触发内容生成
 const generateContent = async (article: ArticleRespDto) => {
-  if (confirm(`确定要生成文章"${article.articleName}"的内容吗？`)) {
+  try {
+    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-content`);
+    const response = resp.data;
+    if (response.code === '00000000') {
+      window.showNotification('内容生成任务已启动', 'success');
+      loadArticles(); // 重新加载列表
+    } else {
+      window.showNotification('启动失败：' + response.msg, 'error');
+    }
+  } catch (error) {
+    console.error('启动内容生成失败:', error);
+    window.showNotification('启动失败，请稍后重试', 'error');
+  }
+};
+
+// 触发章节生成
+const generateChapters = async (article: ArticleRespDto) => {
+  try {
+    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-chapters`);
+    const response = resp.data;
+    if (response.code === '00000000') {
+      window.showNotification('章节生成任务已启动', 'success');
+      loadArticles(); // 重新加载列表
+    } else {
+      window.showNotification('启动失败：' + response.msg, 'error');
+    }
+  } catch (error) {
+    console.error('启动章节生成失败:', error);
+    window.showNotification('启动失败，请稍后重试', 'error');
+  }
+};
+
+// 触发章节内容生成
+const generateChapterContent = async (article: ArticleRespDto) => {
+  try {
+    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-chapter-content`);
+    const response = resp.data;
+    if (response.code === '00000000') {
+      window.showNotification('章节内容生成任务已启动', 'success');
+      loadArticles(); // 重新加载列表
+    } else {
+      window.showNotification('启动失败：' + response.msg, 'error');
+    }
+  } catch (error) {
+    console.error('启动章节内容生成失败:', error);
+    window.showNotification('启动失败，请稍后重试', 'error');
+  }
+};
+
+// 清理卡住的任务状态
+const cleanupStuckStatuses = async () => {
+  if (confirm('确定要清理卡住的任务状态吗？这将重置长时间处于生成中的任务。')) {
     try {
-      const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-content`);
+      const resp = await http.post<BaseResponse<string>>('/api/articles/cleanup-stuck-statuses');
       const response = resp.data;
       if (response.code === '00000000') {
-        alert('内容生成任务已启动');
+        window.showNotification('任务状态清理完成', 'success');
         loadArticles(); // 重新加载列表
       } else {
-        alert('启动失败：' + response.msg);
+        window.showNotification('清理失败：' + response.msg, 'error');
       }
     } catch (error) {
-      console.error('启动内容生成失败:', error);
-      alert('启动失败，请稍后重试');
+      console.error('清理任务状态失败:', error);
+      window.showNotification('清理失败，请稍后重试', 'error');
     }
   }
 };
@@ -373,6 +446,11 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .articles-grid {

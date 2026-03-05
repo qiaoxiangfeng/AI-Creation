@@ -77,7 +77,7 @@
     <select id="selectArticleList" resultMap="ListResultMap">
         SELECT
         id, article_name, article_outline, story_background, article_type, article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, create_time, update_time
+        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, generation_status, create_time, update_time
         FROM article
         <where>
             res_state = 1
@@ -173,20 +173,35 @@
 
     <!-- 查询没有章节的文章列表 -->
     <select id="selectArticlesWithoutChapters" resultMap="BaseResultMap">
-        SELECT DISTINCT a.id, a.article_name, a.article_outline, a.story_background, a.image_desc,
+        SELECT a.id, a.article_name, a.article_outline, a.story_background, a.image_desc,
                a.article_type, a.article_characteristics, a.article_content, a.voice_tone,
                a.voice_link, a.voice_file_path, a.video_link, a.video_file_path,
                a.publish_status, a.total_word_count_estimate,
                a.chapter_word_count_estimate, a.generation_status, a.res_state, a.create_time, a.update_time
         FROM article a
-        LEFT JOIN article_chapter ac ON a.id = ac.article_id AND ac.res_state = 1
         WHERE a.res_state = 1
-        AND ac.id IS NULL
         AND a.total_word_count_estimate IS NOT NULL
         AND a.chapter_word_count_estimate IS NOT NULL
         AND a.total_word_count_estimate > 0
         AND a.chapter_word_count_estimate > 0
+        AND NOT EXISTS (
+            SELECT 1 FROM article_chapter ac
+            WHERE ac.article_id = a.id AND ac.res_state = 1
+        )
         ORDER BY a.create_time ASC
+    </select>
+
+    <!-- 根据生成状态查询文章列表 -->
+    <select id="selectArticlesByGenerationStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+            id, article_name, article_outline, story_background, image_desc, article_type,
+            article_characteristics, article_content, voice_tone, voice_link, voice_file_path,
+            video_link, video_file_path, publish_status, total_word_count_estimate,
+            chapter_word_count_estimate, generation_status, res_state, create_time, update_time
+        FROM article
+        WHERE res_state = 1
+        AND generation_status = #{generationStatus,jdbcType=INTEGER}
+        ORDER BY create_time ASC
     </select>
 
 </mapper>

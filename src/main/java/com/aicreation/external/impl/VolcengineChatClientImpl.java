@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -66,7 +67,55 @@ public class VolcengineChatClientImpl implements VolcengineChatClient {
         return Collections.emptyList();
     }
 
+    @Override
+    public void streamChatCompletion(String url, String model, Object content, Consumer<String> onChunk) {
+        // 创建 ArkService 实例
+        ArkService arkService = ArkService.builder()
+                .apiKey(volcengineProperties.getApiKey())
+                .baseUrl(url)
+                .build();
 
+        try {
+            // 初始化消息列表
+            List<ChatMessage> chatMessages = new ArrayList<>();
+
+            // 创建用户消息
+            ChatMessage userMessage = ChatMessage.builder()
+                    .role(ChatMessageRole.USER)
+                    .build();
+
+            userMessage.setContent(content);
+            chatMessages.add(userMessage);
+
+            // 创建流式聊天完成请求
+            ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
+                    .model(model)
+                    .messages(chatMessages)
+                    .build();
+
+            // 发送流式聊天完成请求
+            arkService.streamChatCompletion(chatCompletionRequest)
+                    .doOnError(throwable -> {
+                        log.error("流式请求失败", throwable);
+                        onChunk.accept("[ERROR] " + throwable.getMessage());
+                    })
+                    .blockingForEach(choice -> {
+                        if (choice.getChoices() != null && choice.getChoices().size() > 0) {
+                            String contentChunk = (String) choice.getChoices().get(0).getMessage().getContent();
+                            if (contentChunk != null && !contentChunk.isEmpty()) {
+                                onChunk.accept(contentChunk);
+                            }
+                        }
+                    });
+
+        } catch (Exception e) {
+            log.error("流式请求异常", e);
+            onChunk.accept("[ERROR] " + e.getMessage());
+        } finally {
+            // 关闭服务执行器
+            arkService.shutdownExecutor();
+        }
+    }
 
 }
 

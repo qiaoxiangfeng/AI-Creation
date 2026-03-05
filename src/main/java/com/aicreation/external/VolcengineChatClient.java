@@ -14,6 +14,16 @@ public interface VolcengineChatClient {
 
 
     List<String> chatCompletions(String url, String model, Object content);
+
+    /**
+     * 流式聊天完成请求
+     * @param url 基础URL
+     * @param model 模型ID
+     * @param content 消息内容
+     * @param onChunk 每个数据块的回调函数
+     */
+    void streamChatCompletion(String url, String model, Object content,
+                            java.util.function.Consumer<String> onChunk);
 }
 
 

@@ -12,13 +12,15 @@
         <result column="word_count_estimate" jdbcType="INTEGER" property="wordCountEstimate"/>
         <result column="chapter_voice_link" jdbcType="VARCHAR" property="chapterVoiceLink"/>
         <result column="chapter_video_link" jdbcType="VARCHAR" property="chapterVideoLink"/>
+        <result column="generation_status" jdbcType="SMALLINT" property="generationStatus"/>
+        <result column="story_complete" jdbcType="BOOLEAN" property="storyComplete"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
+        id, chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, chapter_voice_link, chapter_video_link, generation_status, story_complete, res_state, create_time, update_time
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -104,6 +106,29 @@
         AND word_count_estimate IS NOT NULL
         AND res_state = 1
         ORDER BY chapter_no ASC
+    </select>
+
+    <!-- 查询没有内容的章节，排除文章状态为生成中的章节 -->
+    <select id="selectChaptersWithoutContentExcludingGenerating" resultMap="BaseResultMap">
+        SELECT ac.*
+        FROM article_chapter ac
+        INNER JOIN article a ON ac.article_id = a.id
+        WHERE (ac.chapter_content IS NULL OR ac.chapter_content = '')
+        AND ac.core_plot IS NOT NULL
+        AND ac.word_count_estimate IS NOT NULL
+        AND ac.res_state = 1
+        AND a.generation_status != 1  -- 排除生成中的文章
+        ORDER BY ac.article_id ASC, ac.chapter_no ASC
+    </select>
+
+    <!-- 根据生成状态查询章节列表 -->
+    <select id="selectChaptersByGenerationStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM article_chapter
+        WHERE res_state = 1
+        AND generation_status = #{generationStatus,jdbcType=SMALLINT}
+        ORDER BY article_id ASC, chapter_no ASC
     </select>
 
 </mapper>

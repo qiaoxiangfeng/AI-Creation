@@ -551,11 +551,11 @@ const createConfig = async () => {
       };
       await loadConfigs();
     } else {
-      alert('创建失败: ' + response.msg);
+      window.showNotification('创建失败: ' + response.msg, 'error');
     }
   } catch (error) {
     console.error('创建文章生成配置失败:', error);
-    alert('创建失败，请查看控制台日志');
+    window.showNotification('创建失败，请查看控制台日志', 'error');
   }
 };
 
@@ -589,19 +589,16 @@ const updateConfig = async () => {
       editingConfig.value = null;
       await loadConfigs();
     } else {
-      alert('更新失败: ' + response.msg);
+      window.showNotification('更新失败: ' + response.msg, 'error');
     }
   } catch (error) {
     console.error('更新文章生成配置失败:', error);
-    alert('更新失败，请查看控制台日志');
+    window.showNotification('更新失败，请查看控制台日志', 'error');
   }
 };
 
 // 删除文章生成配置
 const deleteConfig = async (config: ArticleGenerationConfigListRespDto) => {
-  if (!confirm(`确定要删除文章生成配置"${config.theme}"吗？`)) {
-    return;
-  }
 
   try {
     const deleteData: ArticleGenerationConfigDeleteReqDto = {
@@ -613,11 +610,11 @@ const deleteConfig = async (config: ArticleGenerationConfigListRespDto) => {
     if (response.code === '00000000') {
       await loadConfigs();
     } else {
-      alert('删除失败: ' + response.msg);
+      window.showNotification('删除失败: ' + response.msg, 'error');
     }
   } catch (error) {
     console.error('删除文章生成配置失败:', error);
-    alert('删除失败，请查看控制台日志');
+    window.showNotification('删除失败，请查看控制台日志', 'error');
   }
 };
 
