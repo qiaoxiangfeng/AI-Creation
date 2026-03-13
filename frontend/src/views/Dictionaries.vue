@@ -8,13 +8,20 @@
       <div class="card-body">
         <div class="toolbar">
           <div class="search-section">
-            <input
+            <select
               v-model="searchDictKey"
-              type="text"
-              class="search-input"
-              placeholder="请输入字典键搜索..."
-              @keyup.enter="handleSearch"
-            />
+              class="search-select"
+              @change="handleSearch"
+            >
+              <option value="">全部字典键</option>
+              <option
+                v-for="key in allDictKeys"
+                :key="key"
+                :value="key"
+              >
+                {{ key }}
+              </option>
+            </select>
             <input
               v-model="searchDictValue"
               type="text"
@@ -51,7 +58,7 @@
                 <th>字典值</th>
                 <th>排序顺序</th>
                 <th>创建时间</th>
-                <th>操作</th>
+                <th class="action-column">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -61,14 +68,20 @@
                 <td>{{ dictionary.dictValue }}</td>
                 <td>{{ dictionary.sortOrder }}</td>
                 <td>{{ formatDate(dictionary.createTime) }}</td>
-                <td>
+                <td class="action-column">
                   <div class="flex gap-2">
                     <button @click="editDictionary(dictionary)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
-                    <button @click="deleteDictionary(dictionary)" class="btn btn-outline btn-sm text-error">
-                      删除
-                    </button>
+                    <select @change="handleActionSelect($event, dictionary)" class="action-select">
+                      <option value="">更多操作</option>
+                      <option
+                        :value="'delete_' + dictionary.id"
+                        class="text-error"
+                      >
+                        删除
+                      </option>
+                    </select>
                   </div>
                 </td>
               </tr>
@@ -80,23 +93,28 @@
           </div>
         </div>
 
-        <!-- 分页组件 -->
-        <div v-if="total > 0" class="pagination-container">
+        <div v-if="total > 0" class="pagination">
           <div class="pagination-info">
-            <span>共 {{ total }} 条记录，第 {{ currentPage }} / {{ totalPages }} 页</span>
+            <span class="text-sm text-text-secondary">
+              共 {{ total }} 条记录，第 {{ currentPage }} 页，共 {{ totalPages }} 页
+            </span>
           </div>
-          <div class="pagination-buttons">
+
+          <div class="pagination-controls">
             <button
               @click="goToPage(currentPage - 1)"
               :disabled="currentPage <= 1"
-              class="btn btn-outline btn-sm"
+              class="pagination-item"
             >
               上一页
             </button>
+            <span class="pagination-item">
+              {{ currentPage }} / {{ totalPages }}
+            </span>
             <button
               @click="goToPage(currentPage + 1)"
               :disabled="currentPage >= totalPages"
-              class="btn btn-outline btn-sm"
+              class="pagination-item"
             >
               下一页
             </button>
@@ -147,14 +165,14 @@
             />
           </div>
 
-          <div class="modal-footer">
-            <button type="button" @click="closeModals" class="btn btn-outline">
-              取消
-            </button>
-            <button type="submit" :disabled="submitting" class="btn btn-primary">
-              {{ submitting ? '提交中...' : '确定' }}
-            </button>
-          </div>
+            <div class="flex gap-2 justify-end">
+              <button type="button" @click="closeModals" class="btn btn-outline">
+                取消
+              </button>
+              <button type="submit" :disabled="submitting" class="btn btn-primary">
+                {{ submitting ? '提交中...' : '确定' }}
+              </button>
+            </div>
         </form>
       </div>
     </div>
@@ -171,14 +189,14 @@
           <p>确定要删除字典 "{{ deleteTarget?.dictKey }}: {{ deleteTarget?.dictValue }}" 吗？此操作不可恢复。</p>
         </div>
 
-        <div class="modal-footer">
-          <button @click="closeDeleteModal" class="btn btn-outline">
-            取消
-          </button>
-          <button @click="confirmDelete" :disabled="submitting" class="btn btn-error">
-            {{ submitting ? '删除中...' : '删除' }}
-          </button>
-        </div>
+          <div class="flex gap-2 justify-end">
+            <button @click="closeDeleteModal" class="btn btn-outline">
+              取消
+            </button>
+            <button @click="confirmDelete" :disabled="submitting" class="btn btn-error">
+              {{ submitting ? '删除中...' : '删除' }}
+            </button>
+          </div>
       </div>
     </div>
   </div>
@@ -202,6 +220,7 @@ const loading = ref(false);
 const submitting = ref(false);
 const searchDictKey = ref('');
 const searchDictValue = ref('');
+const allDictKeys = ref<string[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
@@ -217,8 +236,10 @@ const formData = ref({
   sortOrder: 0
 });
 
+
 onMounted(() => {
   loadDictionaries();
+  loadAllDictKeys();
 });
 
 const loadDictionaries = async () => {
@@ -243,6 +264,16 @@ const loadDictionaries = async () => {
   }
 };
 
+const loadAllDictKeys = async () => {
+  try {
+    const resp = await http.get<BaseResponse<string[]>>('/api/dictionaries/keys');
+    allDictKeys.value = resp.data.data || [];
+  } catch (error: any) {
+    console.error('加载字典键列表失败:', error);
+    // 不显示错误提示，因为这不是关键功能
+  }
+};
+
 const handleSearch = () => {
   currentPage.value = 1;
   loadDictionaries();
@@ -260,6 +291,24 @@ const goToPage = (page: number) => {
     currentPage.value = page;
     loadDictionaries();
   }
+};
+
+// 下拉列表操作
+const handleActionSelect = async (event: Event, dictionary: DictionaryListRespDto) => {
+  const target = event.target as HTMLSelectElement;
+  const value = target.value;
+
+  if (!value) return; // 如果选择的是"更多操作"，不做任何操作
+
+  const [action, dictIdStr] = value.split('_');
+  const dictId = parseInt(dictIdStr);
+
+  if (action === 'delete') {
+    deleteDictionary(dictionary);
+  }
+
+  // 重置选择
+  target.value = '';
 };
 
 const editDictionary = (dictionary: DictionaryListRespDto) => {
@@ -368,17 +417,15 @@ const showError = (message: string) => {
 </script>
 
 <style scoped>
-/* 复用其他页面的样式 */
 .card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .card-body {
@@ -389,64 +436,53 @@ const showError = (message: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   gap: 1rem;
 }
 
 .search-section {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .search-input {
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  flex: 1;
+  max-width: 300px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
   font-size: 0.875rem;
-  width: 200px;
+  transition: all 0.2s ease;
+  background: white;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.search-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-  display: inline-flex;
+  background: white;
+  min-width: 120px;
+}
+
+.action-buttons {
+  display: flex;
   align-items: center;
-  gap: 0.5px;
+  gap: 0.5rem;
 }
 
-.btn-primary {
-  background-color: #3b82f6;
-  color: white;
-}
 
-.btn-primary:hover {
-  background-color: #2563eb;
-}
 
-.btn-outline {
-  background-color: transparent;
-  border: 1px solid #d1d5db;
-  color: #374151;
-}
-
-.btn-outline:hover {
-  background-color: #f9fafb;
-}
-
-.btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.action-column {
+  width: 120px;
 }
 
 .flex {
@@ -457,25 +493,23 @@ const showError = (message: string) => {
   gap: 0.5rem;
 }
 
-.text-error {
-  color: #dc2626;
-}
-
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 3rem 1rem;
+  text-align: center;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #3b82f6;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--border);
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
 @keyframes spin {
@@ -484,34 +518,42 @@ const showError = (message: string) => {
 }
 
 .loading-text {
-  margin-top: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 }
 
 .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
   text-align: center;
-  padding: 3rem;
 }
 
 .empty-text {
-  color: #6b7280;
-  font-size: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 }
 
 .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
 }
 
 .pagination-info {
-  color: #6b7280;
-  font-size: 0.875rem;
+  flex: 1;
+  text-align: left;
 }
 
 .pagination-buttons {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -521,38 +563,42 @@ const showError = (message: string) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 50;
 }
 
 .modal-content {
-  background: white;
-  border-radius: 8px;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
 }
 
 .modal-small {
   max-width: 400px;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
 }
 
 .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: white;
 }
 
 .modal-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   margin: 0;
 }
 
@@ -561,7 +607,7 @@ const showError = (message: string) => {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 0;
   width: 24px;
   height: 24px;
@@ -572,71 +618,101 @@ const showError = (message: string) => {
 
 .modal-body {
   padding: 1.5rem;
+  background: white;
 }
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  background: white;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-label {
-  display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
+  color: var(--text);
 }
 
 .required {
-  color: #dc2626;
+  color: var(--error);
 }
 
 .form-input {
   width: 100%;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: var(--text);
   font-size: 0.875rem;
+  transition: all 0.2s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-.btn-error {
-  background-color: #dc2626;
-  color: white;
+/* 下拉菜单样式 */
+.dropdown {
+  position: relative;
 }
 
-.btn-error:hover {
-  background-color: #b91c1c;
+.dropdown.open .dropdown-menu {
+  display: block;
 }
 
-.table {
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  display: none;
+  min-width: 120px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 0.25rem;
+}
+
+.dropdown-menu-item {
+  display: block;
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.table th,
-.table td {
-  padding: 0.75rem;
+  padding: 0.5rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-  color: #374151;
+.dropdown-menu-item:hover {
+  background-color: var(--surface);
+}
+
+.dropdown-menu-item.text-error {
+  color: var(--error);
+}
+
+.dropdown-menu-item.text-error:hover {
+  background-color: var(--error-light);
+  color: var(--error);
 }
 </style>

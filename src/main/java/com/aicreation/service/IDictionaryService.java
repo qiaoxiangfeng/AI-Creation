@@ -31,6 +31,13 @@ public interface IDictionaryService {
     List<DictionaryRespDto> getDictionaryByKey(String dictKey);
 
     /**
+     * 获取所有唯一的字典键
+     *
+     * @return 字典键列表
+     */
+    List<String> getAllDistinctDictKeys();
+
+    /**
      * 创建字典
      *
      * @param request 创建请求

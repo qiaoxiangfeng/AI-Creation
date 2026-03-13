@@ -102,14 +102,6 @@ public interface ArticleMapper {
     List<Article> selectArticlesWithoutChapters();
 
     /**
-     * 根据生成状态查询文章列表
-     *
-     * @param generationStatus 生成状态
-     * @return 文章列表
-     */
-    List<Article> selectArticlesByGenerationStatus(@Param("generationStatus") Integer generationStatus);
-
-    /**
      * 更新文章的response_id
      *
      * @param id 文章ID

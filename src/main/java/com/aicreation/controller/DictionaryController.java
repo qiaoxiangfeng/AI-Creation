@@ -46,6 +46,13 @@ public class DictionaryController {
         return BaseResponse.success(dictionaries);
     }
 
+    @Operation(summary = "获取所有唯一的字典键", description = "获取系统中所有去重后的字典键列表")
+    @GetMapping("/keys")
+    public BaseResponse<List<String>> getAllDistinctDictKeys() {
+        List<String> dictKeys = dictionaryService.getAllDistinctDictKeys();
+        return BaseResponse.success(dictKeys);
+    }
+
     @Operation(summary = "创建字典", description = "创建新的字典")
     @PostMapping
     public BaseResponse<Long> createDictionary(

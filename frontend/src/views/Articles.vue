@@ -54,7 +54,7 @@
                 <th>视频链接</th>
                 <th>发布状态</th>
                 <th>创建时间</th>
-                <th>操作</th>
+                <th class="action-column">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -88,7 +88,7 @@
                   </span>
                 </td>
                 <td>{{ formatDate(article.createTime) }}</td>
-                <td>
+                <td class="action-column">
                   <div class="flex gap-2">
                     <button @click="viewArticle(article)" class="btn btn-outline btn-sm">
                       查看
@@ -96,16 +96,36 @@
                     <button @click="editArticle(article)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
-                    <button
-                      v-if="article.publishStatus !== 2"
-                      @click="publishArticle(article)"
-                      class="btn btn-primary btn-sm"
-                    >
-                      发布
-                    </button>
-                    <button @click="deleteArticle(article)" class="btn btn-outline btn-sm text-error">
-                      删除
-                    </button>
+                    <select @change="handleActionSelect($event, article)" class="action-select">
+                      <option value="">更多操作</option>
+                      <option
+                        :value="'generateChapters_' + article.id"
+                      >
+                        生成全部章节
+                      </option>
+                      <option
+                        :value="'generateChapterContent_' + article.id"
+                      >
+                        按序生成全部章节内容
+                      </option>
+                      <option
+                        :value="'downloadFullText_' + article.id"
+                      >
+                        下载全文
+                      </option>
+                      <option
+                        v-if="article.publishStatus !== 2"
+                        :value="'publish_' + article.id"
+                      >
+                        发布
+                      </option>
+                      <option
+                        :value="'delete_' + article.id"
+                        class="text-error"
+                      >
+                        删除
+                      </option>
+                    </select>
                   </div>
                 </td>
               </tr>
@@ -275,7 +295,7 @@
                   type="number"
                   class="form-input form-input-number"
                   min="1000"
-                  max="500000"
+                  max="10000000"
                   step="1000"
                   required
                   placeholder="请输入总字数预估"
@@ -340,7 +360,6 @@ interface ArticleRespDto {
   publishStatus: number;
   totalWordCountEstimate?: number;
   chapterWordCountEstimate?: number;
-  generationStatus?: number;
   resState: number;
   createTime: string;
   updateTime: string;
@@ -422,7 +441,14 @@ const changePage = (page: number) => {
 
 const createArticle = async () => {
   try {
-    await http.post('/api/articles', newArticle.value);
+    // 创建文章时如果未填写预估字数，则使用默认值传给后端
+    const payload = {
+      ...newArticle.value,
+      totalWordCountEstimate: (newArticle.value as any).totalWordCountEstimate ?? 100000,
+      chapterWordCountEstimate: (newArticle.value as any).chapterWordCountEstimate ?? 5000
+    };
+
+    await http.post('/api/articles', payload);
     showCreateModal.value = false;
     newArticle.value = {
       articleName: '',
@@ -433,8 +459,10 @@ const createArticle = async () => {
       voiceLink: '',
       voiceFilePath: '',
       videoLink: '',
-      videoFilePath: ''
-    };
+      videoFilePath: '',
+      totalWordCountEstimate: 100000,
+      chapterWordCountEstimate: 5000
+    } as any;
     loadArticles();
     window.showNotification('文章创建成功！', 'success');
   } catch (error: any) {
@@ -448,7 +476,7 @@ const createArticle = async () => {
 const adjustTotalWordCount = (delta: number) => {
   if (!editingArticle.value) return;
   const current = editingArticle.value.totalWordCountEstimate || 0;
-  const newValue = Math.max(1000, Math.min(500000, current + delta));
+  const newValue = Math.max(1000, Math.min(10000000, current + delta));
   editingArticle.value.totalWordCountEstimate = newValue;
 };
 
@@ -461,7 +489,12 @@ const adjustChapterWordCount = (delta: number) => {
 };
 
 const editArticle = (article: ArticleRespDto) => {
-  editingArticle.value = { ...article };
+  // 编辑时为字数预估字段补上默认值，避免为 null
+  editingArticle.value = {
+    ...article,
+    totalWordCountEstimate: article.totalWordCountEstimate ?? 100000,
+    chapterWordCountEstimate: article.chapterWordCountEstimate ?? 5000
+  };
   showEditModal.value = true;
 };
 
@@ -543,6 +576,100 @@ const getVoiceToneText = (tone: string | undefined) => {
   if (tone === 'alex') return 'Alex';
   if (tone === 'anna') return 'Anna';
   return tone;
+};
+
+// 触发文章级别操作：生成全部章节
+const generateChaptersForArticle = async (articleId: number) => {
+  try {
+    window.showNotification('章节生成任务已启动', 'success');
+    await http.post<BaseResponse<boolean>>(
+      `/api/articles/${articleId}/generate-chapters`,
+      {},
+      { timeout: 300000, silentBizError: true } as any
+    );
+  } catch (error) {
+    console.error('章节生成失败:', error);
+  }
+};
+
+// 触发文章级别操作：按序生成全部章节内容
+const generateChapterContentForArticle = async (articleId: number) => {
+  try {
+    window.showNotification('章节内容生成任务已启动', 'success');
+    await http.post<BaseResponse<boolean>>(
+      `/api/articles/${articleId}/generate-chapter-content`,
+      {},
+      { timeout: 600000, silentBizError: true } as any
+    );
+  } catch (error) {
+    console.error('章节内容生成失败:', error);
+  }
+};
+
+// 下载文章全文
+const downloadFullText = async (article: ArticleRespDto) => {
+  try {
+    const resp = await http.get<BaseResponse<string>>(`/api/articles/${article.id}/full-text`);
+    const response = resp.data;
+    if (response.code === '00000000') {
+      const fullText = response.data;
+      const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${article.articleName}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      window.showNotification('下载失败：' + (response.msg || '未知错误'), 'error');
+    }
+  } catch (error) {
+    console.error('下载全文失败:', error);
+    window.showNotification('下载失败，请稍后重试', 'error');
+  }
+};
+
+// 下拉列表操作
+const handleActionSelect = async (event: Event, article: ArticleRespDto) => {
+  const target = event.target as HTMLSelectElement;
+  const value = target.value;
+
+  if (!value) return; // 如果选择的是"更多操作"，不做任何操作
+
+  const [action, articleIdStr] = value.split('_');
+  const articleId = parseInt(articleIdStr);
+
+  try {
+    if (action === 'publish') {
+      const newStatus = article.publishStatus === 1 ? 2 : 1;
+      const actionText = newStatus === 2 ? '发布' : '取消发布';
+
+      await http.put(`/api/articles/${articleId}/publish?publishStatus=${newStatus}`);
+      loadArticles();
+      window.showNotification(`文章${actionText}成功！`, 'success');
+    } else if (action === 'delete') {
+      if (confirm('确定要删除这篇文章吗？此操作不可恢复。')) {
+        await http.delete('/api/articles', { data: { articleId } });
+        loadArticles();
+        window.showNotification('文章删除成功！', 'success');
+      }
+    } else if (action === 'generateChapters') {
+      await generateChaptersForArticle(articleId);
+    } else if (action === 'generateChapterContent') {
+      await generateChapterContentForArticle(articleId);
+    } else if (action === 'downloadFullText') {
+      await downloadFullText(article);
+    }
+  } catch (error: any) {
+    console.error('操作失败:', error);
+    const errorMessage = error.message || '操作失败，请稍后重试';
+    window.showNotification(errorMessage, 'error');
+  } finally {
+    // 重置选择
+    target.value = '';
+  }
 };
 
 // 查看文章详情

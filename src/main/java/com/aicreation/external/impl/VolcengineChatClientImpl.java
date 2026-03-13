@@ -161,7 +161,22 @@ public class VolcengineChatClientImpl implements VolcengineChatClient {
 
         } catch (Exception e) {
             log.error("Responses API调用失败", e);
-            throw new RuntimeException("Responses API调用失败: " + e.getMessage(), e);
+
+            // 针对不同错误类型提供更友好的错误信息
+            String errorMessage = e.getMessage();
+            if (errorMessage != null) {
+                if (errorMessage.contains("AccountOverdueError") || errorMessage.contains("overdue balance")) {
+                    throw new RuntimeException("AI服务账户余额不足，请联系管理员充值", e);
+                } else if (errorMessage.contains("403") || errorMessage.contains("Forbidden")) {
+                    throw new RuntimeException("AI服务访问被拒绝，请检查账户权限", e);
+                } else if (errorMessage.contains("429") || errorMessage.contains("Too Many Requests")) {
+                    throw new RuntimeException("AI服务请求过于频繁，请稍后再试", e);
+                } else if (errorMessage.contains("500") || errorMessage.contains("Internal Server Error")) {
+                    throw new RuntimeException("AI服务暂时不可用，请稍后再试", e);
+                }
+            }
+
+            throw new RuntimeException("AI服务调用失败: " + errorMessage, e);
         } finally {
             // 关闭服务执行器
             arkService.shutdownExecutor();

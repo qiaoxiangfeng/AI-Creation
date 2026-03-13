@@ -9,13 +9,13 @@ import com.aicreation.mapper.ArticleGenerationConfigMapper;
 import com.aicreation.mapper.ArticleMapper;
 import com.aicreation.mapper.PlotMapper;
 import com.aicreation.external.VolcengineChatClient;
-import com.aicreation.service.ResponseIdManager;
+import com.aicreation.external.ResponseContentExtractor;
+import com.volcengine.ark.runtime.model.responses.response.ResponseObject;
 import com.aicreation.util.TraceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -52,9 +52,6 @@ public class ArticleContentGenerationTask {
     private VolcengineChatClient volcengineChatClient;
 
     @Autowired
-    private ResponseIdManager responseIdManager;
-
-    @Autowired
     private com.aicreation.generate.ArticleContentGenerator articleContentGenerator;
 
     /**
@@ -65,8 +62,8 @@ public class ArticleContentGenerationTask {
     /**
      * 手动触发单个章节的内容生成
      * 用于在点击生成按钮时立即生成指定章节的内容
+     * 数据实时落表，无事务保护
      */
-    @Transactional(rollbackFor = Exception.class)
     public void generateChapterContentManually(ArticleChapter chapter) {
         articleContentGenerator.generateChapterContent(chapter.getId());
     }
@@ -74,8 +71,8 @@ public class ArticleContentGenerationTask {
     /**
      * 检查并更新文章完成状态
      * 用于在手动生成内容后检查是否所有章节都已完成
+     * 数据实时落表，无事务保护
      */
-    @Transactional(rollbackFor = Exception.class)
     public void checkAndUpdateArticleCompletionStatusManually(Article article) {
         checkAndUpdateArticleCompletionStatus(article);
     }
@@ -93,8 +90,9 @@ public class ArticleContentGenerationTask {
 
         for (ArticleChapter chapter : chapters) {
             try {
-                // 只为没有内容且生成状态不为失败的章节生成内容
-                if (StringUtils.hasText(chapter.getChapterContent()) || chapter.getGenerationStatus() == 3) {
+                // 只为没有内容且生成状态不为失败的章节生成内容（兼容空状态）
+                Integer generationStatus = chapter.getGenerationStatus();
+                if (StringUtils.hasText(chapter.getChapterContent()) || (generationStatus != null && generationStatus == 3)) {
                     log.info("章节[ID:{}]已有内容或生成失败，跳过", chapter.getId());
                     continue;
                 }
@@ -118,9 +116,9 @@ public class ArticleContentGenerationTask {
     /**
      * 定时任务：每月1号执行文章内容生成
      * 如果上次执行未完成，则丢弃本次调度
+     * 数据实时落表，无事务保护，确保服务重启时数据不丢失
      */
     @Scheduled(cron = "0 0 0 1 * ?") // 每月1号0点0分0秒执行
-    @Transactional(rollbackFor = Exception.class)
     public void generateArticleContents() {
         TraceUtil.executeWithTraceId(() -> {
             executeArticleContentsTask();
@@ -191,9 +189,6 @@ public class ArticleContentGenerationTask {
      * 采用实时落表策略，确保生成过程不会因中断丢失数据
      */
     private void generateContentForChapter(ArticleChapter chapter) {
-        String originalContent = chapter.getChapterContent(); // 保存原始内容，用于回滚
-        boolean contentGenerated = false;
-
         try {
             // 获取文章信息
             Article article = articleMapper.selectByPrimaryKey(chapter.getArticleId());
@@ -202,14 +197,8 @@ public class ArticleContentGenerationTask {
                 return;
             }
 
-            // 检查文章是否处于生成中状态，如果不是则设置为生成中
-            Integer currentStatus = article.getGenerationStatus() != null ? article.getGenerationStatus() : 0;
-            if (currentStatus != 1) {
-                article.setGenerationStatus(1); // 1-生成中
-                article.setUpdateTime(LocalDateTime.now());
-                articleMapper.updateByPrimaryKey(article);
-                log.info("文章[{}]状态已更新为生成中", article.getArticleName());
-            }
+            // 记录开始生成内容
+            log.info("开始为文章[{}]生成章节内容", article.getArticleName());
 
             // 获取文章生成配置
             ArticleGenerationConfig config = findArticleGenerationConfig(article);
@@ -233,7 +222,6 @@ public class ArticleContentGenerationTask {
             chapter.setChapterContent(chapterContent);
             chapter.setUpdateTime(LocalDateTime.now());
             articleChapterMapper.updateByPrimaryKey(chapter);
-            contentGenerated = true;
 
             log.info("章节[ID:{}]内容生成并保存成功，内容长度：{} 字符", chapter.getId(), chapterContent.length());
 
@@ -242,18 +230,6 @@ public class ArticleContentGenerationTask {
 
         } catch (Exception e) {
             log.error("生成章节[ID:{}]内容时发生异常：{}", chapter.getId(), e.getMessage(), e);
-
-            // 如果内容已经生成但保存失败，尝试重新保存
-            if (contentGenerated && chapter.getChapterContent() != null) {
-                try {
-                    log.info("尝试重新保存章节[ID:{}]的内容", chapter.getId());
-                    articleChapterMapper.updateByPrimaryKey(chapter);
-                    log.info("章节[ID:{}]内容重新保存成功", chapter.getId());
-                } catch (Exception saveException) {
-                    log.error("章节[ID:{}]内容重新保存失败：{}", chapter.getId(), saveException.getMessage());
-                    // 可以考虑将内容保存到临时文件或日志中，以便后续恢复
-                }
-            }
 
             throw e;
         }
@@ -273,40 +249,36 @@ public class ArticleContentGenerationTask {
         log.debug("{}", prompt);
 
         try {
-            // 使用Responses API生成内容，支持上下文管理和多任务隔离
+            // 使用Responses API生成内容，以上一轮本章规划的 response_id 作为上下文起点
             log.info("开始使用Responses API生成章节内容...");
-            String generatedContent = callAIWithResponsesAPI(
-                article,
-                prompt
+            String previousResponseId = chapter.getResponseIdPlan();
+            ResponseObject response = volcengineChatClient.createResponse(
+                    prompt,
+                    previousResponseId,
+                    "content"
             );
+            String generatedContent = ResponseContentExtractor.extractContent(response);
 
             log.info("=== AI生成内容 ===");
             log.info("内容长度: {} 字符", generatedContent.length());
 
+            // 记录本次正文生成使用的 response_id，便于后续重新生成时复用上下文
+            chapter.setResponseIdContent(response.getId());
+
             // 检查并处理故事完结标记
-            boolean storyComplete = false;
             String cleanContent = generatedContent;
             if (generatedContent.contains("[STORY_COMPLETE]")) {
-                storyComplete = true;
                 cleanContent = generatedContent.replace("[STORY_COMPLETE]", "").trim();
                 log.info("检测到故事完结标记，此章节后故事已完结");
             }
 
-            // 更新章节的完结状态
-            chapter.setStoryComplete(storyComplete);
+            // 注意：故事完结状态已移至文章表，不再设置章节级别的完结标识
 
             return cleanContent;
         } catch (Exception e) {
             log.error("调用AI生成章节内容失败：{}", e.getMessage(), e);
             throw new RuntimeException("AI生成章节内容失败: " + e.getMessage(), e);
         }
-    }
-
-    /**
-     * 使用Responses API调用AI，支持上下文管理和多任务隔离
-     */
-    private String callAIWithResponsesAPI(Article article, String prompt) {
-        return responseIdManager.callAIWithResponsesAPI(article, prompt);
     }
 
     /**
@@ -529,20 +501,7 @@ public class ArticleContentGenerationTask {
                 return;
             }
 
-            // 检查是否所有章节都有内容
-            boolean allCompleted = allChapters.stream()
-                .allMatch(chapter -> chapter.getChapterContent() != null &&
-                           !chapter.getChapterContent().trim().isEmpty());
-
-            Integer currentStatus = article.getGenerationStatus() != null ? article.getGenerationStatus() : 0;
-            if (allCompleted && currentStatus != 2) {
-                // 更新文章状态为已完成
-                article.setGenerationStatus(2); // 2-已完成
-                article.setUpdateTime(LocalDateTime.now());
-                articleMapper.updateByPrimaryKey(article);
-
-                log.info("文章[{}]所有章节内容生成完成，状态更新为已完成", article.getArticleName());
-            }
+            // story_complete 仅用于“章节生成是否完结”的标识，不在内容生成流程中更新
         } catch (Exception e) {
             log.error("检查文章[{}]完成状态时发生异常：{}", article.getArticleName(), e.getMessage(), e);
             // 不抛出异常，避免影响主要流程

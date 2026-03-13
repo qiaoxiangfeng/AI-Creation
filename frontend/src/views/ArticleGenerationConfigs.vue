@@ -51,7 +51,7 @@
                 <th>每章字数预估</th>
                 <th>待生成数量</th>
                 <th>创建时间</th>
-                <th>操作</th>
+                <th class="action-column">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -78,20 +78,23 @@
                 <td>{{ config.chapterWordCountEstimate || 5000 }}</td>
                 <td>{{ config.pendingCount }}</td>
                 <td>{{ formatDate(config.createTime) }}</td>
-                <td>
+                <td class="action-column">
                   <div class="flex gap-2">
                     <button @click="editConfig(config)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
-                    <button @click="generateTitle(config)" class="btn btn-primary btn-sm" :disabled="generatingTitle">
-                      <svg v-if="generatingTitle && generatingConfigId === config.id" class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                      </svg>
-                      生成标题
-                    </button>
-                    <button @click="deleteConfig(config)" class="btn btn-outline btn-sm text-error">
-                      删除
-                    </button>
+                    <select @change="handleActionSelect($event, config)" class="action-select">
+                      <option value="">更多操作</option>
+                      <option :value="'generateTitle_' + config.id">
+                        生成标题
+                      </option>
+                      <option
+                        :value="'delete_' + config.id"
+                        class="text-error"
+                      >
+                        删除
+                      </option>
+                    </select>
                   </div>
                 </td>
               </tr>
@@ -118,7 +121,9 @@
             >
               上一页
             </button>
-            <span class="pagination-current">{{ currentPage }}</span>
+            <span class="pagination-item">
+              {{ currentPage }} / {{ totalPages }}
+            </span>
             <button
               @click="changePage(currentPage + 1)"
               :disabled="currentPage >= totalPages"
@@ -126,14 +131,16 @@
             >
               下一页
             </button>
+          </div>
 
-            <div class="page-size-select">
-              <select v-model="pageSize" @change="handlePageSizeChange">
-                <option :value="10">10 条/页</option>
-                <option :value="20">20 条/页</option>
-                <option :value="50">50 条/页</option>
-              </select>
-            </div>
+          <div class="pagination-size">
+            <label class="text-sm text-text-secondary">每页显示：</label>
+            <select v-model="pageSize" @change="handlePageSizeChange" class="page-size-select">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
           </div>
         </div>
       </div>
@@ -450,6 +457,9 @@ const searchKeyword = ref('');
 const generatingTitle = ref(false);
 const generatingConfigId = ref<number | null>(null);
 
+// 下拉菜单状态
+const openDropdownId = ref<number | null>(null);
+
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const editingConfig = ref<ArticleGenerationConfigListRespDto | null>(null);
@@ -543,7 +553,14 @@ const loadDictionaryOptions = async () => {
 // 创建文章生成配置
 const createConfig = async () => {
   try {
-    const resp = await http.post<BaseResponse<number>>('/api/article-generation-configs', newConfig.value);
+    // 确保无论用户是否填写，这两个字段都有默认值传给后端
+    const payload: ArticleGenerationConfigCreateReqDto = {
+      ...newConfig.value,
+      totalWordCountEstimate: newConfig.value.totalWordCountEstimate ?? 100000,
+      chapterWordCountEstimate: newConfig.value.chapterWordCountEstimate ?? 5000
+    };
+
+    const resp = await http.post<BaseResponse<number>>('/api/article-generation-configs', payload);
     const response = resp.data;
     if (response.code === '00000000') {
       showCreateModal.value = false;
@@ -555,6 +572,8 @@ const createConfig = async () => {
         characterType: '',
         style: '',
         additionalCharacteristics: '',
+        totalWordCountEstimate: 100000,
+        chapterWordCountEstimate: 5000,
         pendingCount: 0
       };
       await loadConfigs();
@@ -569,7 +588,12 @@ const createConfig = async () => {
 
 // 编辑文章生成配置
 const editConfig = (config: ArticleGenerationConfigListRespDto) => {
-  editingConfig.value = { ...config };
+  // 确保编辑时总字数和每章字数都有默认值（即使后端是 null）
+  editingConfig.value = {
+    ...config,
+    totalWordCountEstimate: config.totalWordCountEstimate ?? 100000,
+    chapterWordCountEstimate: config.chapterWordCountEstimate ?? 5000
+  };
   showEditModal.value = true;
 };
 
@@ -587,6 +611,8 @@ const updateConfig = async () => {
       characterType: editingConfig.value.characterType,
       style: editingConfig.value.style,
       additionalCharacteristics: editingConfig.value.additionalCharacteristics,
+      totalWordCountEstimate: editingConfig.value.totalWordCountEstimate,
+      chapterWordCountEstimate: editingConfig.value.chapterWordCountEstimate,
       pendingCount: editingConfig.value.pendingCount
     };
 
@@ -655,6 +681,37 @@ const handleSearch = () => {
   loadConfigs();
 };
 
+// 下拉菜单操作
+const toggleDropdown = (configId: number) => {
+  if (openDropdownId.value === configId) {
+    openDropdownId.value = null;
+  } else {
+    openDropdownId.value = configId;
+  }
+};
+
+const handleDropdownAction = (action: () => void, configId: number) => {
+  action();
+  openDropdownId.value = null; // 执行操作后关闭下拉菜单
+};
+
+// 处理select选择动作
+const handleActionSelect = (event: Event, config: ArticleGenerationConfigListRespDto) => {
+  const target = event.target as HTMLSelectElement;
+  const value = target.value;
+
+  if (!value) return; // 如果选择的是"更多操作"，不执行任何操作
+
+  if (value.startsWith('generateTitle_')) {
+    generateTitle(config);
+  } else if (value.startsWith('delete_')) {
+    deleteConfig(config);
+  }
+
+  // 重置select为默认值
+  target.value = '';
+};
+
 // 清空搜索
 const clearSearch = () => {
   searchKeyword.value = '';
@@ -668,36 +725,18 @@ const generateTitle = async (config: ArticleGenerationConfigListRespDto) => {
     generatingTitle.value = true;
     generatingConfigId.value = config.id;
 
-    // 显示正在生成提示
-    window.showNotification('正在生成文章标题，请稍后查看结果...', 'info');
-
-    // 2秒后关闭按钮禁用状态
-    setTimeout(() => {
+    // 全局改为异步调用：点击即提示成功，不等待后端
+    window.showNotification('文章标题生成任务已启动', 'success');
+    http.post<BaseResponse<number>>(
+      `/api/articles/generate-title/${config.id}`,
+      {},
+      { timeout: 60000, silentBizError: true } as any
+    ).catch((error) => {
+      console.error('生成标题失败:', error);
+    }).finally(() => {
       generatingTitle.value = false;
       generatingConfigId.value = null;
-    }, 2000);
-
-    // 异步发送请求，不等待响应
-    http.post<BaseResponse<number>>(`/api/articles/generate-title/${config.id}`)
-      .then(resp => {
-        const response = resp.data;
-        if (response.code === '00000000') {
-          setTimeout(() => {
-            window.showNotification('文章标题生成成功', 'success');
-            loadConfigs(); // 刷新列表
-          }, 1000); // 延迟1秒显示成功消息
-        } else {
-          setTimeout(() => {
-            window.showNotification('生成失败：' + response.msg, 'error');
-          }, 1000);
-        }
-      })
-      .catch(error => {
-        console.error('生成标题失败:', error);
-        setTimeout(() => {
-          window.showNotification('生成失败，请稍后重试', 'error');
-        }, 1000);
-      });
+    });
   }
 };
 
@@ -823,68 +862,11 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
-}
-
-.btn-outline {
-  background-color: white;
-  color: var(--text);
-  border-color: var(--border);
-}
-
-.btn-outline:hover {
-  background-color: var(--gray-50);
-  border-color: var(--gray-300);
-}
-
-.btn-sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-}
 
 .table-container {
   margin-bottom: 1.5rem;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-
-.table th,
-.table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.table th {
-  background-color: var(--gray-50);
-  font-weight: 600;
-  color: var(--text-secondary);
-}
 
 .loading-container {
   display: flex;
@@ -1103,9 +1085,6 @@ onMounted(() => {
   justify-content: flex-end;
 }
 
-.text-error {
-  color: var(--error);
-}
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -1113,6 +1092,152 @@ onMounted(() => {
 }
 
 /* 响应式设计 */
+/* 下拉菜单样式 */
+.dropdown {
+  position: relative;
+}
+
+.dropdown.open .dropdown-menu {
+  display: block;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  display: none;
+  min-width: 120px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 0.25rem;
+}
+
+.dropdown-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu-item:hover {
+  background-color: var(--surface);
+}
+
+.dropdown-menu-item.text-error {
+  color: var(--error);
+}
+
+.dropdown-menu-item.text-error:hover {
+  background-color: var(--error-light);
+  color: var(--error);
+}
+
+.action-column {
+  width: 140px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.text-error {
+  color: var(--error);
+}
+
+.text-text {
+  color: var(--text);
+}
+
+.text-text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.pagination-size {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-size-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-size-select:hover {
+  border-color: var(--primary);
+}
+
 @media (max-width: 768px) {
   .toolbar {
     flex-direction: column;

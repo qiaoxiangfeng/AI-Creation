@@ -121,6 +121,22 @@ public class ArticleGenerationConfigRespDto extends BaseDto {
         this.additionalCharacteristics = additionalCharacteristics;
     }
 
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
+    }
+
     public Integer getPendingCount() {
         return pendingCount;
     }

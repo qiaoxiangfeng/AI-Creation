@@ -18,7 +18,7 @@
         <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
-        <result column="generation_status" jdbcType="INTEGER" property="generationStatus"/>
+        <result column="story_complete" jdbcType="BOOLEAN" property="storyComplete"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
         <result column="response_id" jdbcType="VARCHAR" property="responseId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -41,7 +41,7 @@
         <result column="publish_status" jdbcType="SMALLINT" property="publishStatus"/>
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
-        <result column="generation_status" jdbcType="INTEGER" property="generationStatus"/>
+        <result column="story_complete" jdbcType="BOOLEAN" property="storyComplete"/>
         <result column="response_id" jdbcType="VARCHAR" property="responseId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -50,7 +50,7 @@
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
         id, article_name, article_outline, story_background, image_desc, article_type, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, response_id, create_time, update_time
+        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, story_complete, res_state, response_id, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章 -->
@@ -84,7 +84,7 @@
     <select id="selectArticleList" resultMap="ListResultMap">
         SELECT
         id, article_name, article_outline, story_background, article_type, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, generation_status, create_time, update_time
+        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, create_time, update_time
         FROM article
         <where>
             res_state = 1
@@ -108,14 +108,14 @@
     <insert id="insert" parameterType="com.aicreation.entity.po.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article (
             article_name, article_outline, story_background, image_desc, article_type, voice_tone, voice_link, voice_file_path,
-            video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, generation_status, res_state, create_time, update_time
+            video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, story_complete, response_id, res_state, create_time, update_time
         ) VALUES (
             #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{storyBackground,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleType,jdbcType=VARCHAR},
             #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR},
             #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR},
             #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT},
-            #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER}, #{generationStatus,jdbcType=INTEGER},
-            #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+            #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER},
+            #{storyComplete,jdbcType=BOOLEAN}, #{responseId,jdbcType=VARCHAR}, #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
 
@@ -136,7 +136,7 @@
             <if test="publishStatus != null">publish_status = #{publishStatus,jdbcType=SMALLINT},</if>
             <if test="totalWordCountEstimate != null">total_word_count_estimate = #{totalWordCountEstimate,jdbcType=INTEGER},</if>
             <if test="chapterWordCountEstimate != null">chapter_word_count_estimate = #{chapterWordCountEstimate,jdbcType=INTEGER},</if>
-            <if test="generationStatus != null">generation_status = #{generationStatus,jdbcType=INTEGER},</if>
+            <if test="storyComplete != null">story_complete = #{storyComplete,jdbcType=BOOLEAN},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
             <if test="responseId != null">response_id = #{responseId,jdbcType=VARCHAR},</if>
             update_time = #{updateTime,jdbcType=TIMESTAMP}
@@ -172,18 +172,14 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM article
-        WHERE (generation_status IS NULL OR generation_status = 0)
-        AND res_state = 1
+        WHERE res_state = 1
         ORDER BY create_time ASC
     </select>
 
     <!-- 查询没有章节的文章列表 -->
     <select id="selectArticlesWithoutChapters" resultMap="BaseResultMap">
-        SELECT a.id, a.article_name, a.article_outline, a.story_background, a.image_desc,
-               a.article_type, a.voice_tone,
-               a.voice_link, a.voice_file_path, a.video_link, a.video_file_path,
-               a.publish_status, a.total_word_count_estimate,
-               a.chapter_word_count_estimate, a.generation_status, a.res_state, a.create_time, a.update_time
+        SELECT
+        <include refid="Base_Column_List"/>
         FROM article a
         WHERE a.res_state = 1
         AND a.total_word_count_estimate IS NOT NULL
@@ -198,18 +194,6 @@
     </select>
 
     <!-- 根据生成状态查询文章列表 -->
-    <select id="selectArticlesByGenerationStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-        SELECT
-            id, article_name, article_outline, story_background, image_desc, article_type,
-            voice_tone, voice_link, voice_file_path,
-            video_link, video_file_path, publish_status, total_word_count_estimate,
-            chapter_word_count_estimate, generation_status, res_state, create_time, update_time
-        FROM article
-        WHERE res_state = 1
-        AND generation_status = #{generationStatus,jdbcType=INTEGER}
-        ORDER BY create_time ASC
-    </select>
-
     <!-- 根据文章类型查询文章名称列表 -->
     <select id="selectArticleNamesByType" parameterType="java.lang.String" resultType="java.lang.String">
         SELECT article_name

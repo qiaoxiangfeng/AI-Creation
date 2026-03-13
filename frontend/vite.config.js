@@ -13,16 +13,16 @@ var DEV_SERVER_CONFIG = {
     HOST: 'localhost',
     PROXY: {
         '/api': {
-            target: 'http://localhost:8080',
+            target: 'http://localhost:6666',
             changeOrigin: true,
             secure: false,
             ws: true,
         },
     },
 };
-// API配置
+// API配置 - 支持环境变量
 var API_CONFIG = {
-    BASE_URL: 'http://localhost:8080',
+    BASE_URL: process.env.VITE_API_BASE_URL || '/',
     TIMEOUT: 10000,
     RETRY_TIMES: 3,
 };

@@ -10,17 +10,18 @@
         <result column="chapter_content" jdbcType="VARCHAR" property="chapterContent"/>
         <result column="core_plot" jdbcType="VARCHAR" property="corePlot"/>
         <result column="word_count_estimate" jdbcType="INTEGER" property="wordCountEstimate"/>
+        <result column="response_id_plan" jdbcType="VARCHAR" property="responseIdPlan"/>
+        <result column="response_id_content" jdbcType="VARCHAR" property="responseIdContent"/>
         <result column="chapter_voice_link" jdbcType="VARCHAR" property="chapterVoiceLink"/>
         <result column="chapter_video_link" jdbcType="VARCHAR" property="chapterVideoLink"/>
         <result column="generation_status" jdbcType="SMALLINT" property="generationStatus"/>
-        <result column="story_complete" jdbcType="BOOLEAN" property="storyComplete"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, chapter_voice_link, chapter_video_link, generation_status, story_complete, res_state, create_time, update_time
+        id, chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, response_id_plan, response_id_content, chapter_voice_link, chapter_video_link, generation_status, res_state, create_time, update_time
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -51,11 +52,11 @@
 
     <insert id="insert" parameterType="com.aicreation.entity.po.ArticleChapter" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article_chapter (
-            chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
+            chapter_no, article_id, chapter_title, chapter_content, core_plot, word_count_estimate, response_id_plan, response_id_content, generation_status, chapter_voice_link, chapter_video_link, res_state, create_time, update_time
         ) VALUES (
             #{chapterNo,jdbcType=INTEGER}, #{articleId,jdbcType=BIGINT}, #{chapterTitle,jdbcType=VARCHAR}, #{chapterContent,jdbcType=VARCHAR},
-            #{corePlot,jdbcType=VARCHAR}, #{wordCountEstimate,jdbcType=INTEGER},
-            #{chapterVoiceLink,jdbcType=VARCHAR}, #{chapterVideoLink,jdbcType=VARCHAR},
+            #{corePlot,jdbcType=VARCHAR}, #{wordCountEstimate,jdbcType=INTEGER}, #{responseIdPlan,jdbcType=VARCHAR}, #{responseIdContent,jdbcType=VARCHAR},
+            #{generationStatus,jdbcType=SMALLINT}, #{chapterVoiceLink,jdbcType=VARCHAR}, #{chapterVideoLink,jdbcType=VARCHAR},
             #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
@@ -69,8 +70,11 @@
             <if test="chapterContent != null">chapter_content = #{chapterContent,jdbcType=VARCHAR},</if>
             <if test="corePlot != null">core_plot = #{corePlot,jdbcType=VARCHAR},</if>
             <if test="wordCountEstimate != null">word_count_estimate = #{wordCountEstimate,jdbcType=INTEGER},</if>
+            <if test="responseIdPlan != null">response_id_plan = #{responseIdPlan,jdbcType=VARCHAR},</if>
+            <if test="responseIdContent != null">response_id_content = #{responseIdContent,jdbcType=VARCHAR},</if>
             <if test="chapterVoiceLink != null">chapter_voice_link = #{chapterVoiceLink,jdbcType=VARCHAR},</if>
             <if test="chapterVideoLink != null">chapter_video_link = #{chapterVideoLink,jdbcType=VARCHAR},</if>
+            <if test="generationStatus != null">generation_status = #{generationStatus,jdbcType=SMALLINT},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
             update_time = #{updateTime,jdbcType=TIMESTAMP}
         </set>
@@ -112,12 +116,11 @@
     <select id="selectChaptersWithoutContentExcludingGenerating" resultMap="BaseResultMap">
         SELECT ac.*
         FROM article_chapter ac
-        INNER JOIN article a ON ac.article_id = a.id
         WHERE (ac.chapter_content IS NULL OR ac.chapter_content = '')
         AND ac.core_plot IS NOT NULL
         AND ac.word_count_estimate IS NOT NULL
         AND ac.res_state = 1
-        AND a.generation_status != 1  -- 排除生成中的文章
+        AND ac.generation_status != 1  -- 排除生成中的章节
         ORDER BY ac.article_id ASC, ac.chapter_no ASC
     </select>
 

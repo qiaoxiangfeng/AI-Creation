@@ -63,6 +63,16 @@ public class DictionaryServiceImpl implements IDictionaryService {
     }
 
     @Override
+    public List<String> getAllDistinctDictKeys() {
+        List<Dictionary> dictionaries = dictionaryMapper.selectAll();
+        return dictionaries.stream()
+                .map(Dictionary::getDictKey)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Long createDictionary(DictionaryCreateReqDto request) {
         if (Objects.isNull(request) || !StringUtils.hasText(request.getDictKey()) || !StringUtils.hasText(request.getDictValue())) {
             log.warn("创建字典失败：请求参数无效");

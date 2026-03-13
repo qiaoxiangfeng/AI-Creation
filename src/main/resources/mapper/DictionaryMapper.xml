@@ -37,6 +37,15 @@
         ORDER BY sort_order ASC, create_time ASC
     </select>
 
+    <!-- 查询所有字典 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dictionary
+        WHERE res_state = 1
+        ORDER BY dict_key ASC, sort_order ASC
+    </select>
+
     <!-- 查询字典列表 -->
     <select id="selectDictionaryList" resultMap="BaseResultMap">
         SELECT

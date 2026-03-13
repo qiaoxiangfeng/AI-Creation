@@ -6,6 +6,20 @@
         <div class="header-top">
           <h1 class="article-title">{{ article?.articleName || '加载中...' }}</h1>
           <div class="header-actions">
+            <button
+              v-if="article"
+              @click="generateChaptersForArticle"
+              class="btn btn-secondary download-btn"
+            >
+              生成全部章节
+            </button>
+            <button
+              v-if="article"
+              @click="generateChapterContentForArticle"
+              class="btn btn-secondary download-btn"
+            >
+              按序生成全部章节内容
+            </button>
             <button @click="downloadFullText" class="btn btn-primary download-btn">
               下载全文
             </button>
@@ -20,10 +34,9 @@
 
     <!-- 主要内容区域 -->
     <div class="content-section">
-      <div class="container">
-        <div class="content-layout">
-          <!-- 左侧章节列表 -->
-          <div class="chapters-sidebar">
+      <div class="content-layout">
+        <!-- 左侧章节列表 -->
+        <div class="chapters-sidebar">
             <h3>章节列表</h3>
             <div class="chapters-list">
               <div
@@ -33,18 +46,10 @@
                 @click="selectChapter(chapter)"
               >
                 <span class="chapter-no">第{{ chapter.chapterNo }}章</span>
-                <span class="chapter-title">{{ chapter.chapterTitle }}</span>
-                <div class="chapter-actions">
-                  <button
-                    v-if="!chapter.chapterContent && chapter.generationStatus !== 1"
-                    @click.stop="generateChapterContent(chapter)"
-                    class="generate-btn"
-                    title="生成章节内容"
-                    :disabled="generatingChapters.has(chapter.id)"
-                  >
-                    {{ generatingChapters.has(chapter.id) ? '生成中...' : '生成内容' }}
-                  </button>
-                  <button @click.stop="deleteChapter(chapter)" class="delete-btn" title="删除章节">×</button>
+                <div class="chapter-title-container">
+                  <span class="chapter-title">
+                    {{ truncateTitle(chapter.chapterTitle, 10) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -53,10 +58,48 @@
           <!-- 右侧章节内容 -->
           <div class="chapter-content">
             <div v-if="selectedChapter" class="content-wrapper">
-              <h2 class="chapter-title">{{ selectedChapter.chapterTitle }}</h2>
+              <div class="content-header">
+                <h2 class="chapter-title">{{ selectedChapter.chapterTitle }}</h2>
+                <div class="content-header-actions">
+                  <button
+                    class="btn btn-secondary chapter-download-btn"
+                    @click="downloadCurrentChapter"
+                  >
+                    下载本章
+                  </button>
+                  <button
+                    v-if="!selectedChapter.chapterContent && selectedChapter.generationStatus !== 1"
+                    class="btn btn-secondary"
+                    :disabled="generatingChapters.has(selectedChapter.id)"
+                    @click="generateChapterContent(selectedChapter)"
+                  >
+                    {{ generatingChapters.has(selectedChapter.id) ? '生成中...' : '生成本章内容' }}
+                  </button>
+                  <button
+                    v-else
+                    class="btn btn-secondary"
+                    @click="openRegenerateDialog(selectedChapter)"
+                  >
+                    重新生成本章内容
+                  </button>
+                  <button
+                    class="btn btn-outline btn-error"
+                    @click="deleteChapter(selectedChapter)"
+                  >
+                    删除本章
+                  </button>
+                </div>
+              </div>
 
-              <!-- 章节信息区域 -->
-              <div class="chapter-info">
+              <!-- 章节信息区域：可折叠，有内容时默认折叠，无内容时默认展开 -->
+              <div class="chapter-info" :class="{ collapsed: isChapterInfoCollapsed }">
+                <!-- 折叠切换按钮（右上角） -->
+                <div class="chapter-info-toggle" @click="toggleChapterInfo">
+                  <span>{{ isChapterInfoCollapsed ? '展开章节信息' : '收起章节信息' }}</span>
+                  <span class="toggle-icon">{{ isChapterInfoCollapsed ? '▼' : '▲' }}</span>
+                </div>
+
+                <div v-show="!isChapterInfoCollapsed">
                 <!-- 核心剧情 -->
                 <div class="info-section">
                   <div class="info-title">
@@ -139,7 +182,7 @@
                           class="edit-input plot-input"
                           min="1"
                         />
-                        <button @click="removePlot(index)" class="btn btn-danger btn-xs remove-plot-btn">删除</button>
+                        <button @click="removePlot(index)" class="btn btn-error btn-xs remove-plot-btn">删除</button>
                       </div>
                     </div>
                     <button @click="addPlot" class="btn btn-outline btn-sm add-plot-btn">添加伏笔</button>
@@ -149,13 +192,13 @@
                     </div>
                   </div>
                 </div>
+                </div>
               </div>
 
               <!-- 章节内容 -->
               <div class="chapter-text" v-html="formatChapterContent(selectedChapter.chapterContent || '暂无章节内容')"></div>
             </div>
           </div>
-        </div>
       </div>
     </div>
 
@@ -167,6 +210,31 @@
         </button>
       </div>
     </div>
+
+  <!-- 章节重新生成弹窗 -->
+  <div v-if="showRegenerateModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>重新生成本章内容</h3>
+        <button class="close-btn" @click="cancelRegenerate">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>修改意见（必填）</label>
+          <textarea
+            v-model="regenerateInstruction"
+            class="form-textarea"
+            rows="5"
+            placeholder="请描述你希望本章节在剧情、节奏、人物塑造、风格等方面如何调整，例如：加强悬念、减少无关日常、放大某个冲突等。"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" @click="cancelRegenerate">取消</button>
+        <button class="btn btn-primary" @click="confirmRegenerate">确认重新生成本章内容</button>
+      </div>
+    </div>
+  </div>
 
   </div>
 </template>
@@ -225,6 +293,9 @@ const chapters = ref<ArticleChapterRespDto[]>([]);
 const selectedChapterId = ref<number | null>(null);
 const selectedChapter = ref<ArticleChapterRespDto | null>(null);
 
+// 章节信息折叠状态：有内容时默认折叠，无内容时默认展开
+const isChapterInfoCollapsed = ref(false);
+
 // 编辑状态管理
 const editingCorePlot = ref(false);
 const editingWordCount = ref(false);
@@ -233,10 +304,18 @@ const editingPlots = ref(false);
 // 生成状态跟踪
 const generatingChapters = ref<Set<number>>(new Set());
 
+// 操作按钮显示状态
+const activeActionsChapter = ref<number | null>(null);
+
 // 编辑表单数据
 const editedCorePlot = ref('');
 const editedWordCount = ref(0);
 const editedPlots = ref<PlotRespDto[]>([]);
+
+// 重新生成弹窗状态
+const showRegenerateModal = ref(false);
+const regenerateInstruction = ref('');
+const regeneratingChapter = ref<ArticleChapterRespDto | null>(null);
 
 
 // 获取文章详情
@@ -279,11 +358,30 @@ const selectChapter = (chapter: ArticleChapterRespDto) => {
   editedWordCount.value = chapter.wordCountEstimate || 0;
   editedPlots.value = chapter.plots ? [...chapter.plots] : [];
 
+  // 根据章节是否已有内容设置章节信息折叠状态
+  isChapterInfoCollapsed.value = !!chapter.chapterContent;
+
   // 重置编辑状态
   editingCorePlot.value = false;
   editingWordCount.value = false;
   editingPlots.value = false;
 };
+
+// 切换章节信息折叠/展开
+const toggleChapterInfo = () => {
+  isChapterInfoCollapsed.value = !isChapterInfoCollapsed.value;
+};
+
+// 显示操作按钮
+const showActions = (chapter: ArticleChapterRespDto) => {
+  activeActionsChapter.value = chapter.id;
+};
+
+// 隐藏操作按钮
+const hideActions = () => {
+  activeActionsChapter.value = null;
+};
+
 
 // 格式化章节内容
 const formatChapterContent = (content: string) => {
@@ -296,31 +394,88 @@ const formatChapterContent = (content: string) => {
 const generateChapterContent = async (chapter: ArticleChapterRespDto) => {
   if (generatingChapters.value.has(chapter.id)) return;
 
+  generatingChapters.value.add(chapter.id);
+
+  // 点击即提示任务已启动
+  window.showNotification('章节内容生成任务已启动', 'success');
+
   try {
-    generatingChapters.value.add(chapter.id);
-
-    // 显示正在生成提示
-    window.showNotification('正在生成章节内容，请稍候...', 'info');
-
-    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.value!.id}/generate-chapter-content/${chapter.id}`);
+    const resp = await http.post<BaseResponse<boolean>>(
+      `/api/articles/${article.value!.id}/generate-chapter-content/${chapter.id}`,
+      {},
+      { timeout: 180000, silentBizError: true } as any
+    );
     const response = resp.data;
-
-    if (response.code === '00000000') {
-      window.showNotification('章节内容生成成功', 'success');
-      // 重新获取章节列表以更新状态
-      await fetchArticleChapters(article.value!.id.toString());
-      // 重新选择当前章节
-      if (selectedChapterId.value === chapter.id) {
-        selectChapter(chapter);
-      }
-    } else {
-      window.showNotification('生成失败：' + response.msg, 'error');
+    if (response.code !== '00000000') {
+      window.showNotification(
+        response.msg || '章节内容生成失败，请稍后重试',
+        'error'
+      );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('生成章节内容失败：', error);
-    window.showNotification('生成失败，请稍后重试', 'error');
+    const msg = error?.message || '章节内容生成失败，请稍后重试';
+    window.showNotification(msg, 'error');
   } finally {
     generatingChapters.value.delete(chapter.id);
+  }
+};
+
+// 打开章节内容重新生成弹窗
+const openRegenerateDialog = (chapter: ArticleChapterRespDto) => {
+  regeneratingChapter.value = chapter;
+  regenerateInstruction.value = '';
+  showRegenerateModal.value = true;
+};
+
+// 取消重新生成
+const cancelRegenerate = () => {
+  showRegenerateModal.value = false;
+  regeneratingChapter.value = null;
+  regenerateInstruction.value = '';
+};
+
+// 确认重新生成章节内容
+const confirmRegenerate = async () => {
+  if (!regeneratingChapter.value || !article.value) return;
+  const instruction = regenerateInstruction.value.trim();
+  if (!instruction) {
+    window.showNotification('请先输入修改意见再重新生成章节内容', 'error');
+    return;
+  }
+
+  try {
+    window.showNotification('重新生成本章内容任务已启动', 'success');
+    await http.post<BaseResponse<boolean>>(
+      `/api/articles/${article.value.id}/generate-chapter-content/${regeneratingChapter.value.id}/regenerate`,
+      { instruction },
+      { timeout: 180000, silentBizError: true } as any
+    );
+
+    // 重新加载章节列表，并保持当前选中章节
+    const currentArticleId = article.value.id;
+    const currentChapterId = regeneratingChapter.value.id;
+    try {
+      const resp = await http.get<BaseResponse<ArticleChapterRespDto[]>>(
+        `/api/articles/${currentArticleId}/chapters`
+      );
+      const response = resp.data;
+      if (response.code === '00000000') {
+        chapters.value = response.data || [];
+        const updated = chapters.value.find(c => c.id === currentChapterId);
+        if (updated) {
+          selectChapter(updated);
+        }
+      }
+    } catch (e) {
+      console.error('重新加载章节列表失败:', e);
+    }
+  } catch (error) {
+    console.error('重新生成章节内容失败：', error);
+  } finally {
+    showRegenerateModal.value = false;
+    regeneratingChapter.value = null;
+    regenerateInstruction.value = '';
   }
 };
 
@@ -379,6 +534,63 @@ const downloadFullText = async () => {
     console.error('下载全文失败:', error);
     window.showNotification('下载失败，请稍后重试', 'error');
   }
+};
+
+// 下载当前章节
+const downloadCurrentChapter = () => {
+  if (!article.value || !selectedChapter.value) return;
+
+  const chapter = selectedChapter.value;
+  const articleName = article.value.articleName || '未命名文章';
+  const chapterNo = chapter.chapterNo ?? '';
+  const chapterTitle = chapter.chapterTitle || '';
+  const chapterContent = chapter.chapterContent || '';
+
+  const contentLines = [
+    `【${articleName}】`,
+    chapterNo ? `第${chapterNo}章 ${chapterTitle}` : chapterTitle,
+    '',
+    chapterContent,
+  ];
+
+  const chapterText = contentLines.join('\n');
+  const blob = new Blob([chapterText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = chapterNo
+    ? `${articleName}-第${chapterNo}章-${chapterTitle || '未命名章节'}.txt`
+    : `${articleName}-${chapterTitle || '未命名章节'}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+// 整篇文章级别操作：生成章节 / 生成章节内容
+
+const generateChaptersForArticle = async () => {
+  if (!article.value) return;
+  window.showNotification('章节生成任务已启动', 'success');
+  http.post<BaseResponse<boolean>>(
+    `/api/articles/${article.value.id}/generate-chapters`,
+    {},
+    { timeout: 300000, silentBizError: true } as any
+  ).catch((error) => {
+    console.error('章节生成失败:', error);
+  });
+};
+
+const generateChapterContentForArticle = async () => {
+  if (!article.value) return;
+  window.showNotification('章节内容生成任务已启动', 'success');
+  http.post<BaseResponse<boolean>>(
+    `/api/articles/${article.value.id}/generate-chapter-content`,
+    {},
+    { timeout: 600000, silentBizError: true } as any
+  ).catch((error) => {
+    console.error('章节内容生成失败:', error);
+  });
 };
 
 // 编辑功能
@@ -486,6 +698,20 @@ const goBack = () => {
   router.go(-1);
 };
 
+
+// 章节标题截断函数，确保至少显示10个字
+const truncateTitle = (title: string, minLength: number = 10) => {
+  if (!title) return '';
+
+  // 如果标题长度小于等于最小显示长度，直接返回
+  if (title.length <= minLength) {
+    return title;
+  }
+
+  // 截取最小显示长度并添加省略号
+  return title.substring(0, minLength) + '...';
+};
+
 onMounted(() => {
   const articleId = route.params.id as string;
   if (articleId) {
@@ -574,17 +800,15 @@ onMounted(() => {
   padding: 0 0 2rem 0;
 }
 
-.content-section .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
 .content-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 2rem;
   min-height: 600px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 0;
+  padding-right: 1rem;
 }
 
 /* 左侧章节列表 */
@@ -596,6 +820,7 @@ onMounted(() => {
   height: fit-content;
   max-height: 600px;
   overflow-y: auto;
+  margin-left: 1rem; /* 添加左边距保持美观 */
 }
 
 .chapters-sidebar h3 {
@@ -642,58 +867,69 @@ onMounted(() => {
   min-width: 60px;
 }
 
-.chapter-title {
+.chapter-title-container {
   flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.chapter-title {
+  width: 100%;
   font-size: 0.875rem;
   line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+
+.chapter-actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.125rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  padding: 0.125rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  z-index: 10;
 }
 
 .delete-btn {
   background: none;
   border: none;
   color: #ef4444;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
+  padding: 0.125rem;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: all 0.2s ease;
-  margin-left: 0.5rem;
-  opacity: 0;
 }
 
-.chapter-item:hover .delete-btn {
-  opacity: 1;
-}
-
-.chapter-actions {
-  display: flex;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.chapter-item:hover .chapter-actions {
-  opacity: 1;
+.delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 .generate-btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
   background-color: var(--success, #10b981);
   color: white;
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .generate-btn:hover:not(:disabled) {
@@ -736,13 +972,43 @@ onMounted(() => {
   overflow-y: auto;
 }
 
-.content-wrapper h2 {
-  font-size: 1.75rem;
-  font-weight: bold;
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 1.5rem;
-  color: var(--text);
   border-bottom: 2px solid var(--primary);
   padding-bottom: 0.5rem;
+}
+
+.content-header .chapter-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 0;
+  color: var(--text);
+}
+
+.content-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* 本章下载按钮去掉鼠标悬停特效 */
+.chapter-download-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: inherit;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: none;
+}
+
+.chapter-download-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* 章节信息区域 */
@@ -752,6 +1018,29 @@ onMounted(() => {
   padding: 1.5rem;
   margin-bottom: 2rem;
   border: 1px solid var(--border);
+}
+
+.chapter-info.collapsed {
+  padding-bottom: 0.75rem;
+}
+
+.chapter-info-toggle {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.chapter-info-toggle:hover {
+  color: var(--primary);
+}
+
+.toggle-icon {
+  font-size: 0.75rem;
 }
 
 .info-section {

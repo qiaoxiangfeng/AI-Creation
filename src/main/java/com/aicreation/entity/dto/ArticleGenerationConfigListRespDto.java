@@ -41,6 +41,12 @@ public class ArticleGenerationConfigListRespDto extends BaseDto {
     @Schema(description = "附加特点", example = "搞笑,失落")
     private String additionalCharacteristics;
 
+    @Schema(description = "总字数预估", example = "100000")
+    private Integer totalWordCountEstimate;
+
+    @Schema(description = "每章节字数预估", example = "5000")
+    private Integer chapterWordCountEstimate;
+
     @Schema(description = "待生成数量", example = "10")
     private Integer pendingCount;
 
@@ -110,6 +116,22 @@ public class ArticleGenerationConfigListRespDto extends BaseDto {
 
     public void setAdditionalCharacteristics(String additionalCharacteristics) {
         this.additionalCharacteristics = additionalCharacteristics;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
     public Integer getPendingCount() {

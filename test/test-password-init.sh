@@ -3,7 +3,7 @@
 # 测试用户密码初始化功能
 # 使用方法: ./test-password-init.sh [base_url]
 
-BASE_URL=${1:-"http://localhost:8080"}
+BASE_URL=${1:-"http://localhost:6666"}
 API_BASE="${BASE_URL}/api/users"
 
 echo "=== 测试用户密码初始化功能 ==="

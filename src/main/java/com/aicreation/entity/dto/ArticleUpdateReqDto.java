@@ -71,9 +71,6 @@ public class ArticleUpdateReqDto extends BaseDto {
     @Schema(description = "每章节字数预估", example = "4000")
     private Integer chapterWordCountEstimate;
 
-    @Schema(description = "生成状态：0-未开始，1-生成中，2-已完成，3-失败", example = "0")
-    private Integer generationStatus;
-
     // Getter and Setter methods
     public Long getArticleId() {
         return articleId;
@@ -187,12 +184,5 @@ public class ArticleUpdateReqDto extends BaseDto {
         this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
-    public Integer getGenerationStatus() {
-        return generationStatus;
-    }
-
-    public void setGenerationStatus(Integer generationStatus) {
-        this.generationStatus = generationStatus;
-    }
 
 }

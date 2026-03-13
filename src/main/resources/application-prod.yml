@@ -1,19 +1,83 @@
+server:
+  port: 6666
+  servlet:
+    context-path: /api
+
 spring:
+  application:
+    name: ai-creation
+
+
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    
+    driver-class-name: org.postgresql.Driver
+    # 生产环境推荐使用本机/内网地址，避免走公网IP导致回环被安全组/防火墙策略拦截
+    url: jdbc:postgresql://127.0.0.1:5432/ai_creation
+    username: postgres
+    password: 123456
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
   jpa:
-    show-sql: false
     hibernate:
       ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.aicreation.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    cache-enabled: false
 
 logging:
   level:
-    com.aicreation: warn
-    org.springframework.web: warn
-    org.mybatis: warn
-  file:
-    max-size: 100MB
-    max-history: 30 
+    com.aicreation: info
+    org.springframework.web: info
+    org.mybatis: info
+
+# 自定义配置
+app:
+  jwt:
+    secret: aiCreationSecretKey2024
+    expiration: 86400000  # 24小时
+  volcengine:
+    api-key: 644bad9b-cf07-49ac-bc57-7e0baac2e398
+  doubao:
+    tts:
+      app-id: 2119661233
+      access-token: Yu7I8HtdJXvD9WgepagbXbPoYx1GqhTf
+      cluster: volcano_tts
+      ws-url: wss://openspeech.bytedance.com/api/v3/tts/unidirectional/stream
+      http-url: https://openspeech.bytedance.com/api/v1/tts
+      default-voice-type: zh_female_cancan_mars_bigtts
+      default-encoding: mp3
+      default-speed-ratio: 1.0
+      default-rate: 24000
+      default-bitrate: 160
+  audio:
+    file-path: file
+    file-prefix: audio
+
+# Swagger 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    display-request-duration: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs 

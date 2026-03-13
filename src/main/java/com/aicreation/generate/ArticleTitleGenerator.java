@@ -1,7 +1,6 @@
 package com.aicreation.generate;
 
 import com.aicreation.entity.dto.ArticleCreateReqDto;
-import com.aicreation.entity.po.Article;
 import com.aicreation.entity.po.ArticleGenerationConfig;
 import com.aicreation.external.VolcengineChatClient;
 import com.aicreation.mapper.ArticleGenerationConfigMapper;
@@ -10,7 +9,6 @@ import com.aicreation.service.IArticleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -42,11 +40,11 @@ public class ArticleTitleGenerator {
 
     /**
      * 生成单个文章标题
+     * 无事务保护，数据实时提交
      *
      * @param configId 文章生成配置ID
      * @return 生成的文章ID
      */
-    @Transactional(rollbackFor = Exception.class)
     public Long generateSingleTitle(Long configId) {
         log.info("开始为配置[{}]生成单个文章标题", configId);
 
@@ -69,6 +67,7 @@ public class ArticleTitleGenerator {
             // 使用Responses API生成内容（首次调用，previous_response_id为null）
             // 非流式调用：API会在生成全部内容后一次性返回完整响应，收到返回即代表输出完成
             log.info("开始使用非流式Responses API生成文章标题和大纲...");
+            log.info("本次AI标题生成请求 previous_response_id: null");
             com.volcengine.ark.runtime.model.responses.response.ResponseObject response =
                 volcengineChatClient.createResponse(
                     prompt,
@@ -108,11 +107,8 @@ public class ArticleTitleGenerator {
 
             // 创建文章（只包含标题和大纲）
             ArticleCreateReqDto createReq = buildArticleCreateReq(config, content);
-            Long articleId = articleService.createArticle(createReq);
-
-            // 设置从标题生成API获得的response_id
+            Long articleId = articleService.createArticleWithResponseId(createReq, responseId);
             if (responseId != null && !responseId.trim().isEmpty()) {
-                articleMapper.updateResponseId(articleId, responseId);
                 log.info("文章[{}]的response_id已设置为: {}", articleId, responseId);
             } else {
                 log.warn("标题生成API未返回有效的response_id，文章后续AI交互可能无法保持上下文");
@@ -196,29 +192,82 @@ public class ArticleTitleGenerator {
      */
     private String buildTitleGenerationPrompt(ArticleGenerationConfig config, List<String> existingTitles) {
         StringBuilder prompt = new StringBuilder();
-        prompt.append("请为以下配置生成一个新的小说标题和大纲：\n\n");
+        prompt.append("你是一名擅长中文网络小说与大众出版市场的专业编辑，请根据下面的“小说生成配置”生成一个新的小说标题、大纲和故事背景。\n\n");
 
-        // 配置信息
-        prompt.append("小说类型：").append(config.getTheme()).append("\n");
+        // 配置信息（完整使用文章生成配置的各个字段）
+        prompt.append("【小说生成配置】\n");
+        prompt.append("- 主题（Theme）：").append(config.getTheme()).append("\n");
+        if (StringUtils.hasText(config.getGender())) {
+            prompt.append("- 性别向（Gender）：").append(config.getGender()).append("\n");
+        }
+        if (StringUtils.hasText(config.getGenre())) {
+            prompt.append("- 题材（Genre）：").append(config.getGenre()).append("\n");
+        }
+        if (StringUtils.hasText(config.getPlot())) {
+            prompt.append("- 情节类型（Plot）：").append(config.getPlot()).append("\n");
+        }
+        if (StringUtils.hasText(config.getCharacterType())) {
+            prompt.append("- 角色类型（CharacterType）：").append(config.getCharacterType()).append("\n");
+        }
+        if (StringUtils.hasText(config.getStyle())) {
+            prompt.append("- 整体风格（Style）：").append(config.getStyle()).append("\n");
+        }
         if (StringUtils.hasText(config.getAdditionalCharacteristics())) {
-            prompt.append("附加特征：").append(config.getAdditionalCharacteristics()).append("\n");
+            prompt.append("- 附加特点（AdditionalCharacteristics）：")
+                  .append(config.getAdditionalCharacteristics()).append("\n");
+        }
+        if (config.getTotalWordCountEstimate() != null) {
+            prompt.append("- 总字数预估（TotalWordCountEstimate）：")
+                  .append(config.getTotalWordCountEstimate()).append(" 字左右\n");
+        }
+        if (config.getChapterWordCountEstimate() != null) {
+            prompt.append("- 每章字数预估（ChapterWordCountEstimate）：")
+                  .append(config.getChapterWordCountEstimate()).append(" 字左右\n");
         }
 
         // 现有标题（用于去重）
         if (!existingTitles.isEmpty()) {
-            prompt.append("\n已有标题（请避免重复）：\n");
+            prompt.append("\n已有标题列表（新标题必须与下列任意一个在字面或结构上都不能相同或仅作轻微改动）：\n");
             for (int i = 0; i < Math.min(existingTitles.size(), 10); i++) {
                 prompt.append("- ").append(existingTitles.get(i)).append("\n");
             }
         }
 
-        prompt.append("\n请生成一个吸引人的小说标题和详细大纲：\n");
-        prompt.append("1. title：小说标题（创意新颖，吸引读者）\n");
-        prompt.append("2. outline：小说大纲（300-500字，包含主要情节框架、世界观设定、核心冲突）\n");
-        prompt.append("3. storyBackground：故事背景（100-200字，世界观和人物背景介绍）\n");
+        // 根据总字数预估动态调整大纲字数区间
+        Integer totalWordCount = config.getTotalWordCountEstimate();
+        String outlineRange;
+        if (totalWordCount == null) {
+            outlineRange = "300-500字";
+        } else if (totalWordCount <= 30000) {
+            outlineRange = "150-200字";
+        } else if (totalWordCount <= 100000) {
+            outlineRange = "300-500字";
+        } else if (totalWordCount <= 500000) {
+            outlineRange = "500-700字";
+        } else if (totalWordCount <= 1000000) {
+            outlineRange = "700-1000字";
+        } else {
+            outlineRange = "1000-2000字";
+        }
+
+        prompt.append("\n请在充分理解上述配置的基础上，生成一个全新的小说标题及配套大纲、故事背景：\n");
+        prompt.append("1. title：小说标题。\n");
+        prompt.append("   - 语言：中文。\n");
+        prompt.append("   - 长度：一般控制在10～20个汉字之间，避免过长或过短。\n");
+        prompt.append("   - 风格：需明显符合【主题 / 性别向 / 题材 / 情节类型 / 角色类型 / 整体风格】的受众预期，具有清晰的“卖点”（如强冲突、强爽点、强情绪或强悬念）。\n");
+        prompt.append("   - 不能与“已有标题列表”中的任何一个标题相同，也不能只做一两个字的小改动（如仅替换同义词或简单加减一两个字）。\n");
+        prompt.append("   - 尽量避免使用生僻词和难以理解的隐喻，保证一眼就能看出题材与爽点。\n");
+        prompt.append("   - 可以使用书名号《》或不使用，二者选其一，不要混用其它花哨符号。\n");
+        prompt.append("2. outline：小说大纲（").append(outlineRange).append("）。\n");
+        prompt.append("   - 需要涵盖：主线冲突、男女主或核心角色设定、世界观框架、故事走向（开局—发展—高潮—结局的大致安排）。\n");
+        prompt.append("   - 要明显服务于上面的标题设计，让读者从大纲中看到标题所承诺的爽点或矛盾如何展开。\n");
+        prompt.append("3. storyBackground：故事背景（100-200字）。\n");
+        prompt.append("   - 更侧重世界观设定、时代背景、社会环境或关键规则设定，为后续章节创作提供稳定的基底。\n");
 
         prompt.append("\n生成要求：\n");
-        prompt.append("请根据以上要求直接输出JSON格式，不要任何解释或思考过程。\n\n");
+        prompt.append("- 必须严格按照下方给出的JSON字段名输出，不要新增、删除或重命名字段。\n");
+        prompt.append("- 不要输出任何分析过程、解释文字、标注、Markdown语法或多余内容，只输出一个完整的JSON对象。\n");
+        prompt.append("- 字符串内容中如需使用双引号，请进行正确的JSON转义。\n\n");
 
         prompt.append("输出格式（只输出JSON，不要其他内容）：\n");
         prompt.append("{\n");
@@ -321,8 +370,12 @@ public class ArticleTitleGenerator {
         req.setArticleOutline(content.getOutline());
         req.setStoryBackground(content.getStoryBackground());
         req.setArticleType(config.getTheme());
+        // 从文章生成配置中继承总字数预估和每章节字数预估，若为空则使用默认值
+        Integer totalEstimate = config.getTotalWordCountEstimate() != null ? config.getTotalWordCountEstimate() : 100000;
+        Integer chapterEstimate = config.getChapterWordCountEstimate() != null ? config.getChapterWordCountEstimate() : 5000;
+        req.setTotalWordCountEstimate(totalEstimate);
+        req.setChapterWordCountEstimate(chapterEstimate);
         req.setPublishStatus(0); // 未发布
-        req.setGenerationStatus(0); // 未开始生成
         return req;
     }
 

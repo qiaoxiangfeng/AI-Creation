@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 6666
   servlet:
     context-path: /api
 
@@ -48,17 +48,6 @@ mybatis:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     cache-enabled: false
-
-logging:
-  level:
-    com.aicreation: debug
-    org.springframework.web: info
-    org.mybatis: debug
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/ai-creation.log
 
 # 自定义配置
 app:

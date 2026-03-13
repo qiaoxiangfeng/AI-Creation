@@ -86,6 +86,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         categoryBo.setCharacterType(request.getCharacterType());
         categoryBo.setStyle(request.getStyle());
         categoryBo.setAdditionalCharacteristics(request.getAdditionalCharacteristics());
+        categoryBo.setTotalWordCountEstimate(request.getTotalWordCountEstimate());
+        categoryBo.setChapterWordCountEstimate(request.getChapterWordCountEstimate());
         categoryBo.setPendingCount(request.getPendingCount() != null ? request.getPendingCount() : 0);
         categoryBo.setResState(1);
         categoryBo.setCreateTime(LocalDateTime.now());
@@ -100,6 +102,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         articleGenerationConfig.setCharacterType(categoryBo.getCharacterType());
         articleGenerationConfig.setStyle(categoryBo.getStyle());
         articleGenerationConfig.setAdditionalCharacteristics(categoryBo.getAdditionalCharacteristics());
+        articleGenerationConfig.setTotalWordCountEstimate(categoryBo.getTotalWordCountEstimate());
+        articleGenerationConfig.setChapterWordCountEstimate(categoryBo.getChapterWordCountEstimate());
         articleGenerationConfig.setPendingCount(categoryBo.getPendingCount());
         articleGenerationConfig.setResState(categoryBo.getResState());
         articleGenerationConfig.setCreateTime(categoryBo.getCreateTime());
@@ -147,6 +151,12 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         }
         if (StringUtils.hasText(request.getAdditionalCharacteristics())) {
             articleGenerationConfig.setAdditionalCharacteristics(request.getAdditionalCharacteristics());
+        }
+        if (request.getTotalWordCountEstimate() != null) {
+            articleGenerationConfig.setTotalWordCountEstimate(request.getTotalWordCountEstimate());
+        }
+        if (request.getChapterWordCountEstimate() != null) {
+            articleGenerationConfig.setChapterWordCountEstimate(request.getChapterWordCountEstimate());
         }
         if (request.getPendingCount() != null) {
             articleGenerationConfig.setPendingCount(request.getPendingCount());
@@ -233,6 +243,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         dto.setCharacterType(category.getCharacterType());
         dto.setStyle(category.getStyle());
         dto.setAdditionalCharacteristics(category.getAdditionalCharacteristics());
+        dto.setTotalWordCountEstimate(category.getTotalWordCountEstimate());
+        dto.setChapterWordCountEstimate(category.getChapterWordCountEstimate());
         dto.setPendingCount(category.getPendingCount());
         dto.setCreateTime(category.getCreateTime());
         dto.setUpdateTime(category.getUpdateTime());
@@ -252,6 +264,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         dto.setCharacterType(category.getCharacterType());
         dto.setStyle(category.getStyle());
         dto.setAdditionalCharacteristics(category.getAdditionalCharacteristics());
+        dto.setTotalWordCountEstimate(category.getTotalWordCountEstimate());
+        dto.setChapterWordCountEstimate(category.getChapterWordCountEstimate());
         dto.setPendingCount(category.getPendingCount());
         dto.setCreateTime(category.getCreateTime());
         return dto;

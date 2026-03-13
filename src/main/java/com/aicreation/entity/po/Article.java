@@ -86,9 +86,9 @@ public class Article implements Serializable {
     private Integer chapterWordCountEstimate;
 
     /**
-     * 生成状态：0-未开始，1-生成中，2-已完成，3-失败
+     * 章节完结标识：true-章节已完结，false-章节未完结
      */
-    private Integer generationStatus;
+    private Boolean storyComplete;
 
     /**
      * 删除标记：1-有效，0-无效
@@ -225,12 +225,12 @@ public class Article implements Serializable {
         this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
-    public Integer getGenerationStatus() {
-        return generationStatus != null ? generationStatus : 0;
+    public Boolean getStoryComplete() {
+        return storyComplete != null ? storyComplete : false;
     }
 
-    public void setGenerationStatus(Integer generationStatus) {
-        this.generationStatus = generationStatus;
+    public void setStoryComplete(Boolean storyComplete) {
+        this.storyComplete = storyComplete;
     }
 
     public Integer getResState() {

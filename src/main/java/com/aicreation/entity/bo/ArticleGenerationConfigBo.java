@@ -47,6 +47,16 @@ public class ArticleGenerationConfigBo {
     private String additionalCharacteristics;
 
     /**
+     * 总字数预估
+     */
+    private Integer totalWordCountEstimate;
+
+    /**
+     * 每章节字数预估
+     */
+    private Integer chapterWordCountEstimate;
+
+    /**
      * 待生成数量
      */
     private Integer pendingCount;
@@ -121,6 +131,22 @@ public class ArticleGenerationConfigBo {
 
     public void setAdditionalCharacteristics(String additionalCharacteristics) {
         this.additionalCharacteristics = additionalCharacteristics;
+    }
+
+    public Integer getTotalWordCountEstimate() {
+        return totalWordCountEstimate;
+    }
+
+    public void setTotalWordCountEstimate(Integer totalWordCountEstimate) {
+        this.totalWordCountEstimate = totalWordCountEstimate;
+    }
+
+    public Integer getChapterWordCountEstimate() {
+        return chapterWordCountEstimate;
+    }
+
+    public void setChapterWordCountEstimate(Integer chapterWordCountEstimate) {
+        this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
     public Integer getPendingCount() {

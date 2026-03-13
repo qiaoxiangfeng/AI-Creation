@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <aside class="sidebar">
-      <div class="logo text-2xl font-bold text-primary">AI Creation</div>
+      <div class="logo text-2xl font-bold text-primary">故视无极</div>
       <nav class="nav">
         <router-link to="/dashboard" class="nav-link">仪表盘</router-link>
         <router-link to="/article-generation-configs" class="nav-link">文章生成配置</router-link>

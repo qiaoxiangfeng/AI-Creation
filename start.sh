@@ -135,13 +135,13 @@ start_backend() {
     print_info "启动后端服务..."
 
     # 检查服务是否已经正常运行
-    if curl -s http://localhost:8080/api/v3/api-docs >/dev/null 2>&1; then
+    if curl -s http://localhost:6666/api/v3/api-docs >/dev/null 2>&1; then
         print_success "后端服务已在正常运行，跳过启动"
         return 0
     fi
 
-    if ! check_port 8080 "后端服务"; then
-        print_warning "端口 8080 已被占用但服务未响应，可能有其他进程占用"
+    if ! check_port 6666 "后端服务"; then
+        print_warning "端口 6666 已被占用但服务未响应，可能有其他进程占用"
     fi
 
     # 清理 Maven 本地仓库缓存（可选）
@@ -201,7 +201,7 @@ start_backend() {
 
     print_info "等待后端服务启动..."
     for i in {1..60}; do
-        if curl -s http://localhost:8080/api/v3/api-docs >/dev/null 2>&1; then
+        if curl -s http://localhost:6666/api/v3/api-docs >/dev/null 2>&1; then
             print_success "后端服务启动成功 (PID: $BACKEND_PID)"
             return 0
         fi
@@ -294,8 +294,8 @@ open_browser() {
         print_info "   前台页面: http://localhost:5173 (或 5174-5177)"
     fi
 
-    print_info "   后端API:  http://localhost:8080/api"
-    print_info "   API文档:  http://localhost:8080/api/swagger-ui/index.html"
+    print_info "   后端API:  http://localhost:6666/api"
+    print_info "   API文档:  http://localhost:6666/api/swagger-ui/index.html"
     print_info ""
     print_info "🔑 默认账号: admin"
     print_info "🔑 默认密码: 123456"
@@ -305,8 +305,8 @@ open_browser() {
 show_status() {
     print_info "服务状态："
 
-    if curl -s http://localhost:8080/api/v3/api-docs >/dev/null 2>&1; then
-        print_success "✅ 后端服务: 运行中 (http://localhost:8080/api)"
+    if curl -s http://localhost:6666/api/v3/api-docs >/dev/null 2>&1; then
+        print_success "✅ 后端服务: 运行中 (http://localhost:6666/api)"
     else
         print_error "❌ 后端服务: 未运行"
     fi

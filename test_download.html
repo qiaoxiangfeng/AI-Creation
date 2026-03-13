@@ -11,7 +11,7 @@
     <script>
         async function testDownload() {
             try {
-                const response = await fetch('http://localhost:8080/api/articles/1/full-text');
+                const response = await fetch('http://localhost:6666/api/articles/1/full-text');
                 const result = await response.json();
 
                 if (result.code === '00000000') {

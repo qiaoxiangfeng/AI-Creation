@@ -31,6 +31,12 @@ public class ArticleChapter implements Serializable {
     /** 字数预估 */
     private Integer wordCountEstimate;
 
+    /** 生成本章章节信息时的 response_id，用于本章内容生成的上下文起点 */
+    private String responseIdPlan;
+
+    /** 生成本章正文内容时的 response_id，用于后续重新生成的上下文起点 */
+    private String responseIdContent;
+
     /** 章节语音链接地址 */
     private String chapterVoiceLink;
 
@@ -48,9 +54,6 @@ public class ArticleChapter implements Serializable {
 
     /** 生成状态（0-未开始，1-生成中，2-已完成，3-失败） */
     private Integer generationStatus;
-
-    /** 故事完结标识（true-故事已完结，false-故事未完结，可以继续续写） */
-    private Boolean storyComplete;
 
     public Long getId() {
         return id;
@@ -108,6 +111,22 @@ public class ArticleChapter implements Serializable {
         this.wordCountEstimate = wordCountEstimate;
     }
 
+    public String getResponseIdPlan() {
+        return responseIdPlan;
+    }
+
+    public void setResponseIdPlan(String responseIdPlan) {
+        this.responseIdPlan = responseIdPlan;
+    }
+
+    public String getResponseIdContent() {
+        return responseIdContent;
+    }
+
+    public void setResponseIdContent(String responseIdContent) {
+        this.responseIdContent = responseIdContent;
+    }
+
     public String getChapterVoiceLink() {
         return chapterVoiceLink;
     }
@@ -154,14 +173,6 @@ public class ArticleChapter implements Serializable {
 
     public void setGenerationStatus(Integer generationStatus) {
         this.generationStatus = generationStatus;
-    }
-
-    public Boolean getStoryComplete() {
-        return storyComplete;
-    }
-
-    public void setStoryComplete(Boolean storyComplete) {
-        this.storyComplete = storyComplete;
     }
 }
 

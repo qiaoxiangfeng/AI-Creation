@@ -67,9 +67,9 @@ public class ArticleTitleGenerationTask {
     /**
      * 定时任务：每月1号执行文章标题生成
      * 如果上次执行未完成，则丢弃本次调度
+     * 数据实时落表，无事务保护，确保服务重启时数据不丢失
      */
     @Scheduled(cron = "0 0 0 1 * ?") // 每月1号0点0分0秒执行
-    @Transactional(rollbackFor = Exception.class)
     public void generateArticleTitles() {
         TraceUtil.executeWithTraceId(() -> {
             executeArticleTitlesTask();

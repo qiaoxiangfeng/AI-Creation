@@ -43,7 +43,7 @@
                 <th>文章类型</th>
                 <th>待生成数量</th>
                 <th>创建时间</th>
-                <th>操作</th>
+                <th class="action-column">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -52,14 +52,27 @@
                 <td>{{ articleType.articleType }}</td>
                 <td>{{ articleType.pendingCount }}</td>
                 <td>{{ formatDate(articleType.createTime) }}</td>
-                <td>
+                <td class="action-column">
                   <div class="flex gap-2">
+                    <button @click="viewArticleType(articleType)" class="btn btn-outline btn-sm">
+                      查看
+                    </button>
                     <button @click="editArticleType(articleType)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
-                    <button @click="deleteArticleType(articleType)" class="btn btn-outline btn-sm text-error">
-                      删除
-                    </button>
+                    <div class="dropdown" :class="{ open: openDropdownId === articleType.id }">
+                      <button @click="toggleDropdown(articleType.id)" class="btn btn-outline btn-sm dropdown-toggle">
+                        更多操作
+                      </button>
+                      <div class="dropdown-menu">
+                        <button
+                          @click="handleDropdownAction(() => deleteArticleType(articleType), articleType.id)"
+                          class="dropdown-menu-item text-error"
+                        >
+                          删除
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -92,6 +105,43 @@
               下一页
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 查看模态框 -->
+    <div v-if="showViewModal" class="modal-overlay" @click="closeModals">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3 class="modal-title">文章类型详情</h3>
+          <button @click="closeModals" class="modal-close">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="info-section">
+            <div class="info-item">
+              <label class="info-label">ID:</label>
+              <span class="info-value">{{ viewData?.id || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <label class="info-label">文章类型:</label>
+              <span class="info-value">{{ viewData?.articleType || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <label class="info-label">待生成数量:</label>
+              <span class="info-value">{{ viewData?.pendingCount || 0 }}</span>
+            </div>
+            <div class="info-item">
+              <label class="info-label">创建时间:</label>
+              <span class="info-value">{{ viewData?.createTime ? formatDate(viewData.createTime) : '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button @click="closeModals" class="btn btn-primary">
+            关闭
+          </button>
         </div>
       </div>
     </div>
@@ -193,8 +243,13 @@ const total = ref(0);
 const totalPages = ref(0);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
+const showViewModal = ref(false);
 const showDeleteModal = ref(false);
+
+// 下拉菜单状态
+const openDropdownId = ref<number | null>(null);
 const deleteTarget = ref<ArticleTypeListRespDto | null>(null);
+const viewData = ref<ArticleTypeListRespDto | null>(null);
 const formData = ref({
   id: null as number | null,
   articleType: '',
@@ -244,6 +299,25 @@ const goToPage = (page: number) => {
   }
 };
 
+// 下拉菜单操作
+const toggleDropdown = (articleTypeId: number) => {
+  if (openDropdownId.value === articleTypeId) {
+    openDropdownId.value = null;
+  } else {
+    openDropdownId.value = articleTypeId;
+  }
+};
+
+const handleDropdownAction = (action: () => void, articleTypeId: number) => {
+  action();
+  openDropdownId.value = null; // 执行操作后关闭下拉菜单
+};
+
+const viewArticleType = (articleType: ArticleTypeListRespDto) => {
+  viewData.value = articleType;
+  showViewModal.value = true;
+};
+
 const editArticleType = (articleType: ArticleTypeListRespDto) => {
   formData.value = {
     id: articleType.id,
@@ -261,6 +335,7 @@ const deleteArticleType = (articleType: ArticleTypeListRespDto) => {
 const closeModals = () => {
   showCreateModal.value = false;
   showEditModal.value = false;
+  showViewModal.value = false;
   formData.value = {
     id: null,
     articleType: '',
@@ -346,6 +421,38 @@ const showError = (message: string) => {
 </script>
 
 <style scoped>
+/* 查看详情信息样式 */
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 100px;
+  margin-right: 1rem;
+}
+
+.info-value {
+  color: var(--text-secondary);
+  flex: 1;
+}
+</style>
+
+<style scoped>
 /* 复用Articles.vue的样式，这里只展示基本的样式结构 */
 .card {
   background: white;
@@ -389,66 +496,7 @@ const showError = (message: string) => {
   margin-bottom: 1.5rem;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
 
-.table th,
-.table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-  color: #374151;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5px;
-}
-
-.btn-primary {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #2563eb;
-}
-
-.btn-outline {
-  background-color: transparent;
-  border: 1px solid #d1d5db;
-  color: #374151;
-}
-
-.btn-outline:hover {
-  background-color: #f9fafb;
-}
-
-.btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .flex {
   display: flex;
@@ -458,9 +506,6 @@ const showError = (message: string) => {
   gap: 0.5rem;
 }
 
-.text-error {
-  color: #dc2626;
-}
 
 .loading-container {
   display: flex;
@@ -540,6 +585,8 @@ const showError = (message: string) => {
 
 .modal-small {
   max-width: 400px;
+  background: white;
+  border-radius: 8px;
 }
 
 .modal-header {
@@ -613,12 +660,4 @@ const showError = (message: string) => {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.btn-error {
-  background-color: #dc2626;
-  color: white;
-}
-
-.btn-error:hover {
-  background-color: #b91c1c;
-}
 </style>

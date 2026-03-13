@@ -38,6 +38,15 @@ public interface IArticleService {
     Long createArticle(ArticleCreateReqDto request);
 
     /**
+     * 创建文章并设置 response_id（用于 Responses API 上下文关联）
+     *
+     * @param request 创建请求
+     * @param responseId Responses API 的 response_id，可为空
+     * @return 创建后的文章ID
+     */
+    Long createArticleWithResponseId(ArticleCreateReqDto request, String responseId);
+
+    /**
      * 更新文章信息
      * 
      * @param request 更新请求

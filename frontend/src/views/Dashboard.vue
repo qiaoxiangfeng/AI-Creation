@@ -8,26 +8,14 @@
     <!-- 统计卡片 -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon pending">
+        <div class="stat-icon in-progress">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <div class="stat-content">
-          <div class="stat-value">{{ stats.pending }}</div>
-          <div class="stat-label">待生成</div>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon generating">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ stats.generating }}</div>
-          <div class="stat-label">生成中</div>
+          <div class="stat-value">{{ stats.inProgress }}</div>
+          <div class="stat-label">进行中</div>
         </div>
       </div>
 
@@ -39,19 +27,19 @@
         </div>
         <div class="stat-content">
           <div class="stat-value">{{ stats.completed }}</div>
-          <div class="stat-label">已完成</div>
+          <div class="stat-label">已完结</div>
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon failed">
+        <div class="stat-icon total">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
           </svg>
         </div>
         <div class="stat-content">
-          <div class="stat-value">{{ stats.failed }}</div>
-          <div class="stat-label">生成失败</div>
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-label">文章总数</div>
         </div>
       </div>
     </div>
@@ -74,27 +62,14 @@
         <div v-for="article in sortedArticles" :key="article.id" class="article-card">
           <div class="article-header">
             <h3 class="article-title">{{ article.articleName }}</h3>
-            <div class="status-badge" :class="getStatusClass(article.generationStatus)">
-              {{ getStatusText(article.generationStatus) }}
+            <div class="status-badge" :class="getStatusClass(article)">
+              {{ getStatusText(article) }}
             </div>
           </div>
 
           <div class="article-content">
             <p class="article-outline">{{ article.articleOutline || '暂无简介' }}</p>
 
-            <div class="progress-section" v-if="article.generationStatus === 1">
-              <div class="progress-info">
-                <span>生成进度</span>
-                <span>{{ article.progressPercent || 0 }}%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: (article.progressPercent || 0) + '%' }"></div>
-              </div>
-              <div class="progress-details">
-                <span>章节: {{ article.completedChapters || 0 }}/{{ article.totalChapters || 0 }}</span>
-                <span>字数: {{ article.currentWordCount || 0 }}/{{ article.totalWordCountEstimate || 0 }}</span>
-              </div>
-            </div>
 
             <div class="article-stats">
               <div class="stat-item">
@@ -115,27 +90,6 @@
           <div class="article-actions">
             <button @click="viewArticle(article)" class="btn btn-outline btn-sm">
               查看详情
-            </button>
-            <button
-              v-if="article.generationStatus === 0 && article.totalWordCountEstimate && article.chapterWordCountEstimate"
-              @click="generateContent(article)"
-              class="btn btn-primary btn-sm"
-            >
-              开始生成
-            </button>
-            <button
-              v-if="article.generationStatus !== 1"
-              @click="generateChapters(article)"
-              class="btn btn-secondary btn-sm"
-            >
-              生成章节
-            </button>
-            <button
-              v-if="article.generationStatus !== 1"
-              @click="generateChapterContent(article)"
-              class="btn btn-secondary btn-sm"
-            >
-              生成章节内容
             </button>
           </div>
         </div>
@@ -169,12 +123,8 @@ interface ArticleRespDto {
   articleOutline: string;
   totalWordCountEstimate?: number;
   chapterWordCountEstimate?: number;
-  generationStatus: number;
+  storyComplete?: boolean;
   createTime: string;
-  progressPercent?: number;
-  totalChapters?: number;
-  completedChapters?: number;
-  currentWordCount?: number;
 }
 
 const router = useRouter();
@@ -183,24 +133,18 @@ const articles = ref<ArticleRespDto[]>([]);
 
 // 统计数据
 const stats = computed(() => {
-  const pending = articles.value.filter(a => a.generationStatus === 0).length;
-  const generating = articles.value.filter(a => a.generationStatus === 1).length;
-  const completed = articles.value.filter(a => a.generationStatus === 2).length;
-  const failed = articles.value.filter(a => a.generationStatus === 3).length;
+  const completed = articles.value.filter(a => a.storyComplete).length;
+  const inProgress = articles.value.filter(a => !a.storyComplete).length;
 
-  return { pending, generating, completed, failed };
+  return { completed, inProgress, total: articles.value.length };
 });
 
 // 排序后的文章列表（未生成的排在前面）
 const sortedArticles = computed(() => {
   return [...articles.value].sort((a, b) => {
-    // 未生成的排在前面
-    if (a.generationStatus === 0 && b.generationStatus !== 0) return -1;
-    if (a.generationStatus !== 0 && b.generationStatus === 0) return 1;
-
-    // 生成中的排在其次
-    if (a.generationStatus === 1 && b.generationStatus > 1) return -1;
-    if (a.generationStatus > 1 && b.generationStatus === 1) return 1;
+    // 未完结的排在前面
+    if (!a.storyComplete && b.storyComplete) return -1;
+    if (a.storyComplete && !b.storyComplete) return 1;
 
     // 按创建时间倒序
     return new Date(b.createTime).getTime() - new Date(a.createTime).getTime();
@@ -218,31 +162,7 @@ const loadArticles = async () => {
     if (response.code === '00000000') {
       const articleList = response.data.list;
 
-      // 为每个文章获取进度信息
-      const articlesWithProgress = await Promise.all(
-        articleList.map(async (article: ArticleRespDto) => {
-          if (article.generationStatus === 1) { // 只为生成中的文章获取进度
-            try {
-              const progressResp = await http.get<BaseResponse<any>>(`/api/articles/${article.id}/progress`);
-              if (progressResp.data.code === '00000000') {
-                const progress = progressResp.data.data;
-                return {
-                  ...article,
-                  progressPercent: progress.progressPercent,
-                  totalChapters: progress.totalChapters,
-                  completedChapters: progress.completedChapters,
-                  currentWordCount: progress.currentWordCount
-                };
-              }
-            } catch (error) {
-              console.warn(`获取文章${article.id}进度失败:`, error);
-            }
-          }
-          return article;
-        })
-      );
-
-      articles.value = articlesWithProgress;
+      articles.value = articleList;
     }
   } catch (error) {
     console.error('加载文章列表失败:', error);
@@ -252,82 +172,25 @@ const loadArticles = async () => {
 };
 
 // 获取状态文本
-const getStatusText = (status: number): string => {
-  switch (status) {
-    case 0: return '未开始';
-    case 1: return '生成中';
-    case 2: return '已完成';
-    case 3: return '生成失败';
-    default: return '未知状态';
+const getStatusText = (article: ArticleRespDto): string => {
+  if (article.storyComplete) {
+    return '已完结';
   }
+  return '进行中';
 };
 
 // 获取状态样式类
-const getStatusClass = (status: number): string => {
-  switch (status) {
-    case 0: return 'status-pending';
-    case 1: return 'status-generating';
-    case 2: return 'status-completed';
-    case 3: return 'status-failed';
-    default: return 'status-unknown';
+const getStatusClass = (article: ArticleRespDto): string => {
+  if (article.storyComplete) {
+    return 'status-completed';
   }
+  return 'status-pending';
 };
 
 
 // 查看文章详情
 const viewArticle = (article: ArticleRespDto) => {
   router.push(`/articles/${article.id}`);
-};
-
-// 触发内容生成
-const generateContent = async (article: ArticleRespDto) => {
-  try {
-    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-content`);
-    const response = resp.data;
-    if (response.code === '00000000') {
-      window.showNotification('内容生成任务已启动', 'success');
-      loadArticles(); // 重新加载列表
-    } else {
-      window.showNotification('启动失败：' + response.msg, 'error');
-    }
-  } catch (error) {
-    console.error('启动内容生成失败:', error);
-    window.showNotification('启动失败，请稍后重试', 'error');
-  }
-};
-
-// 触发章节生成
-const generateChapters = async (article: ArticleRespDto) => {
-  try {
-    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-chapters`);
-    const response = resp.data;
-    if (response.code === '00000000') {
-      window.showNotification('章节生成任务已启动', 'success');
-      loadArticles(); // 重新加载列表
-    } else {
-      window.showNotification('启动失败：' + response.msg, 'error');
-    }
-  } catch (error) {
-    console.error('启动章节生成失败:', error);
-    window.showNotification('启动失败，请稍后重试', 'error');
-  }
-};
-
-// 触发章节内容生成
-const generateChapterContent = async (article: ArticleRespDto) => {
-  try {
-    const resp = await http.post<BaseResponse<boolean>>(`/api/articles/${article.id}/generate-chapter-content`);
-    const response = resp.data;
-    if (response.code === '00000000') {
-      window.showNotification('章节内容生成任务已启动', 'success');
-      loadArticles(); // 重新加载列表
-    } else {
-      window.showNotification('启动失败：' + response.msg, 'error');
-    }
-  } catch (error) {
-    console.error('启动章节内容生成失败:', error);
-    window.showNotification('启动失败，请稍后重试', 'error');
-  }
 };
 
 
@@ -387,10 +250,9 @@ onMounted(() => {
   color: white;
 }
 
-.stat-icon.pending { background-color: #f59e0b; }
-.stat-icon.generating { background-color: #3b82f6; }
+.stat-icon.in-progress { background-color: #f59e0b; }
 .stat-icon.completed { background-color: #10b981; }
-.stat-icon.failed { background-color: #ef4444; }
+.stat-icon.total { background-color: #6b7280; }
 
 .stat-content {
   flex: 1;

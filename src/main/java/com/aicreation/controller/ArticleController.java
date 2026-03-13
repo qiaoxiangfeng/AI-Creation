@@ -43,6 +43,20 @@ public class ArticleController {
         return BaseResponse.success(result);
     }
 
+    @Operation(summary = "创建文章", description = "创建新文章")
+    @PostMapping
+    public BaseResponse<Long> createArticle(@Valid @RequestBody ArticleCreateReqDto request) {
+        Long articleId = articleService.createArticle(request);
+        return BaseResponse.success(articleId);
+    }
+
+    @Operation(summary = "更新文章", description = "更新文章信息")
+    @PutMapping
+    public BaseResponse<Boolean> updateArticle(@Valid @RequestBody ArticleUpdateReqDto request) {
+        Boolean result = articleService.updateArticle(request);
+        return BaseResponse.success(result);
+    }
+
     @Operation(summary = "根据ID查询文章", description = "根据文章ID查询文章详细信息")
     @GetMapping("/{articleId}")
     public BaseResponse<ArticleRespDto> getArticleById(
@@ -111,6 +125,23 @@ public class ArticleController {
         return BaseResponse.success(result);
     }
 
+    @Operation(summary = "删除文章", description = "删除指定文章及其关联章节（级联软删除）")
+    @DeleteMapping
+    public BaseResponse<Boolean> deleteArticle(@Valid @RequestBody ArticleDeleteReqDto request) {
+        Boolean result = articleService.deleteArticle(request);
+        return BaseResponse.success(result);
+    }
+
+    @Operation(summary = "删除文章（按ID）", description = "按文章ID删除文章及其关联章节（级联软删除）")
+    @DeleteMapping("/{articleId}")
+    public BaseResponse<Boolean> deleteArticleById(
+            @Parameter(description = "文章ID") @PathVariable Long articleId) {
+        ArticleDeleteReqDto request = new ArticleDeleteReqDto();
+        request.setArticleId(articleId);
+        Boolean result = articleService.deleteArticle(request);
+        return BaseResponse.success(result);
+    }
+
     @Operation(summary = "生成文章章节", description = "为指定文章生成章节信息")
     @PostMapping("/{articleId}/generate-chapters")
     public BaseResponse<Boolean> generateArticleChapters(
@@ -137,6 +168,20 @@ public class ArticleController {
             return BaseResponse.success(true);
         } catch (Exception e) {
             return BaseResponse.error("67999999", "生成章节内容失败: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "重新生成单个章节内容", description = "根据用户修改意见重新生成指定章节内容")
+    @PostMapping("/{articleId}/generate-chapter-content/{chapterId}/regenerate")
+    public BaseResponse<Boolean> regenerateChapterContent(
+            @Parameter(description = "文章ID") @PathVariable Long articleId,
+            @Parameter(description = "章节ID") @PathVariable Long chapterId,
+            @Parameter(description = "章节重新生成请求") @Valid @RequestBody ChapterRegenerateReqDto request) {
+        try {
+            articleContentGenerator.regenerateChapterContent(chapterId, request.getInstruction());
+            return BaseResponse.success(true);
+        } catch (Exception e) {
+            return BaseResponse.error("67999999", "重新生成章节内容失败: " + e.getMessage());
         }
     }
 

@@ -26,9 +26,6 @@ public class ArticleProgressDto implements Serializable {
     @Schema(description = "文章名称")
     private String articleName;
 
-    @Schema(description = "生成状态：0-未开始，1-生成中，2-已完成，3-失败")
-    private Integer generationStatus;
-
     @Schema(description = "总章节数")
     private Integer totalChapters;
 

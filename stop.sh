@@ -21,8 +21,8 @@ print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 stop_backend() {
     print_info "停止后端服务..."
     
-    # 查找运行在8080端口的进程
-    BACKEND_PID=$(lsof -ti:8080 2>/dev/null || echo "")
+    # 查找运行在6666端口的进程
+    BACKEND_PID=$(lsof -ti:6666 2>/dev/null || echo "")
     
     if [ ! -z "$BACKEND_PID" ]; then
         print_info "找到后端进程 (PID: $BACKEND_PID)，正在停止..."
@@ -30,7 +30,7 @@ stop_backend() {
         
         # 等待进程结束
         for i in {1..10}; do
-            if ! lsof -ti:8080 >/dev/null 2>&1; then
+            if ! lsof -ti:6666 >/dev/null 2>&1; then
                 print_success "后端服务已停止"
                 return 0
             fi
@@ -112,7 +112,7 @@ show_status() {
     print_info "服务状态检查："
     
     # 检查后端
-    if lsof -ti:8080 >/dev/null 2>&1; then
+    if lsof -ti:6666 >/dev/null 2>&1; then
         print_error "❌ 后端服务: 仍在运行"
     else
         print_success "✅ 后端服务: 已停止"

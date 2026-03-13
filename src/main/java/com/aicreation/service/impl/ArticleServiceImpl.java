@@ -9,10 +9,7 @@ import com.aicreation.entity.dto.*;
 import com.aicreation.entity.dto.base.PageRespDto;
 import com.aicreation.entity.po.Article;
 import com.aicreation.entity.po.ArticleChapter;
-import com.aicreation.entity.po.ArticleGenerationConfig;
 import com.aicreation.entity.po.Plot;
-import java.util.List;
-import java.util.ArrayList;
 import com.aicreation.mapper.ArticleMapper;
 import com.aicreation.mapper.ArticleChapterMapper;
 import com.aicreation.mapper.ArticleGenerationConfigMapper;
@@ -93,6 +90,7 @@ public class ArticleServiceImpl implements IArticleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createArticle(ArticleCreateReqDto request) {
         if (Objects.isNull(request) || !StringUtils.hasText(request.getArticleName())) {
             log.warn("创建文章失败：请求参数无效");
@@ -117,6 +115,40 @@ public class ArticleServiceImpl implements IArticleService {
         Article article = ArticleConverter.INSTANCE.toArticle(articleBo);
 
         // 保存到数据库
+        int result = articleMapper.insert(article);
+        if (result <= 0) {
+            log.error("创建文章失败：数据库插入失败");
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR);
+        }
+
+        return article.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createArticleWithResponseId(ArticleCreateReqDto request, String responseId) {
+        if (Objects.isNull(request) || !StringUtils.hasText(request.getArticleName())) {
+            log.warn("创建文章失败：请求参数无效");
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+        }
+
+        Article existingArticle = articleMapper.selectByArticleName(request.getArticleName());
+        if (Objects.nonNull(existingArticle)) {
+            log.warn("创建文章失败：文章名称已存在，articleName={}", request.getArticleName());
+            throw new BusinessException(ErrorCodeEnum.DUPLICATE_DATA);
+        }
+
+        ArticleBo articleBo = ArticleConverter.INSTANCE.toArticleBo(request);
+        articleBo.setResState(1);
+        articleBo.setPublishStatus(ArticleStatusEnum.UNPUBLISHED.getCode());
+        articleBo.setCreateTime(LocalDateTime.now());
+        articleBo.setUpdateTime(LocalDateTime.now());
+
+        Article article = ArticleConverter.INSTANCE.toArticle(articleBo);
+        if (StringUtils.hasText(responseId)) {
+            article.setResponseId(responseId.trim());
+        }
+
         int result = articleMapper.insert(article);
         if (result <= 0) {
             log.error("创建文章失败：数据库插入失败");
@@ -269,8 +301,6 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setPublishStatus(article.getPublishStatus());
         dto.setTotalWordCountEstimate(article.getTotalWordCountEstimate());
         dto.setChapterWordCountEstimate(article.getChapterWordCountEstimate());
-        // 处理generationStatus为null的情况，默认为0（未开始）
-        dto.setGenerationStatus(article.getGenerationStatus() != null ? article.getGenerationStatus() : 0);
         dto.setCreateTime(article.getCreateTime());
         dto.setUpdateTime(article.getUpdateTime());
         return dto;
@@ -436,11 +466,6 @@ public class ArticleServiceImpl implements IArticleService {
             fullText.append("【暂无章节内容】\n");
         }
 
-        // 添加生成信息
-        fullText.append("\n---\n");
-        fullText.append("本文由AI生成，仅供娱乐。\n");
-        fullText.append("生成时间：").append(java.time.LocalDateTime.now().toString()).append("\n");
-
         return fullText.toString();
     }
 
@@ -464,13 +489,8 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "请先设置文章的总字数预估和每章节字数预估");
         }
 
-        // 更新文章状态为生成中
-        if (article.getGenerationStatus() != 1) {
-            article.setGenerationStatus(1); // 1-生成中
-            article.setUpdateTime(LocalDateTime.now());
-            articleMapper.updateByPrimaryKey(article);
-            log.info("文章[{}]状态已更新为生成中", article.getArticleName());
-        }
+        // 记录开始生成内容
+        log.info("开始为文章[{}]生成章节内容", article.getArticleName());
 
         // 检查是否有章节需要生成内容
         List<ArticleChapter> chaptersWithoutContent = articleChapterMapper.selectChaptersWithoutContentByArticleId(articleId);
@@ -541,19 +561,10 @@ public class ArticleServiceImpl implements IArticleService {
         // 计算进度百分比
         int progressPercent = totalChapters > 0 ? (completedChapters * 100) / totalChapters : 0;
 
-        // 如果所有章节都有内容，标记为已完成
-        Integer currentStatus = article.getGenerationStatus() != null ? article.getGenerationStatus() : 0;
-        if (progressPercent == 100 && currentStatus != 2) {
-            article.setGenerationStatus(2); // 已完成
-            article.setUpdateTime(LocalDateTime.now());
-            articleMapper.updateByPrimaryKey(article);
-        }
-
         // 构建进度DTO
         ArticleProgressDto progress = new ArticleProgressDto();
         progress.setArticleId(article.getId());
         progress.setArticleName(article.getArticleName());
-        progress.setGenerationStatus(article.getGenerationStatus());
         progress.setTotalChapters(totalChapters);
         progress.setCompletedChapters(completedChapters);
         progress.setProgressPercent(progressPercent);
@@ -593,12 +604,7 @@ public class ArticleServiceImpl implements IArticleService {
                 throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
             }
 
-            // 检查文章状态
-            if (article.getGenerationStatus() == 1) {
-                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章正在生成中，请等待完成后再操作");
-            }
-
-            // 异步调用章节生成任务
+            // 同步调用章节生成任务（必须同步，因为需要维护response_id上下文）
             articleChapterGenerator.generateChaptersForArticle(articleId);
 
             log.info("文章{}章节生成任务已启动", articleId);
@@ -611,7 +617,7 @@ public class ArticleServiceImpl implements IArticleService {
 
     @Override
     public Boolean generateArticleChapterContent(Long articleId) {
-        log.info("开始为文章{}生成章节内容", articleId);
+        log.info("[CHAPTER_CONTENT] 开始为文章{}生成章节内容", articleId);
         try {
             // 获取文章信息
             Article article = articleMapper.selectByPrimaryKey(articleId);
@@ -619,24 +625,32 @@ public class ArticleServiceImpl implements IArticleService {
                 throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
             }
 
-            // 检查文章状态
-            if (article.getGenerationStatus() == 1) {
-                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章正在生成中，请等待完成后再操作");
+            // 仅当章节生成已全部完成（故事完结）时，才允许触发章节内容生成
+            if (!Boolean.TRUE.equals(article.getStoryComplete())) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "章节尚未全部生成完成（故事未完结），请先完成章节生成后再生成章节内容");
+            }
+
+            // 获取文章中没有内容的章节
+            List<ArticleChapter> chaptersWithoutContent = articleChapterMapper.selectChaptersWithoutContentByArticleId(articleId);
+
+            if (chaptersWithoutContent.isEmpty()) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章的所有章节内容都已生成完成，没有需要生成的章节");
             }
 
             // 获取文章的所有章节
-            List<ArticleChapter> chapters = articleChapterMapper.selectByArticleId(articleId);
+            List<ArticleChapter> allChapters = articleChapterMapper.selectByArticleId(articleId);
             // 按章节号排序
-            chapters.sort((a, b) -> Integer.compare(a.getChapterNo(), b.getChapterNo()));
+            allChapters.sort((a, b) -> Integer.compare(a.getChapterNo(), b.getChapterNo()));
 
-            if (chapters.isEmpty()) {
+            if (allChapters.isEmpty()) {
                 throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章没有章节信息，请先生成章节");
             }
 
             // 异步调用内容生成任务
-            articleContentGenerationTask.generateContentsForArticle(article, chapters);
+            articleContentGenerationTask.generateContentsForArticle(article, allChapters);
 
-            log.info("文章{}章节内容生成任务已启动", articleId);
+            log.info("文章{}章节内容生成任务已启动，将按顺序生成{}个章节的内容",
+                    articleId, chaptersWithoutContent.size());
             return true;
         } catch (Exception e) {
             log.error("启动文章{}章节内容生成失败：{}", articleId, e.getMessage(), e);

@@ -48,7 +48,7 @@
                 <th>手机号</th>
                 <th>状态</th>
                 <th>创建时间</th>
-                <th>操作</th>
+                <th class="action-column">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -63,17 +63,23 @@
                   </span>
                 </td>
                 <td>{{ formatDate(user.createTime) }}</td>
-                <td>
+                <td class="action-column">
                   <div class="flex gap-2">
                     <button @click="editUser(user)" class="btn btn-outline btn-sm">
                       编辑
                     </button>
-                    <button @click="initPassword(user)" class="btn btn-outline btn-sm btn-warning">
-                      初始化密码
-                    </button>
-                    <button @click="deleteUser(user)" class="btn btn-outline btn-sm text-error">
-                      删除
-                    </button>
+                    <select @change="handleActionSelect($event, user)" class="action-select">
+                      <option value="">更多操作</option>
+                      <option :value="'initPassword_' + user.id">
+                        初始化密码
+                      </option>
+                      <option
+                        :value="'delete_' + user.id"
+                        class="text-error"
+                      >
+                        删除
+                      </option>
+                    </select>
                   </div>
                 </td>
               </tr>
@@ -249,6 +255,7 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showPasswordModal = ref(false);
 
+
 const newUser = ref({ 
   userName: '', 
   userEmail: '', 
@@ -300,6 +307,26 @@ const handleSearch = () => {
   loadUsers();
 };
 
+// 下拉列表操作
+const handleActionSelect = async (event: Event, user: UserRespDto) => {
+  const target = event.target as HTMLSelectElement;
+  const value = target.value;
+
+  if (!value) return; // 如果选择的是"更多操作"，不做任何操作
+
+  const [action, userIdStr] = value.split('_');
+  const userId = parseInt(userIdStr);
+
+  if (action === 'initPassword') {
+    initPassword(user);
+  } else if (action === 'delete') {
+    deleteUser(user);
+  }
+
+  // 重置选择
+  target.value = '';
+};
+
 const clearSearch = () => {
   searchKeyword.value = '';
   currentPage.value = 1;
@@ -318,12 +345,25 @@ const handlePageSizeChange = () => {
 
 const createUser = async () => {
   try {
-    await http.post('/api/users', newUser.value);
+    const payload: any = {
+      userName: newUser.value.userName?.trim(),
+      userPassword: newUser.value.userPassword
+    };
+    if (newUser.value.userEmail && newUser.value.userEmail.trim()) {
+      payload.userEmail = newUser.value.userEmail.trim();
+    }
+    if (newUser.value.userPhone && newUser.value.userPhone.trim()) {
+      payload.userPhone = newUser.value.userPhone.trim();
+    }
+
+    await http.post('/api/users', payload);
     showCreateModal.value = false;
     newUser.value = { userName: '', userEmail: '', userPhone: '', userPassword: '' };
     loadUsers();
   } catch (error) {
     console.error('创建用户失败:', error);
+    const errorMessage = (error as any)?.message || '创建用户失败，请稍后重试';
+    window.showNotification(errorMessage, 'error');
   }
 };
 
@@ -354,6 +394,8 @@ const updateUser = async () => {
     loadUsers();
   } catch (error) {
     console.error('更新用户失败:', error);
+    const errorMessage = (error as any)?.message || '更新用户失败，请稍后重试';
+    window.showNotification(errorMessage, 'error');
   }
 };
 
@@ -364,6 +406,8 @@ const deleteUser = async (user: UserRespDto) => {
     loadUsers();
   } catch (error) {
     console.error('删除用户失败:', error);
+    const errorMessage = (error as any)?.message || '删除用户失败，请稍后重试';
+    window.showNotification(errorMessage, 'error');
   }
 };
 
@@ -420,6 +464,21 @@ const getStatusBadgeClass = (status: number) => {
 </script>
 
 <style scoped>
+.card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -458,6 +517,12 @@ const getStatusBadgeClass = (status: number) => {
   gap: 0.5rem;
 }
 
+
+
+.action-column {
+  width: 120px;
+}
+
 .table-container {
   overflow-x: auto;
 }
@@ -483,6 +548,35 @@ const getStatusBadgeClass = (status: number) => {
 
 .space-y-4 > * + * {
   margin-top: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: white;
+  color: var(--text);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .loading-container {
@@ -528,7 +622,7 @@ const getStatusBadgeClass = (status: number) => {
   align-items: center;
   margin-top: 1rem;
   padding: 0.75rem 1rem;
-  background-color: var(--card);
+  background-color: var(--surface);
   border-radius: 0.5rem;
   border: 1px solid var(--border);
 }
@@ -548,7 +642,7 @@ const getStatusBadgeClass = (status: number) => {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
-  background-color: var(--card);
+  background-color: white;
   color: var(--text);
   font-size: 0.875rem;
   cursor: pointer;
@@ -576,7 +670,7 @@ const getStatusBadgeClass = (status: number) => {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
-  background-color: var(--card);
+  background-color: white;
   color: var(--text);
   font-size: 0.875rem;
   cursor: pointer;
@@ -585,6 +679,115 @@ const getStatusBadgeClass = (status: number) => {
 
 .page-size-select:hover {
   border-color: var(--primary);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background-color: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success-light);
+}
+
+.badge-warning {
+  background-color: var(--warning-light);
+  color: var(--warning);
+  border: 1px solid var(--warning-light);
+}
+
+/* 下拉菜单样式 */
+.dropdown {
+  position: relative;
+}
+
+.dropdown.open .dropdown-menu {
+  display: block;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  display: none;
+  min-width: 120px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 0.25rem;
+}
+
+.dropdown-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu-item:hover {
+  background-color: var(--surface);
+}
+
+.dropdown-menu-item.text-error {
+  color: var(--error);
+}
+
+.dropdown-menu-item.text-error:hover {
+  background-color: var(--error-light);
+  color: var(--error);
+}
+
+.flex {
+  display: flex;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.text-text {
+  color: var(--text);
+}
+
+.text-text-secondary {
+  color: var(--text-secondary);
 }
 
 @keyframes spin {

@@ -33,6 +33,13 @@ public interface DictionaryMapper {
     List<Dictionary> selectByDictKey(@Param("dictKey") String dictKey);
 
     /**
+     * 查询所有字典
+     *
+     * @return 字典列表
+     */
+    List<Dictionary> selectAll();
+
+    /**
      * 查询字典列表
      *
      * @param dictKey 字典键（可选）

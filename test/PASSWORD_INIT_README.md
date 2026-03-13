@@ -36,28 +36,28 @@ POST /users/init-password
 
 ### 1. 初始化所有用户密码为默认值"123456"
 ```bash
-curl -X POST "http://localhost:8080/users/init-password" \
+curl -X POST "http://localhost:6666/users/init-password" \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
 
 ### 2. 初始化所有用户密码为自定义值
 ```bash
-curl -X POST "http://localhost:8080/users/init-password" \
+curl -X POST "http://localhost:6666/users/init-password" \
   -H "Content-Type: application/json" \
   -d '{"newPassword": "888888"}'
 ```
 
 ### 3. 初始化指定用户密码为默认值"123456"
 ```bash
-curl -X POST "http://localhost:8080/users/init-password" \
+curl -X POST "http://localhost:6666/users/init-password" \
   -H "Content-Type: application/json" \
   -d '{"userIds": [1, 2, 3]}'
 ```
 
 ### 4. 初始化指定用户密码为自定义值
 ```bash
-curl -X POST "http://localhost:8080/users/init-password" \
+curl -X POST "http://localhost:6666/users/init-password" \
   -H "Content-Type: application/json" \
   -d '{"userIds": [1, 2, 3], "newPassword": "666666"}'
 ```
@@ -67,11 +67,11 @@ curl -X POST "http://localhost:8080/users/init-password" \
 项目提供了测试脚本 `test-password-init.sh` 来验证功能：
 
 ```bash
-# 使用默认URL (localhost:8080)
+# 使用默认URL (localhost:6666)
 ./test/test-password-init.sh
 
 # 使用自定义URL
-./test/test-password-init.sh http://your-server:8080
+./test/test-password-init.sh http://your-server:6666
 ```
 
 ## 安全特性

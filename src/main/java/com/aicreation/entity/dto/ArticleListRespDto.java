@@ -56,8 +56,8 @@ public class ArticleListRespDto extends BaseDto {
     @Schema(description = "每章节字数预估")
     private Integer chapterWordCountEstimate;
 
-    @Schema(description = "生成状态：0-未开始，1-生成中，2-已完成，3-失败")
-    private Integer generationStatus;
+    @Schema(description = "章节完结标识：true-章节已完结，false-章节未完结")
+    private Boolean storyComplete;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
@@ -171,12 +171,13 @@ public class ArticleListRespDto extends BaseDto {
         this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
-    public Integer getGenerationStatus() {
-        return generationStatus;
+
+    public Boolean getStoryComplete() {
+        return storyComplete != null ? storyComplete : false;
     }
 
-    public void setGenerationStatus(Integer generationStatus) {
-        this.generationStatus = generationStatus;
+    public void setStoryComplete(Boolean storyComplete) {
+        this.storyComplete = storyComplete;
     }
 
     public LocalDateTime getCreateTime() {

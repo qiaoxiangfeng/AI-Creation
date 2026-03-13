@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -105,6 +106,16 @@ public class GlobalExceptionHandler {
     public BaseResponse<Void> handleException(Exception e) {
         log.error("未知异常", e);
         return BaseResponse.error(ErrorCodeEnum.SYSTEM_ERROR.getCode(), "系统异常: " + e.getMessage());
+    }
+
+    /**
+     * 处理静态资源未找到异常（例如错误的 Swagger 资源路径）
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<BaseResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.warn("静态资源未找到: {}", e.getMessage(), e);
+        BaseResponse<Void> response = BaseResponse.error("4040", "资源不存在");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     /**
