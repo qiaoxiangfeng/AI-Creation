@@ -99,6 +99,9 @@
 
     <!-- Package level -->
     <logger name="com.aicreation" level="DEBUG" additivity="true"/>
+    <!-- Query/SQL related -->
+    <logger name="com.aicreation.mapper" level="DEBUG" additivity="true"/>
+    <logger name="org.mybatis" level="DEBUG" additivity="true"/>
 </configuration>
 
 

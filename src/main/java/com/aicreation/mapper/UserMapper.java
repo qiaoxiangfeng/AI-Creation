@@ -26,6 +26,11 @@ public interface UserMapper {
     User selectByPrimaryKey(@Param("id") Long id);
 
     /**
+     * 行锁查询（用于会员顺延等更新）
+     */
+    User selectByPrimaryKeyForUpdate(@Param("id") Long id);
+
+    /**
      * 根据用户名查询用户
      * 
      * @param userName 用户名

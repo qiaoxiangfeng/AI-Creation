@@ -126,9 +126,34 @@ public enum ErrorCodeEnum {
     USER_ALREADY_EXISTS("CM05", "用户已存在"),
     
     /**
-     * 无权限访问
+     * 无权限访问（未细分场景时的通用提示）
      */
     NO_PERMISSION("CM06", "无权限访问"),
+
+    /**
+     * 非管理员无法修改或删除全局字典
+     */
+    GLOBAL_DICTIONARY_WRITE_DENIED("CM11", "非管理员用户无法修改或删除全局字典"),
+
+    /**
+     * 非资源创建者（文章 / 生成配置 / 个人字典等）
+     */
+    RESOURCE_NOT_OWNED("CM12", "无权操作他人创建的内容"),
+
+    /**
+     * 个人字典仅创建人可读
+     */
+    DICTIONARY_READ_DENIED("CM13", "无权查看他人创建的字典"),
+
+    /**
+     * 需要登录
+     */
+    LOGIN_REQUIRED("CM14", "请先登录后再操作"),
+
+    /**
+     * 仅管理员可操作
+     */
+    ADMIN_ONLY("CM15", "仅管理员可执行此操作"),
     
     /**
      * Token无效
@@ -148,7 +173,52 @@ public enum ErrorCodeEnum {
     /**
      * 数据重复
      */
-    DUPLICATE_DATA("CM10", "数据重复");
+    DUPLICATE_DATA("CM10", "数据重复"),
+
+    /**
+     * 余额不足
+     */
+    BALANCE_INSUFFICIENT("CM16", "余额不足，无法使用AI功能"),
+
+    /**
+     * 充值订单不存在
+     */
+    RECHARGE_ORDER_NOT_FOUND("CM17", "充值订单不存在"),
+
+    /**
+     * 支付回调验签失败
+     */
+    PAY_CALLBACK_INVALID("CM18", "支付回调验签失败"),
+
+    /**
+     * 支付金额不匹配
+     */
+    PAY_AMOUNT_MISMATCH("CM19", "支付金额不匹配"),
+
+    /**
+     * 计费预占失败
+     */
+    BILLING_PREAUTH_FAILED("CM20", "计费预占失败"),
+
+    /**
+     * 计费结算失败
+     */
+    BILLING_SETTLEMENT_FAILED("CM21", "计费结算失败"),
+
+    /**
+     * 需要开通会员才可使用 AI
+     */
+    MEMBERSHIP_REQUIRED("CM22", "请先开通会员后使用 AI 功能"),
+
+    /**
+     * 会员已过期
+     */
+    MEMBERSHIP_EXPIRED("CM23", "会员已过期，请续费后使用 AI 功能"),
+
+    /**
+     * 会员定价配置不存在或已下架
+     */
+    MEMBERSHIP_PRICING_NOT_FOUND("CM24", "会员套餐不存在或已下架");
     
     private final String code;
     private final String message;

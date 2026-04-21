@@ -67,6 +67,11 @@ public class ArticleGenerationConfigBo {
     private Integer resState;
 
     /**
+     * 创建人用户ID
+     */
+    private Long createUserId;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -163,6 +168,14 @@ public class ArticleGenerationConfigBo {
 
     public void setResState(Integer resState) {
         this.resState = resState;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
     }
 
     public LocalDateTime getCreateTime() {

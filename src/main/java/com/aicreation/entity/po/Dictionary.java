@@ -40,6 +40,11 @@ public class Dictionary implements Serializable {
     private Integer resState;
 
     /**
+     * 创建人用户ID（NULL 表示全局字典）
+     */
+    private Long createUserId;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -88,6 +93,14 @@ public class Dictionary implements Serializable {
 
     public void setResState(Integer resState) {
         this.resState = resState;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
     }
 
     public LocalDateTime getCreateTime() {

@@ -12,7 +12,7 @@
               v-model="searchKeyword"
               type="text"
               class="search-input"
-              placeholder="请输入主题搜索..."
+              placeholder="请输入主题/想法搜索..."
               @keyup.enter="handleSearch"
             />
             <button @click="handleSearch" class="btn btn-primary">
@@ -40,7 +40,7 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>主题</th>
+                <th>主题/想法</th>
                 <th>性别</th>
                 <th>题材</th>
                 <th>情节</th>
@@ -50,6 +50,7 @@
                 <th>总字数预估</th>
                 <th>每章字数预估</th>
                 <th>待生成数量</th>
+                <th>创建人</th>
                 <th>创建时间</th>
                 <th class="action-column">操作</th>
               </tr>
@@ -57,7 +58,11 @@
             <tbody>
               <tr v-for="config in articleGenerationConfigs" :key="config.id">
                 <td>{{ config.id }}</td>
-                <td>{{ config.theme }}</td>
+                <td>
+                  <div class="theme-cell" :title="config.theme">
+                    {{ config.theme }}
+                  </div>
+                </td>
                 <td>{{ config.gender || '-' }}</td>
                 <td>{{ config.genre || '-' }}</td>
                 <td>{{ config.plot || '-' }}</td>
@@ -77,6 +82,7 @@
                 <td>{{ config.totalWordCountEstimate || 100000 }}</td>
                 <td>{{ config.chapterWordCountEstimate || 5000 }}</td>
                 <td>{{ config.pendingCount }}</td>
+                <td>{{ config.createUserName || '-' }}</td>
                 <td>{{ formatDate(config.createTime) }}</td>
                 <td class="action-column">
                   <div class="flex gap-2">
@@ -85,8 +91,8 @@
                     </button>
                     <select @change="handleActionSelect($event, config)" class="action-select">
                       <option value="">更多操作</option>
-                      <option :value="'generateTitle_' + config.id">
-                        生成标题
+                      <option :value="'generateTitle_' + config.id" :disabled="aiDisabled">
+                        生成标题{{ aiDisabled ? '（需会员或余额）' : '' }}
                       </option>
                       <option
                         :value="'delete_' + config.id"
@@ -155,7 +161,7 @@
         <div class="card-body">
           <form @submit.prevent="createConfig" class="space-y-4">
             <div class="form-group">
-              <label class="form-label">主题 *</label>
+              <label class="form-label">主题/想法 *</label>
               <input v-model="newConfig.theme" class="form-input" placeholder="例如：程序员逆袭" required />
             </div>
 
@@ -272,7 +278,7 @@
         <div class="card-body">
           <form @submit.prevent="updateConfig" class="space-y-4">
             <div class="form-group">
-              <label class="form-label">主题 *</label>
+              <label class="form-label">主题/想法 *</label>
               <input v-model="editingConfig.theme" class="form-input" placeholder="例如：程序员逆袭" required />
             </div>
 
@@ -384,8 +390,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '../stores/auth';
+import { useWalletStore } from '../stores/wallet';
 import { http } from '../lib/http/client';
 import type { BaseResponse, PageRespDto } from '../lib/types/base';
+
+const auth = useAuthStore();
+const wallet = useWalletStore();
+const { balance } = storeToRefs(wallet);
+const { membershipActive } = storeToRefs(auth);
+const aiDisabled = computed(
+  () => !membershipActive.value || (balance.value?.availableBalanceCent ?? 0) <= 0
+);
 
 interface ArticleGenerationConfigListRespDto {
   id: number;
@@ -399,6 +416,8 @@ interface ArticleGenerationConfigListRespDto {
   totalWordCountEstimate?: number;
   chapterWordCountEstimate?: number;
   pendingCount: number;
+  createUserId?: number;
+  createUserName?: string;
   createTime: string;
 }
 
@@ -413,6 +432,7 @@ interface ArticleGenerationConfigCreateReqDto {
   totalWordCountEstimate?: number;
   chapterWordCountEstimate?: number;
   pendingCount?: number;
+  createUserId?: number;
 }
 
 interface ArticleGenerationConfigUpdateReqDto {
@@ -554,10 +574,12 @@ const loadDictionaryOptions = async () => {
 const createConfig = async () => {
   try {
     // 确保无论用户是否填写，这两个字段都有默认值传给后端
+    const uid = auth.userId;
     const payload: ArticleGenerationConfigCreateReqDto = {
       ...newConfig.value,
       totalWordCountEstimate: newConfig.value.totalWordCountEstimate ?? 100000,
-      chapterWordCountEstimate: newConfig.value.chapterWordCountEstimate ?? 5000
+      chapterWordCountEstimate: newConfig.value.chapterWordCountEstimate ?? 5000,
+      ...(uid != null && uid > 0 ? { createUserId: uid } : {})
     };
 
     const resp = await http.post<BaseResponse<number>>('/api/article-generation-configs', payload);
@@ -721,6 +743,10 @@ const clearSearch = () => {
 
 // 生成标题
 const generateTitle = async (config: ArticleGenerationConfigListRespDto) => {
+  if (aiDisabled.value) {
+    window.showNotification?.('需有效会员且余额充足，无法使用 AI 生成标题', 'error');
+    return;
+  }
   if (confirm(`确定要为配置"${config.theme}"生成一个新的文章标题吗？`)) {
     generatingTitle.value = true;
     generatingConfigId.value = config.id;
@@ -759,6 +785,8 @@ const formatDate = (dateStr: string) => {
 
 // 组件挂载时加载数据
 onMounted(() => {
+  auth.refreshSession().catch(() => {});
+  wallet.refreshBalance().catch(() => {});
   loadConfigs();
   loadDictionaryOptions();
 });
@@ -780,6 +808,14 @@ onMounted(() => {
   font-size: 0.75rem;
   border-radius: 0.25rem;
   border: 1px solid var(--primary-light, #bae6fd);
+}
+
+/* 主题列超长省略显示 */
+.theme-cell {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 文章特点输入区域 */

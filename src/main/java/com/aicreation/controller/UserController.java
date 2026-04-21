@@ -9,9 +9,13 @@ import com.aicreation.entity.dto.UserUpdateReqDto;
 import com.aicreation.entity.dto.UserDeleteReqDto;
 import com.aicreation.entity.dto.UserPasswordInitReqDto;
 import com.aicreation.entity.dto.UserRespDto;
+import com.aicreation.entity.dto.AdminAddBalanceReqDto;
 // import com.aicreation.entity.dto.UserListRespDto;
 import com.aicreation.service.IUserService;
+import com.aicreation.service.WalletService;
 import com.aicreation.entity.dto.base.PageRespDto;
+import com.aicreation.security.AccessControlService;
+import com.aicreation.security.CurrentUserHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -38,6 +44,11 @@ public class UserController {
     @Autowired
     private IUserService userService;
 
+    @Autowired
+    private AccessControlService accessControlService;
+
+    @Autowired
+    private WalletService walletService;
 
     /**
      * 根据用户ID查询用户信息
@@ -67,7 +78,7 @@ public class UserController {
     public BaseResponse<Long> createUser(
             @Parameter(description = "用户信息", required = true)
             @Valid @RequestBody UserCreateReqDto req) {
-        
+        accessControlService.assertAdmin();
         log.info("创建用户，用户名: {}", req.getUserName());
         Long userId = userService.createUser(req);
         return BaseResponse.success(userId);
@@ -102,7 +113,7 @@ public class UserController {
     public BaseResponse<Boolean> deleteUser(
             @Parameter(description = "删除用户请求", required = true)
             @Valid @RequestBody UserDeleteReqDto request) {
-        
+        accessControlService.assertAdmin();
         Long userId = request.getUserId();
         log.info("删除用户，用户ID: {}", userId);
         userService.deleteUser(request);
@@ -120,7 +131,7 @@ public class UserController {
     public BaseResponse<PageRespDto<UserRespDto>> getUserList(
             @Parameter(description = "分页参数", required = true)
             @Valid @RequestBody UserListReqDto request) {
-        
+        accessControlService.assertAdmin();
         log.info("查询用户列表，页码: {}, 每页大小: {}, 用户名搜索: {}", request.getPageNum(), request.getPageSize(), request.getUserName());
         PageRespDto<UserRespDto> page = userService.getUserList(request);
         return BaseResponse.success(page);
@@ -136,11 +147,36 @@ public class UserController {
     @PostMapping("/login")
     public BaseResponse<UserRespDto> login(
             @Parameter(description = "登录请求", required = true)
-            @Valid @RequestBody UserLoginReqDto request) {
+            @Valid @RequestBody UserLoginReqDto request,
+            HttpServletRequest httpServletRequest) {
         
         log.info("用户登录，用户名: {}", request.getUserName());
         UserRespDto user = userService.login(request);
+        if (user != null && user.getId() != null) {
+            httpServletRequest.getSession(true)
+                    .setAttribute(com.aicreation.interceptor.AuthContextInterceptor.SESSION_USER_ID, user.getId());
+        }
         return BaseResponse.success(user);
+    }
+
+    @Operation(summary = "获取当前登录用户", description = "基于会话/请求上下文返回当前用户信息")
+    @GetMapping("/me")
+    public BaseResponse<UserRespDto> currentUser() {
+        Long currentUserId = CurrentUserHolder.requireUserId();
+        UserQueryReqDto req = new UserQueryReqDto();
+        req.setUserId(currentUserId);
+        UserRespDto user = userService.getUserById(req);
+        return BaseResponse.success(user);
+    }
+
+    @Operation(summary = "退出登录", description = "清理当前会话")
+    @PostMapping("/logout")
+    public BaseResponse<Boolean> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return BaseResponse.success(true);
     }
 
     /**
@@ -154,13 +190,22 @@ public class UserController {
     public BaseResponse<Integer> initializeUserPasswords(
             @Parameter(description = "密码初始化请求", required = true)
             @Valid @RequestBody UserPasswordInitReqDto request) {
-        
+        accessControlService.assertAdmin();
         log.info("初始化用户密码，用户数量: {}, 是否指定用户: {}", 
                 CollectionUtils.isEmpty(request.getUserIds()) ? "所有用户" : request.getUserIds().size(), 
                 !CollectionUtils.isEmpty(request.getUserIds()));
         
         Integer result = userService.initializeUserPasswords(request);
         return BaseResponse.success(result);
+    }
+
+    @Operation(summary = "管理员给用户补入余额（线下转账补记）", description = "仅管理员可执行：更新 user_wallet + 写入 wallet_ledger + 发送用户通知")
+    @PostMapping("/{userId}/wallet/add-balance")
+    public BaseResponse<Boolean> adminAddBalance(
+            @Parameter(description = "用户ID") @PathVariable Long userId,
+            @Parameter(description = "补入余额请求") @Valid @RequestBody AdminAddBalanceReqDto req) {
+        accessControlService.assertAdmin();
+        return BaseResponse.success(walletService.adminAddBalance(userId, req));
     }
 
     // 转换逻辑由 MapStruct 的 UserConverter 负责

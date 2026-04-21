@@ -29,6 +29,9 @@ public class DictionaryListRespDto extends BaseDto {
     @Schema(description = "排序顺序", example = "1")
     private Integer sortOrder;
 
+    @Schema(description = "创建人用户ID（空表示全局字典）")
+    private Long createUserId;
+
     @Schema(description = "创建时间", example = "2024-01-01T12:00:00")
     private LocalDateTime createTime;
 
@@ -63,6 +66,14 @@ public class DictionaryListRespDto extends BaseDto {
 
     public void setSortOrder(Integer sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
     }
 
     public LocalDateTime getCreateTime() {

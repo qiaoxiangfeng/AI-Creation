@@ -13,7 +13,8 @@ declare global {
 
 // 从全局变量获取配置，如果没有则使用默认值
 export const API_CONFIG = (window as any).__API_CONFIG__ || {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:6666',
+  // dev: 通过 Vite proxy 转发 `/api` 到后端；因此 baseURL 只需要是 `/`
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || '/',
   TIMEOUT: 10000,
   RETRY_TIMES: 3,
 };

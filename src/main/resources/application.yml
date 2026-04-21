@@ -46,7 +46,7 @@ mybatis:
   type-aliases-package: com.aicreation.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
     cache-enabled: false
 
 # 自定义配置
@@ -71,6 +71,23 @@ app:
   audio:
     file-path: file
     file-prefix: audio
+
+  # 支付宝（当面付）配置：上线前请改为生产值并使用环境变量注入
+  alipay:
+    app-id: ${ALIPAY_APP_ID:}
+    private-key: ${ALIPAY_PRIVATE_KEY:}
+    alipay-public-key: ${ALIPAY_PUBLIC_KEY:}
+    gateway: ${ALIPAY_GATEWAY:https://openapi.alipay.com/gateway.do}
+    notify-url: ${ALIPAY_NOTIFY_URL:http://www.talex.top/api/wallet/recharge/callback/alipay}
+
+  # 微信支付（Native 扫码：统一下单）
+  wechat:
+    app-id: ${WECHAT_APP_ID:}
+    mch-id: ${WECHAT_MCH_ID:}
+    api-key: ${WECHAT_API_KEY:}
+    notify-url: ${WECHAT_NOTIFY_URL:http://www.talex.top/api/wallet/recharge/callback/wechat}
+    spbill-create-ip: ${WECHAT_SPBILL_CREATE_IP:127.0.0.1}
+    unified-order-url: ${WECHAT_UNIFIED_ORDER_URL:https://api.mch.weixin.qq.com/pay/unifiedorder}
 
 # Swagger 配置
 springdoc:

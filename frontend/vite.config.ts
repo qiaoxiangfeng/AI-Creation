@@ -25,6 +25,7 @@ const DEV_SERVER_CONFIG = {
 
 // API配置 - 支持环境变量
 const API_CONFIG = {
+  // 本项目约定：请求路径里自带 `/api` 前缀，因此 baseURL 只需要是 `/`
   BASE_URL: process.env.VITE_API_BASE_URL || '/',
   TIMEOUT: 10000,
   RETRY_TIMES: 3,

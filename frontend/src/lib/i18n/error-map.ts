@@ -1,19 +1,34 @@
-const codeToI18nKey: Record<string, string> = {
-  '00000000': 'common.success',
-  CM01: 'error.system',
-  CM02: 'error.param',
-  CM03: 'user.notFound',
-  CM04: 'user.usernameOrPasswordError',
-  CM05: 'user.alreadyExists',
-  CM06: 'auth.noPermission',
-  CM07: 'auth.tokenInvalid',
-  CM08: 'auth.tokenExpired',
+/**
+ * 业务错误码 → 用户可读中文（后端也会在 msg 中返回说明，此处作兜底）
+ */
+const CODE_MESSAGES: Record<string, string> = {
+  '00000000': '操作成功',
+  CM01: '系统错误',
+  CM02: '参数错误',
+  CM03: '用户不存在',
+  CM04: '用户名或密码错误',
+  CM05: '用户已存在',
+  CM06: '无权限访问',
+  CM07: 'Token 无效',
+  CM08: 'Token 已过期',
+  CM09: '数据不存在',
+  CM10: '数据重复',
+  CM11: '非管理员用户无法修改或删除全局字典',
+  CM12: '无权操作他人创建的内容',
+  CM13: '无权查看他人创建的字典',
+  CM14: '请先登录后再操作',
+  CM15: '仅管理员可执行此操作',
+  CM16: '余额不足，无法使用 AI 功能',
+  CM17: '充值订单不存在',
+  CM18: '支付回调验签失败',
+  CM19: '支付金额不匹配',
+  CM20: '计费预占失败',
+  CM21: '计费结算失败',
+  CM22: '请先开通会员后使用 AI 功能',
+  CM23: '会员已过期，请续费后使用 AI 功能',
+  CM24: '会员套餐不存在或已下架',
 };
 
 export function mapErrorCodeToMessage(code: string): string {
-  const key = codeToI18nKey[code] ?? 'error.unknown';
-  // 这里可接入真实 i18n 实现
-  return key;
+  return CODE_MESSAGES[code] ?? '请求失败，请稍后重试';
 }
-
-

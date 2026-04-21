@@ -7,6 +7,7 @@ import com.aicreation.entity.po.ArticleGenerationConfig;
 import com.aicreation.enums.ErrorCodeEnum;
 import com.aicreation.exception.BusinessException;
 import com.aicreation.mapper.ArticleGenerationConfigMapper;
+import com.aicreation.security.AccessControlService;
 import com.aicreation.service.IArticleGenerationConfigService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +34,9 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
     @Autowired
     private ArticleGenerationConfigMapper articleGenerationConfigMapper;
 
+    @Autowired
+    private AccessControlService accessControlService;
+
     @Override
     public ArticleGenerationConfigRespDto getArticleGenerationConfigById(ArticleGenerationConfigQueryReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getId())) {
@@ -45,6 +49,7 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
             return null;
         }
 
+        accessControlService.assertGenerationConfigAccess(request.getId());
         return convertToRespDto(articleGenerationConfig);
     }
 
@@ -60,6 +65,7 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
             return null;
         }
 
+        accessControlService.assertGenerationConfigAccess(articleGenerationConfig.getId());
         return convertToRespDto(articleGenerationConfig);
     }
 
@@ -90,6 +96,7 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         categoryBo.setChapterWordCountEstimate(request.getChapterWordCountEstimate());
         categoryBo.setPendingCount(request.getPendingCount() != null ? request.getPendingCount() : 0);
         categoryBo.setResState(1);
+        categoryBo.setCreateUserId(request.getCreateUserId());
         categoryBo.setCreateTime(LocalDateTime.now());
         categoryBo.setUpdateTime(LocalDateTime.now());
 
@@ -106,6 +113,7 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         articleGenerationConfig.setChapterWordCountEstimate(categoryBo.getChapterWordCountEstimate());
         articleGenerationConfig.setPendingCount(categoryBo.getPendingCount());
         articleGenerationConfig.setResState(categoryBo.getResState());
+        articleGenerationConfig.setCreateUserId(categoryBo.getCreateUserId());
         articleGenerationConfig.setCreateTime(categoryBo.getCreateTime());
         articleGenerationConfig.setUpdateTime(categoryBo.getUpdateTime());
 
@@ -125,6 +133,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
             log.warn("更新文章生成配置失败：请求参数无效");
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
+
+        accessControlService.assertGenerationConfigAccess(request.getId());
 
         // 检查文章生成配置是否存在
         ArticleGenerationConfig existingCategory = articleGenerationConfigMapper.selectByPrimaryKey(request.getId());
@@ -146,10 +156,28 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         // 转换为持久化对象
         ArticleGenerationConfig articleGenerationConfig = new ArticleGenerationConfig();
         articleGenerationConfig.setId(request.getId());
-        if (StringUtils.hasText(request.getTheme())) {
+        // 说明：
+        // - 对于更新接口：null 表示“不更新该字段”；空字符串表示“清空该字段”
+        // - 因此前端传空字符串时必须允许落库覆盖旧值，不能使用 hasText 判定
+        if (request.getTheme() != null) {
             articleGenerationConfig.setTheme(request.getTheme());
         }
-        if (StringUtils.hasText(request.getAdditionalCharacteristics())) {
+        if (request.getGender() != null) {
+            articleGenerationConfig.setGender(request.getGender());
+        }
+        if (request.getGenre() != null) {
+            articleGenerationConfig.setGenre(request.getGenre());
+        }
+        if (request.getPlot() != null) {
+            articleGenerationConfig.setPlot(request.getPlot());
+        }
+        if (request.getCharacterType() != null) {
+            articleGenerationConfig.setCharacterType(request.getCharacterType());
+        }
+        if (request.getStyle() != null) {
+            articleGenerationConfig.setStyle(request.getStyle());
+        }
+        if (request.getAdditionalCharacteristics() != null) {
             articleGenerationConfig.setAdditionalCharacteristics(request.getAdditionalCharacteristics());
         }
         if (request.getTotalWordCountEstimate() != null) {
@@ -180,6 +208,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
+        accessControlService.assertGenerationConfigAccess(request.getId());
+
         // 检查文章生成配置是否存在
         ArticleGenerationConfig existingCategory = articleGenerationConfigMapper.selectByPrimaryKey(request.getId());
         if (Objects.isNull(existingCategory)) {
@@ -204,11 +234,14 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
+        Long scopedCreateUserId = accessControlService.getScopedCreateUserIdForList();
+
         // 设置分页
         PageHelper.startPage(request.getPageNo(), request.getPageSize());
 
         // 查询文章生成配置列表
-        List<ArticleGenerationConfig> categories = articleGenerationConfigMapper.selectArticleGenerationConfigList(request.getTheme());
+        List<ArticleGenerationConfig> categories = articleGenerationConfigMapper.selectArticleGenerationConfigList(
+                request.getTheme(), scopedCreateUserId);
 
         // 获取分页信息
         PageInfo<ArticleGenerationConfig> pageInfo = new PageInfo<>(categories);
@@ -246,6 +279,7 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         dto.setTotalWordCountEstimate(category.getTotalWordCountEstimate());
         dto.setChapterWordCountEstimate(category.getChapterWordCountEstimate());
         dto.setPendingCount(category.getPendingCount());
+        dto.setCreateUserId(category.getCreateUserId());
         dto.setCreateTime(category.getCreateTime());
         dto.setUpdateTime(category.getUpdateTime());
         return dto;
@@ -267,6 +301,8 @@ public class ArticleGenerationConfigServiceImpl implements IArticleGenerationCon
         dto.setTotalWordCountEstimate(category.getTotalWordCountEstimate());
         dto.setChapterWordCountEstimate(category.getChapterWordCountEstimate());
         dto.setPendingCount(category.getPendingCount());
+        dto.setCreateUserId(category.getCreateUserId());
+        dto.setCreateUserName(category.getCreateUserName());
         dto.setCreateTime(category.getCreateTime());
         return dto;
     }

@@ -50,6 +50,9 @@ public class ArticleGenerationConfigRespDto extends BaseDto {
     @Schema(description = "待生成数量", example = "10")
     private Integer pendingCount;
 
+    @Schema(description = "创建人用户ID")
+    private Long createUserId;
+
     @Schema(description = "创建时间", example = "2024-01-01T12:00:00")
     private LocalDateTime createTime;
 
@@ -143,6 +146,14 @@ public class ArticleGenerationConfigRespDto extends BaseDto {
 
     public void setPendingCount(Integer pendingCount) {
         this.pendingCount = pendingCount;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
     }
 
     public LocalDateTime getCreateTime() {

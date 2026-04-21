@@ -16,13 +16,15 @@
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
         <result column="pending_count" jdbcType="INTEGER" property="pendingCount"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
-        id, theme, gender, genre, plot, character_type, style, additional_characteristics, total_word_count_estimate, chapter_word_count_estimate, pending_count, res_state, create_time, update_time
+        id, theme, gender, genre, plot, character_type, style, additional_characteristics, total_word_count_estimate, chapter_word_count_estimate, pending_count, res_state, create_user_id, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章生成配置 -->
@@ -46,24 +48,30 @@
     <!-- 查询文章生成配置列表 -->
     <select id="selectArticleGenerationConfigList" resultMap="BaseResultMap">
         SELECT
-        <include refid="Base_Column_List"/>
-        FROM article_generation_config
-        WHERE res_state = 1
-        <if test="theme != null and theme != ''">
-            AND theme LIKE CONCAT('%', #{theme,jdbcType=VARCHAR}, '%')
+        c.id, c.theme, c.gender, c.genre, c.plot, c.character_type, c.style, c.additional_characteristics,
+        c.total_word_count_estimate, c.chapter_word_count_estimate, c.pending_count, c.res_state, c.create_user_id, c.create_time, c.update_time,
+        u.user_name AS create_user_name
+        FROM article_generation_config c
+        LEFT JOIN user_info u ON c.create_user_id = u.id AND u.res_state = 1
+        WHERE c.res_state = 1
+        <if test="scopedCreateUserId != null">
+            AND c.create_user_id = #{scopedCreateUserId,jdbcType=BIGINT}
         </if>
-        ORDER BY create_time DESC
+        <if test="theme != null and theme != ''">
+            AND c.theme LIKE CONCAT('%', #{theme,jdbcType=VARCHAR}, '%')
+        </if>
+        ORDER BY c.create_time DESC
     </select>
 
     <!-- 插入文章生成配置 -->
     <insert id="insert" parameterType="com.aicreation.entity.po.ArticleGenerationConfig" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article_generation_config (
-            theme, gender, genre, plot, character_type, style, additional_characteristics, total_word_count_estimate, chapter_word_count_estimate, pending_count, res_state, create_time, update_time
+            theme, gender, genre, plot, character_type, style, additional_characteristics, total_word_count_estimate, chapter_word_count_estimate, pending_count, res_state, create_user_id, create_time, update_time
         ) VALUES (
             #{theme,jdbcType=VARCHAR}, #{gender,jdbcType=VARCHAR}, #{genre,jdbcType=VARCHAR}, #{plot,jdbcType=VARCHAR},
             #{characterType,jdbcType=VARCHAR}, #{style,jdbcType=VARCHAR}, #{additionalCharacteristics,jdbcType=VARCHAR},
             #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER},
-            #{pendingCount,jdbcType=INTEGER}, #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+            #{pendingCount,jdbcType=INTEGER}, #{resState,jdbcType=INTEGER}, #{createUserId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
 

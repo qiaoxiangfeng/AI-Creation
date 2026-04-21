@@ -1,11 +1,15 @@
 package com.aicreation.generate;
 
 import com.aicreation.entity.dto.ArticleCreateReqDto;
+import com.aicreation.entity.dto.ArticleTitleDedupItemDto;
 import com.aicreation.entity.po.ArticleGenerationConfig;
 import com.aicreation.external.VolcengineChatClient;
 import com.aicreation.mapper.ArticleGenerationConfigMapper;
 import com.aicreation.mapper.ArticleMapper;
+import com.aicreation.security.AccessControlService;
+import com.aicreation.service.AiBillingService;
 import com.aicreation.service.IArticleService;
+import com.aicreation.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +42,12 @@ public class ArticleTitleGenerator {
     @Autowired
     private VolcengineChatClient volcengineChatClient;
 
+    @Autowired
+    private AccessControlService accessControlService;
+
+    @Autowired
+    private AiBillingService aiBillingService;
+
     /**
      * 生成单个文章标题
      * 无事务保护，数据实时提交
@@ -49,37 +59,49 @@ public class ArticleTitleGenerator {
         log.info("开始为配置[{}]生成单个文章标题", configId);
 
         try {
+            accessControlService.assertGenerationConfigAccess(configId);
+
             // 获取配置信息
             ArticleGenerationConfig config = articleGenerationConfigMapper.selectByPrimaryKey(configId);
             if (config == null) {
                 throw new RuntimeException("文章生成配置不存在: " + configId);
             }
 
-            // 查询该文章主题下已存在的文章标题
-            List<String> existingTitles = getExistingTitlesByArticleType(config.getTheme());
+            // 查询该主题下已生成的文章（标题+大纲），用于去重
+            List<ArticleTitleDedupItemDto> existingItems = getExistingTitleDedupItemsByTheme(config.getTheme());
 
             // 构建生成文章标题和大纲的提示词
-            String prompt = buildTitleGenerationPrompt(config, existingTitles);
+            String prompt = buildTitleGenerationPrompt(config, existingItems);
 
-            log.debug("=== AI标题生成提示词 ===");
-            log.debug("{}", prompt);
+            log.info("=== AI标题生成完整提示词 ===");
+            log.info("{}", prompt);
 
             // 使用Responses API生成内容（首次调用，previous_response_id为null）
             // 非流式调用：API会在生成全部内容后一次性返回完整响应，收到返回即代表输出完成
             log.info("开始使用非流式Responses API生成文章标题和大纲...");
             log.info("本次AI标题生成请求 previous_response_id: null");
+            Long userId = config.getCreateUserId();
+            long estimatedCostCent = aiBillingService.estimateCostCent(
+                "GENERATE_SINGLE_TITLE",
+                config.getChapterWordCountEstimate() != null ? config.getChapterWordCountEstimate() : config.getTotalWordCountEstimate()
+            );
+
             com.volcengine.ark.runtime.model.responses.response.ResponseObject response =
-                volcengineChatClient.createResponse(
-                    prompt,
-                    null, // 首次调用，previous_response_id为null
-                    "title" // 标题生成任务
+                aiBillingService.executeWithAiBilling(
+                    userId,
+                    "GENERATE_SINGLE_TITLE",
+                    null,
+                    null,
+                    estimatedCostCent,
+                    () -> volcengineChatClient.createResponse(
+                        prompt,
+                        null, // 首次调用，previous_response_id为null
+                        "title" // 标题生成任务
+                    )
                 );
 
             // 获取生成的內容
             String generatedContent = com.aicreation.external.ResponseContentExtractor.extractContent(response);
-
-            // 获取返回的response_id
-            String responseId = response.getId();
 
             log.info("非流式响应完成，获取内容长度: {}", generatedContent.length());
 
@@ -90,8 +112,6 @@ public class ArticleTitleGenerator {
             } else {
                 log.warn("AI响应内容为空！");
             }
-            log.info("获得的response_id: {}", responseId);
-
             // 检查JSON是否完整
             if (!isJsonComplete(generatedContent)) {
                 log.error("AI返回的JSON格式不完整，内容长度: {}, 最后100字符: {}",
@@ -107,20 +127,19 @@ public class ArticleTitleGenerator {
 
             // 创建文章（只包含标题和大纲）
             ArticleCreateReqDto createReq = buildArticleCreateReq(config, content);
-            Long articleId = articleService.createArticleWithResponseId(createReq, responseId);
-            if (responseId != null && !responseId.trim().isEmpty()) {
-                log.info("文章[{}]的response_id已设置为: {}", articleId, responseId);
-            } else {
-                log.warn("标题生成API未返回有效的response_id，文章后续AI交互可能无法保持上下文");
-            }
+            // 标题生成完成后不再存储 response_id（避免无意义的上下文绑定）
+            Long articleId = articleService.createArticle(createReq);
 
-            log.info("成功为配置[{}]生成单个文章标题：标题={}, ID={}, response_id={}",
-                    configId, content.getTitle(), articleId, responseId);
+            log.info("成功为配置[{}]生成单个文章标题：标题={}, ID={}",
+                    configId, content.getTitle(), articleId);
 
             return articleId;
 
         } catch (Exception e) {
             log.error("为配置[{}]生成单个文章标题失败: {}", configId, e.getMessage(), e);
+            if (e instanceof BusinessException be) {
+                throw be;
+            }
             throw new RuntimeException("生成文章标题失败: " + e.getMessage(), e);
         }
     }
@@ -182,7 +201,14 @@ public class ArticleTitleGenerator {
      */
     private List<String> getExistingTitlesByArticleType(String articleType) {
         if (StringUtils.hasText(articleType)) {
-            return articleMapper.selectArticleNamesByType(articleType);
+            return articleMapper.selectArticleNamesByTheme(articleType);
+        }
+        return new ArrayList<>();
+    }
+
+    private List<ArticleTitleDedupItemDto> getExistingTitleDedupItemsByTheme(String theme) {
+        if (StringUtils.hasText(theme)) {
+            return articleMapper.selectExistingTitleDedupItemsByTheme(theme);
         }
         return new ArrayList<>();
     }
@@ -190,7 +216,7 @@ public class ArticleTitleGenerator {
     /**
      * 构建标题生成提示词
      */
-    private String buildTitleGenerationPrompt(ArticleGenerationConfig config, List<String> existingTitles) {
+    private String buildTitleGenerationPrompt(ArticleGenerationConfig config, List<ArticleTitleDedupItemDto> existingItems) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("你是一名擅长中文网络小说与大众出版市场的专业编辑，请根据下面的“小说生成配置”生成一个新的小说标题、大纲和故事背景。\n\n");
 
@@ -225,11 +251,20 @@ public class ArticleTitleGenerator {
                   .append(config.getChapterWordCountEstimate()).append(" 字左右\n");
         }
 
-        // 现有标题（用于去重）
-        if (!existingTitles.isEmpty()) {
-            prompt.append("\n已有标题列表（新标题必须与下列任意一个在字面或结构上都不能相同或仅作轻微改动）：\n");
-            for (int i = 0; i < Math.min(existingTitles.size(), 10); i++) {
-                prompt.append("- ").append(existingTitles.get(i)).append("\n");
+        // 已生成文章（标题 + 大纲，用于去重）
+        if (existingItems != null && !existingItems.isEmpty()) {
+            prompt.append("\n已生成文章列表（新标题与新大纲必须与下列任意一个在标题或大纲上都不能相同或仅作轻微改动）：\n");
+            for (int i = 0; i < Math.min(existingItems.size(), 10); i++) {
+                ArticleTitleDedupItemDto it = existingItems.get(i);
+                if (it == null) continue;
+                String name = it.getArticleName() != null ? it.getArticleName().trim() : "";
+                String outline = it.getArticleOutline() != null ? it.getArticleOutline().trim() : "";
+                if (!name.isEmpty() && !outline.isEmpty()) {
+                    prompt.append("- 标题：").append(name).append("\n");
+                    prompt.append("  大纲：").append(outline).append("\n");
+                } else if (!name.isEmpty()) {
+                    prompt.append("- 标题：").append(name).append("\n");
+                }
             }
         }
 
@@ -369,14 +404,32 @@ public class ArticleTitleGenerator {
         req.setArticleName(content.getTitle());
         req.setArticleOutline(content.getOutline());
         req.setStoryBackground(content.getStoryBackground());
-        req.setArticleType(config.getTheme());
+        req.setTheme(config.getTheme());
+        // 将“除主题外”的配置字段值拼接到文章表附加特点（逗号分隔），用于后续章节生成提示词参考
+        req.setAdditionalCharacteristics(buildAdditionalCharacteristicsForArticle(config));
         // 从文章生成配置中继承总字数预估和每章节字数预估，若为空则使用默认值
         Integer totalEstimate = config.getTotalWordCountEstimate() != null ? config.getTotalWordCountEstimate() : 100000;
         Integer chapterEstimate = config.getChapterWordCountEstimate() != null ? config.getChapterWordCountEstimate() : 5000;
         req.setTotalWordCountEstimate(totalEstimate);
         req.setChapterWordCountEstimate(chapterEstimate);
         req.setPublishStatus(0); // 未发布
+        // 与文章生成配置的创建人一致
+        req.setCreateUserId(config.getCreateUserId());
         return req;
+    }
+
+    /**
+     * 将文章生成配置中除主题外的字段值拼接为逗号分隔字符串
+     */
+    private String buildAdditionalCharacteristicsForArticle(ArticleGenerationConfig config) {
+        List<String> parts = new ArrayList<>();
+        if (StringUtils.hasText(config.getGender())) parts.add(config.getGender().trim());
+        if (StringUtils.hasText(config.getGenre())) parts.add(config.getGenre().trim());
+        if (StringUtils.hasText(config.getPlot())) parts.add(config.getPlot().trim());
+        if (StringUtils.hasText(config.getCharacterType())) parts.add(config.getCharacterType().trim());
+        if (StringUtils.hasText(config.getStyle())) parts.add(config.getStyle().trim());
+        if (StringUtils.hasText(config.getAdditionalCharacteristics())) parts.add(config.getAdditionalCharacteristics().trim());
+        return String.join(",", parts);
     }
 
     /**

@@ -29,8 +29,17 @@ public class ArticleListRespDto extends BaseDto {
     @Schema(description = "形象描述")
     private String imageDesc;
 
-    @Schema(description = "文章类型")
-    private String articleType;
+    @Schema(description = "文章主题/分类")
+    private String theme;
+
+    @Schema(description = "附加特点（生成配置的非主题字段值拼接，逗号分隔）")
+    private String additionalCharacteristics;
+
+    @Schema(description = "创建人用户ID")
+    private Long createUserId;
+
+    @Schema(description = "创建人用户名")
+    private String createUserName;
 
     @Schema(description = "音色")
     private String voiceTone;
@@ -98,14 +107,37 @@ public class ArticleListRespDto extends BaseDto {
         this.imageDesc = imageDesc;
     }
 
-    public String getArticleType() {
-        return articleType;
+    public String getTheme() {
+        return theme;
     }
 
-    public void setArticleType(String articleType) {
-        this.articleType = articleType;
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 
+    public String getAdditionalCharacteristics() {
+        return additionalCharacteristics;
+    }
+
+    public void setAdditionalCharacteristics(String additionalCharacteristics) {
+        this.additionalCharacteristics = additionalCharacteristics;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
+    }
+
+    public String getCreateUserName() {
+        return createUserName;
+    }
+
+    public void setCreateUserName(String createUserName) {
+        this.createUserName = createUserName;
+    }
 
     public String getVoiceTone() {
         return voiceTone;

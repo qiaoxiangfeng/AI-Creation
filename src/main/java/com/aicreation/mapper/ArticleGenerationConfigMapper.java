@@ -46,7 +46,8 @@ public interface ArticleGenerationConfigMapper {
      * @param theme 文章生成配置主题（可选）
      * @return 文章生成配置列表
      */
-    List<ArticleGenerationConfig> selectArticleGenerationConfigList(@Param("theme") String theme);
+    List<ArticleGenerationConfig> selectArticleGenerationConfigList(@Param("theme") String theme,
+                                                                    @Param("scopedCreateUserId") Long scopedCreateUserId);
 
     /**
      * 插入文章生成配置

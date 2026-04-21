@@ -44,9 +44,11 @@
               <tr>
                 <th>ID</th>
                 <th>用户名</th>
+                <th>笔名</th>
                 <th>邮箱</th>
                 <th>手机号</th>
                 <th>状态</th>
+                <th>管理员</th>
                 <th>创建时间</th>
                 <th class="action-column">操作</th>
               </tr>
@@ -55,6 +57,7 @@
               <tr v-for="user in users" :key="user.id">
                 <td>{{ user.id }}</td>
                 <td>{{ user.userName }}</td>
+                <td>{{ user.penName || '-' }}</td>
                 <td>{{ user.userEmail || '-' }}</td>
                 <td>{{ user.userPhone || '-' }}</td>
                 <td>
@@ -62,6 +65,7 @@
                     {{ getStatusText(user.userStatus) }}
                   </span>
                 </td>
+                <td>{{ user.isAdmin ? '是' : '否' }}</td>
                 <td>{{ formatDate(user.createTime) }}</td>
                 <td class="action-column">
                   <div class="flex gap-2">
@@ -72,6 +76,9 @@
                       <option value="">更多操作</option>
                       <option :value="'initPassword_' + user.id">
                         初始化密码
+                      </option>
+                      <option :value="'addBalance_' + user.id">
+                        补入余额
                       </option>
                       <option
                         :value="'delete_' + user.id"
@@ -144,6 +151,10 @@
               <input v-model="newUser.userName" class="form-input" required />
             </div>
             <div class="form-group">
+              <label class="form-label">笔名</label>
+              <input v-model="newUser.penName" class="form-input" />
+            </div>
+            <div class="form-group">
               <label class="form-label">邮箱</label>
               <input v-model="newUser.userEmail" type="email" class="form-input" />
             </div>
@@ -154,6 +165,10 @@
             <div class="form-group">
               <label class="form-label">密码</label>
               <input v-model="newUser.userPassword" type="password" class="form-input" required />
+            </div>
+            <div class="form-group flex items-center gap-2">
+              <input id="newUserAdmin" v-model="newUser.isAdmin" type="checkbox" class="form-checkbox" />
+              <label for="newUserAdmin" class="form-label mb-0">管理员</label>
             </div>
             <div class="flex gap-2 justify-end">
               <button type="button" @click="showCreateModal = false" class="btn btn-outline">
@@ -179,6 +194,10 @@
               <input v-model="editingUser!.userName" class="form-input" required />
             </div>
             <div class="form-group">
+              <label class="form-label">笔名</label>
+              <input v-model="editingUser!.penName" class="form-input" />
+            </div>
+            <div class="form-group">
               <label class="form-label">邮箱</label>
               <input v-model="editingUser!.userEmail" type="email" class="form-input" />
             </div>
@@ -189,6 +208,10 @@
             <div class="form-group">
               <label class="form-label">新密码</label>
               <input v-model="editingUser!.userPassword" type="password" class="form-input" placeholder="留空则不修改密码" />
+            </div>
+            <div class="form-group flex items-center gap-2">
+              <input id="editUserAdmin" v-model="editingUser!.isAdmin" type="checkbox" class="form-checkbox" />
+              <label for="editUserAdmin" class="form-label mb-0">管理员</label>
             </div>
             <div class="flex gap-2 justify-end">
               <button type="button" @click="showEditModal = false" class="btn btn-outline">
@@ -227,6 +250,51 @@
         </div>
       </div>
     </div>
+
+    <!-- 补入余额模态框 -->
+    <div v-if="showAddBalanceModal" class="modal-overlay" @click="showAddBalanceModal = false">
+      <div class="modal-content card" @click.stop>
+        <div class="card-header">
+          <h3 class="text-lg font-semibold">补入余额</h3>
+        </div>
+        <div class="card-body">
+          <form @submit.prevent="submitAddBalance" class="space-y-4">
+            <div class="form-group">
+              <label class="form-label">补入金额（元）</label>
+              <input
+                v-model.number="addBalanceAmountYuan"
+                type="number"
+                min="1"
+                step="1"
+                class="form-input"
+                placeholder="例如：100"
+                required
+                :disabled="creatingAddBalance"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">备注</label>
+              <input
+                v-model="addBalanceRemark"
+                class="form-input"
+                placeholder="例如：线下转账补记"
+                :disabled="creatingAddBalance"
+              />
+            </div>
+
+            <div class="flex gap-2 justify-end">
+              <button type="button" @click="showAddBalanceModal = false" class="btn btn-outline" :disabled="creatingAddBalance">
+                取消
+              </button>
+              <button type="submit" class="btn btn-primary" :disabled="creatingAddBalance">
+                {{ creatingAddBalance ? '提交中...' : '提交补入' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -238,9 +306,11 @@ import type { BaseResponse, PageRespDto } from '../lib/types/base';
 interface UserRespDto {
   id: number;
   userName: string;
+  penName?: string;
   userEmail?: string;
   userPhone?: string;
   userStatus: number;
+  isAdmin?: boolean;
   createTime: string;
 }
 
@@ -254,20 +324,30 @@ const searchKeyword = ref('');
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showPasswordModal = ref(false);
+const showAddBalanceModal = ref(false);
+
+const addBalanceTargetUserId = ref<number | null>(null);
+const addBalanceAmountYuan = ref<number>(100);
+const addBalanceRemark = ref<string>('线下转账补记');
+const creatingAddBalance = ref(false);
 
 
 const newUser = ref({ 
   userName: '', 
+  penName: '',
   userEmail: '', 
   userPhone: '', 
-  userPassword: '' 
+  userPassword: '',
+  isAdmin: false,
 });
 const editingUser = ref<{ 
   id: number; 
   userName: string; 
+  penName?: string;
   userEmail?: string; 
   userPhone?: string; 
   userStatus: number; 
+  isAdmin?: boolean;
   createTime: string; 
   userPassword?: string; 
 } | null>(null);
@@ -321,6 +401,11 @@ const handleActionSelect = async (event: Event, user: UserRespDto) => {
     initPassword(user);
   } else if (action === 'delete') {
     deleteUser(user);
+  } else if (action === 'addBalance') {
+    addBalanceTargetUserId.value = user.id;
+    addBalanceAmountYuan.value = 100;
+    addBalanceRemark.value = '线下转账补记';
+    showAddBalanceModal.value = true;
   }
 
   // 重置选择
@@ -349,16 +434,22 @@ const createUser = async () => {
       userName: newUser.value.userName?.trim(),
       userPassword: newUser.value.userPassword
     };
+    if (newUser.value.penName && newUser.value.penName.trim()) {
+      payload.penName = newUser.value.penName.trim();
+    }
     if (newUser.value.userEmail && newUser.value.userEmail.trim()) {
       payload.userEmail = newUser.value.userEmail.trim();
     }
     if (newUser.value.userPhone && newUser.value.userPhone.trim()) {
       payload.userPhone = newUser.value.userPhone.trim();
     }
+    if (newUser.value.isAdmin) {
+      payload.isAdmin = true;
+    }
 
     await http.post('/api/users', payload);
     showCreateModal.value = false;
-    newUser.value = { userName: '', userEmail: '', userPhone: '', userPassword: '' };
+    newUser.value = { userName: '', penName: '', userEmail: '', userPhone: '', userPassword: '', isAdmin: false };
     loadUsers();
   } catch (error) {
     console.error('创建用户失败:', error);
@@ -368,7 +459,7 @@ const createUser = async () => {
 };
 
 const editUser = (user: UserRespDto) => {
-  editingUser.value = { ...user, userPassword: '' };
+  editingUser.value = { ...user, isAdmin: Boolean(user.isAdmin), userPassword: '' };
   showEditModal.value = true;
 };
 
@@ -379,6 +470,8 @@ const updateUser = async () => {
     const updateData: any = { 
       userId: editingUser.value.id, 
       userName: editingUser.value.userName,
+      penName: editingUser.value.penName,
+      isAdmin: Boolean(editingUser.value.isAdmin),
       userEmail: editingUser.value.userEmail,
       userPhone: editingUser.value.userPhone
     };
@@ -424,6 +517,51 @@ const initPassword = async (user: UserRespDto) => {
     console.error('初始化密码失败:', error);
     const errorMessage = error.message || '初始化密码失败，请稍后重试';
     window.showNotification(errorMessage, 'error');
+  }
+};
+
+const submitAddBalance = async () => {
+  if (!addBalanceTargetUserId.value) return;
+  if (creatingAddBalance.value) return;
+
+  const amountYuan = addBalanceAmountYuan.value;
+  if (!Number.isFinite(amountYuan) || amountYuan <= 0) {
+    window.showNotification('请输入正确的金额（大于0）', 'error');
+    return;
+  }
+
+  creatingAddBalance.value = true;
+  try {
+    const amountCent = Math.round(amountYuan * 100);
+    const idempotencyKey =
+      'admin-add-balance:' +
+      addBalanceTargetUserId.value +
+      ':' +
+      Date.now() +
+      ':' +
+      Math.random().toString(16).slice(2);
+
+    await http.post(
+      `/api/users/${addBalanceTargetUserId.value}/wallet/add-balance`,
+      {
+        amountCent,
+        remark: addBalanceRemark.value,
+        idempotencyKey,
+      },
+      { silentBizError: false } as any
+    );
+
+    showAddBalanceModal.value = false;
+    addBalanceTargetUserId.value = null;
+    addBalanceAmountYuan.value = 100;
+    addBalanceRemark.value = '线下转账补记';
+    window.showNotification('补入余额成功', 'success');
+    // 不强制刷新用户列表（余额不在表里），但保持一致性
+    loadUsers();
+  } catch (e: any) {
+    window.showNotification(e?.message || '补入余额失败，请稍后重试', 'error');
+  } finally {
+    creatingAddBalance.value = false;
   }
 };
 

@@ -39,6 +39,11 @@ public class User {
     private String userName;
 
     /**
+     * 笔名
+     */
+    private String penName;
+
+    /**
      * 用户密码
      */
     private String userPassword;
@@ -59,9 +64,29 @@ public class User {
     private Integer userStatus;
 
     /**
+     * 是否管理员
+     */
+    private Boolean isAdmin;
+
+    /**
      * 最后登录时间
      */
     private LocalDateTime lastLoginTime;
+
+    /**
+     * 会员等级：NONE / BASIC
+     */
+    private String membershipTier;
+
+    /**
+     * 首次成为会员时间
+     */
+    private LocalDateTime membershipStartAt;
+
+    /**
+     * 会员权益截止时间
+     */
+    private LocalDateTime membershipEndAt;
 
     public String getUserName() {
         return userName;
@@ -69,6 +94,14 @@ public class User {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getPenName() {
+        return penName;
+    }
+
+    public void setPenName(String penName) {
+        this.penName = penName;
     }
 
     public String getUserPassword() {
@@ -103,12 +136,44 @@ public class User {
         this.userStatus = userStatus;
     }
 
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean admin) {
+        this.isAdmin = admin;
+    }
+
     public LocalDateTime getLastLoginTime() {
         return lastLoginTime;
     }
 
     public void setLastLoginTime(LocalDateTime lastLoginTime) {
         this.lastLoginTime = lastLoginTime;
+    }
+
+    public String getMembershipTier() {
+        return membershipTier;
+    }
+
+    public void setMembershipTier(String membershipTier) {
+        this.membershipTier = membershipTier;
+    }
+
+    public LocalDateTime getMembershipStartAt() {
+        return membershipStartAt;
+    }
+
+    public void setMembershipStartAt(LocalDateTime membershipStartAt) {
+        this.membershipStartAt = membershipStartAt;
+    }
+
+    public LocalDateTime getMembershipEndAt() {
+        return membershipEndAt;
+    }
+
+    public void setMembershipEndAt(LocalDateTime membershipEndAt) {
+        this.membershipEndAt = membershipEndAt;
     }
 
     public Long getId() {

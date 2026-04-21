@@ -8,17 +8,19 @@
           <div class="header-actions">
             <button
               v-if="article"
-              @click="generateChaptersForArticle"
+              @click="openGenerateChaptersDialog"
               class="btn btn-secondary download-btn"
+              :disabled="aiDisabled"
             >
-              生成全部章节
+              按需生成章节
             </button>
             <button
               v-if="article"
-              @click="generateChapterContentForArticle"
+              @click="openGenerateChapterContentDialog"
               class="btn btn-secondary download-btn"
+              :disabled="aiDisabled"
             >
-              按序生成全部章节内容
+              按需生成章节内容
             </button>
             <button @click="downloadFullText" class="btn btn-primary download-btn">
               下载全文
@@ -26,7 +28,17 @@
           </div>
         </div>
         <div class="article-outline">
-          <h3>故事大纲</h3>
+          <div class="outline-header">
+            <h3>故事大纲</h3>
+            <button
+              v-if="article"
+              class="btn btn-secondary btn-sm"
+              :disabled="aiDisabled"
+              @click="openRefineOutlineDialog"
+            >
+              AI修大纲
+            </button>
+          </div>
           <p>{{ article?.articleOutline || '暂无大纲' }}</p>
         </div>
       </div>
@@ -70,7 +82,7 @@
                   <button
                     v-if="!selectedChapter.chapterContent && selectedChapter.generationStatus !== 1"
                     class="btn btn-secondary"
-                    :disabled="generatingChapters.has(selectedChapter.id)"
+                    :disabled="aiDisabled || generatingChapters.has(selectedChapter.id)"
                     @click="generateChapterContent(selectedChapter)"
                   >
                     {{ generatingChapters.has(selectedChapter.id) ? '生成中...' : '生成本章内容' }}
@@ -78,6 +90,7 @@
                   <button
                     v-else
                     class="btn btn-secondary"
+                    :disabled="aiDisabled"
                     @click="openRegenerateDialog(selectedChapter)"
                   >
                     重新生成本章内容
@@ -231,7 +244,103 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" @click="cancelRegenerate">取消</button>
-        <button class="btn btn-primary" @click="confirmRegenerate">确认重新生成本章内容</button>
+        <button class="btn btn-primary" :disabled="aiDisabled" @click="confirmRegenerate">确认重新生成本章内容</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI修订大纲弹窗 -->
+  <div v-if="showRefineOutlineModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>AI修订故事大纲</h3>
+        <button class="close-btn" @click="cancelRefineOutline">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>修改意见（必填）</label>
+          <textarea
+            v-model="refineOutlineInstruction"
+            class="form-textarea"
+            rows="5"
+            placeholder="请输入你希望大纲如何调整，例如：加强冲突、明确主线目标、压缩日常、突出反派动机、增加三幕结构等。"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" @click="cancelRefineOutline">取消</button>
+        <button class="btn btn-primary" :disabled="aiDisabled || refiningOutline" @click="confirmRefineOutline">
+          {{ refiningOutline ? '生成中...' : '确认生成新大纲' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 按需生成章节弹窗 -->
+  <div v-if="showGenerateChaptersModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>按需生成章节</h3>
+        <button class="close-btn" @click="cancelGenerateChapters">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>请选择要生成的章节数量</label>
+          <div class="choice-grid">
+            <button
+              v-for="opt in chapterCountOptions"
+              :key="opt.value"
+              type="button"
+              class="choice-btn"
+              :class="{ active: selectedGenerateChaptersOption === opt.value }"
+              @click="selectedGenerateChaptersOption = opt.value"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" @click="cancelGenerateChapters">取消</button>
+        <button class="btn btn-primary" :disabled="aiDisabled || generatingChaptersBatch" @click="confirmGenerateChapters">
+          {{ generatingChaptersBatch ? '启动中...' : '确认生成' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 按需生成章节内容弹窗 -->
+  <div v-if="showGenerateChapterContentModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>按需生成章节内容</h3>
+        <button class="close-btn" @click="cancelGenerateChapterContent">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>请选择要生成的章节内容数量</label>
+          <div class="helper-text">
+            “全部”表示对<strong>已有章节</strong>中尚未生成内容的章节，全部生成内容。
+          </div>
+          <div class="choice-grid">
+            <button
+              v-for="opt in chapterCountOptions"
+              :key="opt.value"
+              type="button"
+              class="choice-btn"
+              :class="{ active: selectedGenerateChapterContentOption === opt.value }"
+              @click="selectedGenerateChapterContentOption = opt.value"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" @click="cancelGenerateChapterContent">取消</button>
+        <button class="btn btn-primary" :disabled="aiDisabled || generatingChapterContentBatch" @click="confirmGenerateChapterContent">
+          {{ generatingChapterContentBatch ? '启动中...' : '确认生成' }}
+        </button>
       </div>
     </div>
   </div>
@@ -240,16 +349,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import { http } from '../lib/http/client';
 import type { BaseResponse } from '../lib/types/base';
+import { useAuthStore } from '../stores/auth';
+import { useWalletStore } from '../stores/wallet';
 
 interface ArticleRespDto {
   id: number;
   articleName: string;
   articleOutline: string;
-  articleType?: string;
+  theme?: string;
   voiceTone?: string;
   voiceLink?: string;
   videoLink?: string;
@@ -288,6 +400,14 @@ interface ArticleChapterRespDto {
 const route = useRoute();
 const router = useRouter();
 
+const auth = useAuthStore();
+const wallet = useWalletStore();
+const { balance } = storeToRefs(wallet);
+const { membershipActive } = storeToRefs(auth);
+const aiDisabled = computed(
+  () => !membershipActive.value || (balance.value?.availableBalanceCent ?? 0) <= 0
+);
+
 const article = ref<ArticleRespDto | null>(null);
 const chapters = ref<ArticleChapterRespDto[]>([]);
 const selectedChapterId = ref<number | null>(null);
@@ -316,6 +436,33 @@ const editedPlots = ref<PlotRespDto[]>([]);
 const showRegenerateModal = ref(false);
 const regenerateInstruction = ref('');
 const regeneratingChapter = ref<ArticleChapterRespDto | null>(null);
+
+// AI修订大纲弹窗状态
+const showRefineOutlineModal = ref(false);
+const refineOutlineInstruction = ref('');
+const refiningOutline = ref(false);
+
+type ChapterCountOptionValue = number | 'ALL';
+const chapterCountOptions: Array<{ label: string; value: ChapterCountOptionValue }> = [
+  { label: '1章', value: 1 },
+  { label: '3章', value: 3 },
+  { label: '5章', value: 5 },
+  { label: '10章', value: 10 },
+  { label: '30章', value: 30 },
+  { label: '50章', value: 50 },
+  { label: '100章', value: 100 },
+  { label: '全部', value: 'ALL' },
+];
+
+// 按需生成章节弹窗状态
+const showGenerateChaptersModal = ref(false);
+const selectedGenerateChaptersOption = ref<ChapterCountOptionValue>('ALL');
+const generatingChaptersBatch = ref(false);
+
+// 按需生成章节内容弹窗状态
+const showGenerateChapterContentModal = ref(false);
+const selectedGenerateChapterContentOption = ref<ChapterCountOptionValue>('ALL');
+const generatingChapterContentBatch = ref(false);
 
 
 // 获取文章详情
@@ -479,6 +626,52 @@ const confirmRegenerate = async () => {
   }
 };
 
+// 打开AI修订大纲弹窗
+const openRefineOutlineDialog = () => {
+  refineOutlineInstruction.value = '';
+  showRefineOutlineModal.value = true;
+};
+
+const cancelRefineOutline = () => {
+  showRefineOutlineModal.value = false;
+  refineOutlineInstruction.value = '';
+  refiningOutline.value = false;
+};
+
+const confirmRefineOutline = async () => {
+  if (!article.value) return;
+  const instruction = refineOutlineInstruction.value.trim();
+  if (!instruction) {
+    window.showNotification('请先输入修改意见', 'error');
+    return;
+  }
+
+  refiningOutline.value = true;
+  try {
+    const resp = await http.post<BaseResponse<string>>(
+      `/api/articles/${article.value.id}/refine-outline`,
+      { instruction },
+      { timeout: 180000, silentBizError: true } as any
+    );
+    const response = resp.data;
+    if (response.code === '00000000') {
+      if (article.value) {
+        article.value.articleOutline = response.data || '';
+      }
+      window.showNotification('大纲已更新', 'success');
+      showRefineOutlineModal.value = false;
+      refineOutlineInstruction.value = '';
+    } else {
+      window.showNotification('生成失败：' + (response.msg || '未知错误'), 'error');
+    }
+  } catch (e: any) {
+    console.error('AI修订大纲失败:', e);
+    window.showNotification(e?.message || '生成失败，请稍后重试', 'error');
+  } finally {
+    refiningOutline.value = false;
+  }
+};
+
 // 删除章节
 const deleteChapter = async (chapter: ArticleChapterRespDto) => {
 
@@ -569,28 +762,72 @@ const downloadCurrentChapter = () => {
 
 // 整篇文章级别操作：生成章节 / 生成章节内容
 
-const generateChaptersForArticle = async () => {
-  if (!article.value) return;
-  window.showNotification('章节生成任务已启动', 'success');
-  http.post<BaseResponse<boolean>>(
-    `/api/articles/${article.value.id}/generate-chapters`,
-    {},
-    { timeout: 300000, silentBizError: true } as any
-  ).catch((error) => {
-    console.error('章节生成失败:', error);
-  });
+const openGenerateChaptersDialog = () => {
+  selectedGenerateChaptersOption.value = 'ALL';
+  showGenerateChaptersModal.value = true;
 };
 
-const generateChapterContentForArticle = async () => {
+const cancelGenerateChapters = () => {
+  showGenerateChaptersModal.value = false;
+  generatingChaptersBatch.value = false;
+};
+
+const confirmGenerateChapters = async () => {
   if (!article.value) return;
+  if (generatingChaptersBatch.value) return;
+  generatingChaptersBatch.value = true;
+
+  const opt = selectedGenerateChaptersOption.value;
+  const payload = opt === 'ALL' ? { all: true } : { count: opt };
+
+  window.showNotification('章节生成任务已启动', 'success');
+  // 点击确认后立即关闭弹窗（请求在后台继续）
+  showGenerateChaptersModal.value = false;
+  try {
+    await http.post<BaseResponse<boolean>>(
+      `/api/articles/${article.value.id}/generate-chapters`,
+      payload,
+      { timeout: 300000, silentBizError: true } as any
+    );
+  } catch (error) {
+    console.error('章节生成失败:', error);
+  } finally {
+    generatingChaptersBatch.value = false;
+  }
+};
+
+const openGenerateChapterContentDialog = () => {
+  selectedGenerateChapterContentOption.value = 'ALL';
+  showGenerateChapterContentModal.value = true;
+};
+
+const cancelGenerateChapterContent = () => {
+  showGenerateChapterContentModal.value = false;
+  generatingChapterContentBatch.value = false;
+};
+
+const confirmGenerateChapterContent = async () => {
+  if (!article.value) return;
+  if (generatingChapterContentBatch.value) return;
+  generatingChapterContentBatch.value = true;
+
+  const opt = selectedGenerateChapterContentOption.value;
+  const payload = opt === 'ALL' ? { all: true } : { count: opt };
+
   window.showNotification('章节内容生成任务已启动', 'success');
-  http.post<BaseResponse<boolean>>(
-    `/api/articles/${article.value.id}/generate-chapter-content`,
-    {},
-    { timeout: 600000, silentBizError: true } as any
-  ).catch((error) => {
+  // 点击确认后立即关闭弹窗（请求在后台继续）
+  showGenerateChapterContentModal.value = false;
+  try {
+    await http.post<BaseResponse<boolean>>(
+      `/api/articles/${article.value.id}/generate-chapter-content`,
+      payload,
+      { timeout: 600000, silentBizError: true } as any
+    );
+  } catch (error) {
     console.error('章节内容生成失败:', error);
-  });
+  } finally {
+    generatingChapterContentBatch.value = false;
+  }
 };
 
 // 编辑功能
@@ -718,6 +955,10 @@ onMounted(() => {
     fetchArticleDetail(articleId);
     fetchArticleChapters(articleId);
   }
+
+  // 刷新会员与余额用于 AI 按钮禁用态
+  auth.refreshSession().catch(() => {});
+  wallet.refreshBalance().catch(() => {});
 });
 </script>
 
@@ -787,6 +1028,18 @@ onMounted(() => {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
+}
+
+.outline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.outline-header h3 {
+  margin: 0;
 }
 
 .article-outline p {
@@ -1376,6 +1629,49 @@ onMounted(() => {
   gap: 0.75rem;
   padding: 1.5rem;
   border-top: 1px solid var(--border-light, #e5e7eb);
+}
+
+/* 按需选择按钮 */
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.choice-btn {
+  border: 1px solid var(--border-light, #e5e7eb);
+  background: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.15s ease;
+}
+
+.choice-btn:hover {
+  border-color: var(--primary, #2563eb);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.choice-btn.active {
+  border-color: var(--primary, #2563eb);
+  background: rgba(37, 99, 235, 0.10);
+  color: var(--primary, #2563eb);
+  font-weight: 600;
+}
+
+.helper-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 </style>

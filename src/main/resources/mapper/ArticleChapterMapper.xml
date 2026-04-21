@@ -120,7 +120,7 @@
         AND ac.core_plot IS NOT NULL
         AND ac.word_count_estimate IS NOT NULL
         AND ac.res_state = 1
-        AND ac.generation_status != 1  -- 排除生成中的章节
+        AND ac.generation_status NOT IN (1, 3)  -- 排除生成中的章节与已失败章节
         ORDER BY ac.article_id ASC, ac.chapter_no ASC
     </select>
 

@@ -12,8 +12,10 @@ import com.aicreation.entity.po.ArticleChapter;
 import com.aicreation.entity.po.Plot;
 import com.aicreation.mapper.ArticleMapper;
 import com.aicreation.mapper.ArticleChapterMapper;
-import com.aicreation.mapper.ArticleGenerationConfigMapper;
 import com.aicreation.mapper.PlotMapper;
+import com.aicreation.external.VolcengineChatClient;
+import com.aicreation.security.AccessControlService;
+import com.aicreation.service.AiBillingService;
 import com.aicreation.service.IArticleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -48,16 +51,19 @@ public class ArticleServiceImpl implements IArticleService {
     private PlotMapper plotMapper;
 
     @Autowired
-    private ArticleGenerationConfigMapper articleGenerationConfigMapper;
-
-    @Autowired
     private com.aicreation.task.ArticleContentGenerationTask articleContentGenerationTask;
 
     @Autowired
-    private com.aicreation.task.ArticleChapterGenerationTask articleChapterGenerationTask;
+    private com.aicreation.generate.ArticleChapterGenerator articleChapterGenerator;
 
     @Autowired
-    private com.aicreation.generate.ArticleChapterGenerator articleChapterGenerator;
+    private VolcengineChatClient volcengineChatClient;
+
+    @Autowired
+    private AccessControlService accessControlService;
+
+    @Autowired
+    private AiBillingService aiBillingService;
 
     @Override
     public ArticleRespDto getArticleById(ArticleQueryReqDto request) {
@@ -71,6 +77,7 @@ public class ArticleServiceImpl implements IArticleService {
             return null;
         }
 
+        accessControlService.assertArticleAccess(request.getArticleId());
         return ArticleConverter.INSTANCE.toArticleRespDto(article);
     }
 
@@ -86,6 +93,7 @@ public class ArticleServiceImpl implements IArticleService {
             return null;
         }
 
+        accessControlService.assertArticleAccess(article.getId());
         return ArticleConverter.INSTANCE.toArticleRespDto(article);
     }
 
@@ -165,6 +173,8 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
+        accessControlService.assertArticleAccess(request.getArticleId());
+
         // 检查文章是否存在
         Article existingArticle = articleMapper.selectByPrimaryKey(request.getArticleId());
         if (Objects.isNull(existingArticle)) {
@@ -202,6 +212,8 @@ public class ArticleServiceImpl implements IArticleService {
             log.warn("删除文章失败：请求参数无效");
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
+
+        accessControlService.assertArticleAccess(request.getArticleId());
 
         // 检查文章是否存在
         Article existingArticle = articleMapper.selectByPrimaryKey(request.getArticleId());
@@ -247,8 +259,7 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
-
-
+        Long scopedCreateUserId = accessControlService.getScopedCreateUserIdForList();
 
         // 设置分页
         PageHelper.startPage(request.getPageNo(), request.getPageSize());
@@ -258,7 +269,8 @@ public class ArticleServiceImpl implements IArticleService {
             request.getArticleName(),
             request.getVoiceTone(),
             request.getPublishStatus(),
-            request.getArticleType()
+            request.getTheme(),
+            scopedCreateUserId
         );
 
         // 获取分页信息
@@ -292,7 +304,10 @@ public class ArticleServiceImpl implements IArticleService {
         dto.setId(article.getId());
         dto.setArticleName(article.getArticleName());
         dto.setArticleOutline(article.getArticleOutline());
-        dto.setArticleType(article.getArticleType());
+        dto.setTheme(article.getTheme());
+        dto.setAdditionalCharacteristics(article.getAdditionalCharacteristics());
+        dto.setCreateUserId(article.getCreateUserId());
+        dto.setCreateUserName(article.getCreateUserName());
         dto.setVoiceTone(article.getVoiceTone());
         dto.setVoiceLink(article.getVoiceLink());
         dto.setVoiceFilePath(article.getVoiceFilePath());
@@ -312,6 +327,8 @@ public class ArticleServiceImpl implements IArticleService {
             log.warn("更新文章发布状态失败：参数无效");
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
+
+        accessControlService.assertArticleAccess(articleId);
 
         // 验证发布状态值
         if (!ArticleStatusEnum.isValidStatus(publishStatus)) {
@@ -342,6 +359,8 @@ public class ArticleServiceImpl implements IArticleService {
             log.warn("查询文章章节失败：文章ID无效，articleId={}", articleId);
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
+
+        accessControlService.assertArticleAccess(articleId);
 
         // 查询文章是否存在
         Article article = articleMapper.selectByPrimaryKey(articleId);
@@ -425,6 +444,8 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
+        accessControlService.assertArticleAccess(articleId);
+
         // 获取文章信息
         Article article = articleMapper.selectByPrimaryKey(articleId);
         if (article == null) {
@@ -475,6 +496,8 @@ public class ArticleServiceImpl implements IArticleService {
             log.warn("触发文章内容生成失败：文章ID无效，articleId={}", articleId);
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
+
+        accessControlService.assertArticleAccess(articleId);
 
         // 检查文章是否存在
         Article article = articleMapper.selectByPrimaryKey(articleId);
@@ -536,6 +559,8 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
+        accessControlService.assertArticleAccess(articleId);
+
         // 获取文章信息
         Article article = articleMapper.selectByPrimaryKey(articleId);
         if (article == null) {
@@ -580,6 +605,15 @@ public class ArticleServiceImpl implements IArticleService {
     public Boolean deleteChapter(Long chapterId) {
         log.info("开始删除章节，chapterId={}", chapterId);
         try {
+            if (chapterId == null || chapterId <= 0) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+            }
+            ArticleChapter chapter = articleChapterMapper.selectByPrimaryKey(chapterId);
+            if (chapter == null) {
+                throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
+            }
+            accessControlService.assertArticleAccess(chapter.getArticleId());
+
             // 首先删除章节关联的伏笔信息
             plotMapper.deleteByChapterId(chapterId);
 
@@ -598,6 +632,8 @@ public class ArticleServiceImpl implements IArticleService {
     public Boolean generateArticleChapters(Long articleId) {
         log.info("开始为文章{}生成章节", articleId);
         try {
+            accessControlService.assertArticleAccess(articleId);
+
             // 获取文章信息
             Article article = articleMapper.selectByPrimaryKey(articleId);
             if (article == null) {
@@ -609,8 +645,37 @@ public class ArticleServiceImpl implements IArticleService {
 
             log.info("文章{}章节生成任务已启动", articleId);
             return true;
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             log.error("启动文章{}章节生成失败：{}", articleId, e.getMessage(), e);
+            throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public Boolean generateArticleChapters(Long articleId, Integer targetChapterCount, Boolean all) {
+        log.info("开始为文章{}按需生成章节，targetChapterCount={}, all={}", articleId, targetChapterCount, all);
+        try {
+            accessControlService.assertArticleAccess(articleId);
+
+            // 获取文章信息
+            Article article = articleMapper.selectByPrimaryKey(articleId);
+            if (article == null) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
+            }
+
+            boolean generateAll = Boolean.TRUE.equals(all) || targetChapterCount == null;
+            if (generateAll) {
+                articleChapterGenerator.generateChaptersForArticle(articleId);
+            } else {
+                articleChapterGenerator.generateChaptersForArticle(articleId, targetChapterCount);
+            }
+            return true;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("启动文章{}按需生成章节失败：{}", articleId, e.getMessage(), e);
             throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
         }
     }
@@ -619,15 +684,12 @@ public class ArticleServiceImpl implements IArticleService {
     public Boolean generateArticleChapterContent(Long articleId) {
         log.info("[CHAPTER_CONTENT] 开始为文章{}生成章节内容", articleId);
         try {
+            accessControlService.assertArticleAccess(articleId);
+
             // 获取文章信息
             Article article = articleMapper.selectByPrimaryKey(articleId);
             if (article == null) {
                 throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
-            }
-
-            // 仅当章节生成已全部完成（故事完结）时，才允许触发章节内容生成
-            if (!Boolean.TRUE.equals(article.getStoryComplete())) {
-                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "章节尚未全部生成完成（故事未完结），请先完成章节生成后再生成章节内容");
             }
 
             // 获取文章中没有内容的章节
@@ -652,8 +714,61 @@ public class ArticleServiceImpl implements IArticleService {
             log.info("文章{}章节内容生成任务已启动，将按顺序生成{}个章节的内容",
                     articleId, chaptersWithoutContent.size());
             return true;
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             log.error("启动文章{}章节内容生成失败：{}", articleId, e.getMessage(), e);
+            throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public Boolean generateArticleChapterContent(Long articleId, Integer count, Boolean all) {
+        log.info("[CHAPTER_CONTENT] 开始为文章{}按需生成章节内容，count={}, all={}", articleId, count, all);
+        try {
+            accessControlService.assertArticleAccess(articleId);
+
+            Article article = articleMapper.selectByPrimaryKey(articleId);
+            if (article == null) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章不存在");
+            }
+
+            // 获取文章的所有章节
+            List<ArticleChapter> allChapters = articleChapterMapper.selectByArticleId(articleId);
+            allChapters.sort((a, b) -> Integer.compare(a.getChapterNo(), b.getChapterNo()));
+            if (allChapters.isEmpty()) {
+                throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章没有章节信息，请先生成章节");
+            }
+
+            boolean generateAllExisting = Boolean.TRUE.equals(all) || count == null;
+            List<ArticleChapter> chaptersToGenerate;
+            if (generateAllExisting) {
+                // “全部”：已有章节全部都要生成内容（任务内部会自动跳过已有内容的章节）
+                chaptersToGenerate = allChapters;
+            } else {
+                // 从“未生成内容且未标记失败”的章节中，按章节号取前 N 个
+                final int requestedCount = count == null ? Integer.MAX_VALUE : count.intValue();
+                List<ArticleChapter> candidates = new ArrayList<>();
+                for (ArticleChapter c : allChapters) {
+                    Integer status = c.getGenerationStatus();
+                    boolean failed = status != null && status == 3;
+                    if (!StringUtils.hasText(c.getChapterContent()) && !failed) {
+                        candidates.add(c);
+                    }
+                }
+                if (candidates.isEmpty()) {
+                    throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "文章的所有章节内容都已生成完成，没有需要生成的章节");
+                }
+                chaptersToGenerate = candidates.size() > requestedCount ? candidates.subList(0, requestedCount) : candidates;
+            }
+
+            articleContentGenerationTask.generateContentsForArticle(article, chaptersToGenerate);
+            log.info("文章{}按需章节内容生成任务已启动，本次目标章节数={}", articleId, chaptersToGenerate.size());
+            return true;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("启动文章{}按需章节内容生成失败：{}", articleId, e.getMessage(), e);
             throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR);
         }
     }
@@ -672,8 +787,9 @@ public class ArticleServiceImpl implements IArticleService {
             throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
 
+        accessControlService.assertArticleAccess(chapter.getArticleId());
+
         // 更新章节信息
-        boolean chapterUpdated = false;
         if (StringUtils.hasText(corePlot) || wordCountEstimate != null) {
             if (StringUtils.hasText(corePlot)) {
                 chapter.setCorePlot(corePlot);
@@ -683,7 +799,6 @@ public class ArticleServiceImpl implements IArticleService {
             }
             chapter.setUpdateTime(LocalDateTime.now());
             articleChapterMapper.updateByPrimaryKey(chapter);
-            chapterUpdated = true;
             log.info("更新章节基本信息成功，chapterId={}", chapterId);
         }
 
@@ -709,6 +824,72 @@ public class ArticleServiceImpl implements IArticleService {
         }
 
         return true;
+    }
+
+    @Override
+    public String refineArticleOutline(Long articleId, String instruction) {
+        if (articleId == null || articleId <= 0) {
+            log.warn("AI修订文章大纲失败：文章ID无效，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
+        }
+        if (!StringUtils.hasText(instruction)) {
+            log.warn("AI修订文章大纲失败：修改意见为空，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.PARAM_ERROR, "修改意见不能为空");
+        }
+
+        accessControlService.assertArticleAccess(articleId);
+
+        Article article = articleMapper.selectByPrimaryKey(articleId);
+        if (article == null) {
+            log.warn("AI修订文章大纲失败：文章不存在，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
+        }
+
+        String currentOutline = article.getArticleOutline() != null ? article.getArticleOutline() : "";
+        String prompt = """
+你是一名中文小说编辑。请根据“当前故事大纲”和“用户修改意见”，输出一份更新后的【故事大纲】。
+
+要求：
+- 只输出新的故事大纲正文，不要输出任何解释、分析、标题、前缀、序号说明之外的内容。
+- 保持与原大纲一致的题材与人物设定，不要引入不相关的新主线。
+- 语言简洁、结构清晰，长度与原大纲大致相当（允许适度增减）。
+
+当前故事大纲：
+%s
+
+用户修改意见：
+%s
+""".formatted(currentOutline, instruction.trim());
+
+        Long userId = article.getCreateUserId();
+        // 用当前大纲与修改意见长度做一个粗估算（目前没有 token 精确数据）
+        int lenEstimate = Math.max(200, currentOutline.length() + instruction.trim().length());
+        long estimatedCostCent = aiBillingService.estimateCostCent("REFINE_OUTLINE", lenEstimate);
+
+        List<String> results = aiBillingService.executeWithAiBilling(
+                userId,
+                "REFINE_OUTLINE",
+                articleId,
+                null,
+                estimatedCostCent,
+                () -> volcengineChatClient.chatCompletions(prompt)
+        );
+        String newOutline = (results != null && !results.isEmpty() && results.get(0) != null)
+                ? results.get(0).trim()
+                : "";
+
+        if (!StringUtils.hasText(newOutline)) {
+            log.warn("AI修订文章大纲失败：AI返回空内容，articleId={}", articleId);
+            throw new BusinessException(ErrorCodeEnum.INTERNAL_ERROR, "AI未返回有效的大纲内容");
+        }
+
+        Article toUpdate = new Article();
+        toUpdate.setId(articleId);
+        toUpdate.setArticleOutline(newOutline);
+        toUpdate.setUpdateTime(LocalDateTime.now());
+        articleMapper.updateByPrimaryKey(toUpdate);
+
+        return newOutline;
     }
 
 

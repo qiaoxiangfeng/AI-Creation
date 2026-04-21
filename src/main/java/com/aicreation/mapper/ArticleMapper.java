@@ -1,6 +1,7 @@
 package com.aicreation.mapper;
 
 import com.aicreation.entity.po.Article;
+import com.aicreation.entity.dto.ArticleTitleDedupItemDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -38,13 +39,14 @@ public interface ArticleMapper {
      * @param articleName 文章名称（可选）
      * @param voiceTone 音色（可选）
      * @param publishStatus 发布状态（可选）
-     * @param articleType 文章类型（可选）
+     * @param theme 文章主题/分类（可选）
      * @return 文章列表
      */
     List<Article> selectArticleList(@Param("articleName") String articleName,
                                    @Param("voiceTone") String voiceTone,
                                    @Param("publishStatus") Integer publishStatus,
-                                   @Param("articleType") String articleType);
+                                   @Param("theme") String theme,
+                                   @Param("scopedCreateUserId") Long scopedCreateUserId);
 
     /**
      * 插入文章
@@ -85,7 +87,15 @@ public interface ArticleMapper {
      * @param articleType 文章类型
      * @return 文章名称列表
      */
-    List<String> selectExistingTitlesByArticleType(@Param("articleType") String articleType);
+    List<String> selectExistingTitlesByTheme(@Param("theme") String theme);
+
+    /**
+     * 根据主题查询已存在文章（标题 + 大纲），用于标题生成去重
+     *
+     * @param theme 主题
+     * @return 已存在文章信息列表
+     */
+    List<ArticleTitleDedupItemDto> selectExistingTitleDedupItemsByTheme(@Param("theme") String theme);
 
     /**
      * 查询内容未生成的文章列表
@@ -124,5 +134,5 @@ public interface ArticleMapper {
      * @param articleType 文章类型
      * @return 文章名称列表
      */
-    List<String> selectArticleNamesByType(@Param("articleType") String articleType);
+    List<String> selectArticleNamesByTheme(@Param("theme") String theme);
 }

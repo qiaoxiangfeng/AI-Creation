@@ -4,6 +4,7 @@ import com.aicreation.entity.dto.*;
 import com.aicreation.entity.dto.base.BaseResponse;
 import com.aicreation.entity.dto.base.PageRespDto;
 import com.aicreation.entity.dto.ArticleQueryReqDto;
+import com.aicreation.security.AccessControlService;
 import com.aicreation.service.IArticleService;
 import com.aicreation.generate.ArticleTitleGenerator;
 import java.util.List;
@@ -35,6 +36,9 @@ public class ArticleController {
 
     @Autowired
     private com.aicreation.generate.ArticleContentGenerator articleContentGenerator;
+
+    @Autowired
+    private AccessControlService accessControlService;
 
     @Operation(summary = "查询文章列表", description = "分页查询文章列表，支持按名称、类型、发布状态筛选")
     @PostMapping("/list")
@@ -145,16 +149,26 @@ public class ArticleController {
     @Operation(summary = "生成文章章节", description = "为指定文章生成章节信息")
     @PostMapping("/{articleId}/generate-chapters")
     public BaseResponse<Boolean> generateArticleChapters(
-            @Parameter(description = "文章ID") @PathVariable Long articleId) {
-        Boolean result = articleService.generateArticleChapters(articleId);
+            @Parameter(description = "文章ID") @PathVariable Long articleId,
+            @Parameter(description = "按需生成参数（可选）") @Valid @RequestBody(required = false) ArticleGenerateBatchReqDto request) {
+        if (request == null) {
+            Boolean result = articleService.generateArticleChapters(articleId);
+            return BaseResponse.success(result);
+        }
+        Boolean result = articleService.generateArticleChapters(articleId, request.getCount(), request.getAll());
         return BaseResponse.success(result);
     }
 
     @Operation(summary = "生成文章章节内容", description = "为指定文章生成章节内容")
     @PostMapping("/{articleId}/generate-chapter-content")
     public BaseResponse<Boolean> generateArticleChapterContent(
-            @Parameter(description = "文章ID") @PathVariable Long articleId) {
-        Boolean result = articleService.generateArticleChapterContent(articleId);
+            @Parameter(description = "文章ID") @PathVariable Long articleId,
+            @Parameter(description = "按需生成参数（可选）") @Valid @RequestBody(required = false) ArticleGenerateBatchReqDto request) {
+        if (request == null) {
+            Boolean result = articleService.generateArticleChapterContent(articleId);
+            return BaseResponse.success(result);
+        }
+        Boolean result = articleService.generateArticleChapterContent(articleId, request.getCount(), request.getAll());
         return BaseResponse.success(result);
     }
 
@@ -164,9 +178,13 @@ public class ArticleController {
             @Parameter(description = "文章ID") @PathVariable Long articleId,
             @Parameter(description = "章节ID") @PathVariable Long chapterId) {
         try {
+            accessControlService.assertArticleAccess(articleId);
             articleContentGenerator.generateChapterContent(chapterId);
             return BaseResponse.success(true);
         } catch (Exception e) {
+            if (e instanceof com.aicreation.exception.BusinessException be) {
+                return BaseResponse.error(be.getCode(), be.getMessage());
+            }
             return BaseResponse.error("67999999", "生成章节内容失败: " + e.getMessage());
         }
     }
@@ -178,9 +196,13 @@ public class ArticleController {
             @Parameter(description = "章节ID") @PathVariable Long chapterId,
             @Parameter(description = "章节重新生成请求") @Valid @RequestBody ChapterRegenerateReqDto request) {
         try {
+            accessControlService.assertArticleAccess(articleId);
             articleContentGenerator.regenerateChapterContent(chapterId, request.getInstruction());
             return BaseResponse.success(true);
         } catch (Exception e) {
+            if (e instanceof com.aicreation.exception.BusinessException be) {
+                return BaseResponse.error(be.getCode(), be.getMessage());
+            }
             return BaseResponse.error("67999999", "重新生成章节内容失败: " + e.getMessage());
         }
     }
@@ -193,8 +215,20 @@ public class ArticleController {
             Long articleId = articleTitleGenerator.generateSingleTitle(configId);
             return BaseResponse.success(articleId);
         } catch (Exception e) {
+            if (e instanceof com.aicreation.exception.BusinessException be) {
+                return BaseResponse.error(be.getCode(), be.getMessage());
+            }
             return BaseResponse.error("67999999", "生成文章标题失败: " + e.getMessage());
         }
+    }
+
+    @Operation(summary = "AI修订故事大纲", description = "根据用户修改意见调用AI生成新大纲并更新文章大纲")
+    @PostMapping("/{articleId}/refine-outline")
+    public BaseResponse<String> refineArticleOutline(
+            @Parameter(description = "文章ID") @PathVariable Long articleId,
+            @Parameter(description = "大纲修改请求") @Valid @RequestBody ArticleOutlineRefineReqDto request) {
+        String newOutline = articleService.refineArticleOutline(articleId, request.getInstruction());
+        return BaseResponse.success(newOutline);
     }
 
 }

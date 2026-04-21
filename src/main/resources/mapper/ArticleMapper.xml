@@ -9,7 +9,8 @@
         <result column="article_outline" jdbcType="VARCHAR" property="articleOutline"/>
         <result column="story_background" jdbcType="VARCHAR" property="storyBackground"/>
         <result column="image_desc" jdbcType="VARCHAR" property="imageDesc"/>
-        <result column="article_type" jdbcType="VARCHAR" property="articleType"/>
+        <result column="theme" jdbcType="VARCHAR" property="theme"/>
+        <result column="additional_characteristics" jdbcType="VARCHAR" property="additionalCharacteristics"/>
         <result column="voice_tone" jdbcType="VARCHAR" property="voiceTone"/>
         <result column="voice_link" jdbcType="VARCHAR" property="voiceLink"/>
         <result column="voice_file_path" jdbcType="VARCHAR" property="voiceFilePath"/>
@@ -20,6 +21,7 @@
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
         <result column="story_complete" jdbcType="BOOLEAN" property="storyComplete"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
         <result column="response_id" jdbcType="VARCHAR" property="responseId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -32,7 +34,8 @@
         <result column="article_outline" jdbcType="VARCHAR" property="articleOutline"/>
         <result column="story_background" jdbcType="VARCHAR" property="storyBackground"/>
         <result column="image_desc" jdbcType="VARCHAR" property="imageDesc"/>
-        <result column="article_type" jdbcType="VARCHAR" property="articleType"/>
+        <result column="theme" jdbcType="VARCHAR" property="theme"/>
+        <result column="additional_characteristics" jdbcType="VARCHAR" property="additionalCharacteristics"/>
         <result column="voice_tone" jdbcType="VARCHAR" property="voiceTone"/>
         <result column="voice_link" jdbcType="VARCHAR" property="voiceLink"/>
         <result column="voice_file_path" jdbcType="VARCHAR" property="voiceFilePath"/>
@@ -42,6 +45,8 @@
         <result column="total_word_count_estimate" jdbcType="INTEGER" property="totalWordCountEstimate"/>
         <result column="chapter_word_count_estimate" jdbcType="INTEGER" property="chapterWordCountEstimate"/>
         <result column="story_complete" jdbcType="BOOLEAN" property="storyComplete"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
+        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName"/>
         <result column="response_id" jdbcType="VARCHAR" property="responseId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -49,8 +54,8 @@
 
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
-        id, article_name, article_outline, story_background, image_desc, article_type, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, story_complete, res_state, response_id, create_time, update_time
+        id, article_name, article_outline, story_background, image_desc, theme, additional_characteristics, voice_tone, voice_link, voice_file_path,
+        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, story_complete, res_state, create_user_id, response_id, create_time, update_time
     </sql>
 
     <!-- 根据ID查询文章 -->
@@ -83,39 +88,44 @@
     <!-- 查询文章列表（用于显示，不包含删除状态） -->
     <select id="selectArticleList" resultMap="ListResultMap">
         SELECT
-        id, article_name, article_outline, story_background, article_type, voice_tone, voice_link, voice_file_path,
-        video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, create_time, update_time
-        FROM article
+        a.id, a.article_name, a.article_outline, a.story_background, a.theme, a.additional_characteristics, a.voice_tone, a.voice_link, a.voice_file_path,
+        a.video_link, a.video_file_path, a.publish_status, a.total_word_count_estimate, a.chapter_word_count_estimate, a.create_user_id, a.create_time, a.update_time,
+        u.user_name AS create_user_name
+        FROM article a
+        LEFT JOIN user_info u ON a.create_user_id = u.id AND u.res_state = 1
         <where>
-            res_state = 1
+            a.res_state = 1
+            <if test="scopedCreateUserId != null">
+                AND a.create_user_id = #{scopedCreateUserId,jdbcType=BIGINT}
+            </if>
             <if test="articleName != null and articleName != ''">
-                AND article_name LIKE CONCAT('%', #{articleName,jdbcType=VARCHAR}, '%')
+                AND a.article_name LIKE CONCAT('%', #{articleName,jdbcType=VARCHAR}, '%')
             </if>
             <if test="voiceTone != null and voiceTone != ''">
-                AND voice_tone = #{voiceTone,jdbcType=VARCHAR}
+                AND a.voice_tone = #{voiceTone,jdbcType=VARCHAR}
             </if>
             <if test="publishStatus != null">
-                AND publish_status = #{publishStatus,jdbcType=SMALLINT}
+                AND a.publish_status = #{publishStatus,jdbcType=SMALLINT}
             </if>
-            <if test="articleType != null and articleType != ''">
-                AND article_type = #{articleType,jdbcType=VARCHAR}
+            <if test="theme != null and theme != ''">
+                AND a.theme = #{theme,jdbcType=VARCHAR}
             </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY a.create_time DESC
     </select>
 
     <!-- 插入文章 -->
     <insert id="insert" parameterType="com.aicreation.entity.po.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article (
-            article_name, article_outline, story_background, image_desc, article_type, voice_tone, voice_link, voice_file_path,
-            video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, story_complete, response_id, res_state, create_time, update_time
+            article_name, article_outline, story_background, image_desc, theme, additional_characteristics, voice_tone, voice_link, voice_file_path,
+            video_link, video_file_path, publish_status, total_word_count_estimate, chapter_word_count_estimate, story_complete, response_id, res_state, create_user_id, create_time, update_time
         ) VALUES (
-            #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{storyBackground,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{articleType,jdbcType=VARCHAR},
+            #{articleName,jdbcType=VARCHAR}, #{articleOutline,jdbcType=VARCHAR}, #{storyBackground,jdbcType=VARCHAR}, #{imageDesc,jdbcType=VARCHAR}, #{theme,jdbcType=VARCHAR}, #{additionalCharacteristics,jdbcType=VARCHAR},
             #{voiceTone,jdbcType=VARCHAR}, #{voiceLink,jdbcType=VARCHAR},
             #{voiceFilePath,jdbcType=VARCHAR}, #{videoLink,jdbcType=VARCHAR},
             #{videoFilePath,jdbcType=VARCHAR}, #{publishStatus,jdbcType=SMALLINT},
             #{totalWordCountEstimate,jdbcType=INTEGER}, #{chapterWordCountEstimate,jdbcType=INTEGER},
-            #{storyComplete,jdbcType=BOOLEAN}, #{responseId,jdbcType=VARCHAR}, #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+            #{storyComplete,jdbcType=BOOLEAN}, #{responseId,jdbcType=VARCHAR}, #{resState,jdbcType=INTEGER}, #{createUserId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
 
@@ -127,7 +137,8 @@
             <if test="articleOutline != null">article_outline = #{articleOutline,jdbcType=VARCHAR},</if>
             <if test="storyBackground != null">story_background = #{storyBackground,jdbcType=VARCHAR},</if>
             <if test="imageDesc != null">image_desc = #{imageDesc,jdbcType=VARCHAR},</if>
-            <if test="articleType != null">article_type = #{articleType,jdbcType=VARCHAR},</if>
+            <if test="theme != null">theme = #{theme,jdbcType=VARCHAR},</if>
+            <if test="additionalCharacteristics != null">additional_characteristics = #{additionalCharacteristics,jdbcType=VARCHAR},</if>
             <if test="voiceTone != null">voice_tone = #{voiceTone,jdbcType=VARCHAR},</if>
             <if test="voiceLink != null">voice_link = #{voiceLink,jdbcType=VARCHAR},</if>
             <if test="voiceFilePath != null">voice_file_path = #{voiceFilePath,jdbcType=VARCHAR},</if>
@@ -159,11 +170,22 @@
     </update>
 
     <!-- 根据文章类型查询已存在的文章名称列表 -->
-    <select id="selectExistingTitlesByArticleType" resultType="java.lang.String">
+    <select id="selectExistingTitlesByTheme" resultType="java.lang.String">
         SELECT article_name
         FROM article
-        WHERE article_type = #{articleType,jdbcType=VARCHAR}
+        WHERE theme = #{theme,jdbcType=VARCHAR}
         AND res_state = 1
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据主题查询已存在文章（标题 + 大纲），用于标题生成去重 -->
+    <select id="selectExistingTitleDedupItemsByTheme" resultType="com.aicreation.entity.dto.ArticleTitleDedupItemDto">
+        SELECT
+            article_name AS articleName,
+            article_outline AS articleOutline
+        FROM article
+        WHERE theme = #{theme,jdbcType=VARCHAR}
+          AND res_state = 1
         ORDER BY create_time DESC
     </select>
 
@@ -195,11 +217,11 @@
 
     <!-- 根据生成状态查询文章列表 -->
     <!-- 根据文章类型查询文章名称列表 -->
-    <select id="selectArticleNamesByType" parameterType="java.lang.String" resultType="java.lang.String">
+    <select id="selectArticleNamesByTheme" parameterType="java.lang.String" resultType="java.lang.String">
         SELECT article_name
         FROM article
         WHERE res_state = 1
-        AND article_type = #{articleType,jdbcType=VARCHAR}
+        AND theme = #{theme,jdbcType=VARCHAR}
         ORDER BY create_time DESC
     </select>
 

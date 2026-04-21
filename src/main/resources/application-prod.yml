@@ -40,14 +40,15 @@ mybatis:
   type-aliases-package: com.aicreation.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
     cache-enabled: false
 
 logging:
   level:
     com.aicreation: info
     org.springframework.web: info
-    org.mybatis: info
+    org.mybatis: debug
+    com.aicreation.mapper: debug
 
 # 自定义配置
 app:

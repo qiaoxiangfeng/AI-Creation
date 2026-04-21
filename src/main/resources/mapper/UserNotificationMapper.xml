@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.UserNotificationMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.UserNotification">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="is_read" jdbcType="BOOLEAN" property="isRead"/>
+        <result column="read_time" jdbcType="TIMESTAMP" property="readTime"/>
+        <result column="biz_ref_type" jdbcType="VARCHAR" property="bizRefType"/>
+        <result column="biz_ref_id" jdbcType="BIGINT" property="bizRefId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, type, title, content, is_read, read_time, biz_ref_type, biz_ref_id, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_notification
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_notification
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+    <select id="countUnreadByUserId" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM user_notification
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        AND is_read = FALSE
+    </select>
+
+    <select id="countByBizRef" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM user_notification
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        AND biz_ref_type = #{bizRefType,jdbcType=VARCHAR}
+        AND biz_ref_id = #{bizRefId,jdbcType=BIGINT}
+    </select>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.UserNotification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_notification (
+            user_id, type, title, content, is_read, read_time, biz_ref_type, biz_ref_id, create_time, update_time
+        ) VALUES (
+            #{userId,jdbcType=BIGINT},
+            #{type,jdbcType=VARCHAR},
+            #{title,jdbcType=VARCHAR},
+            #{content,jdbcType=VARCHAR},
+            #{isRead,jdbcType=BOOLEAN},
+            #{readTime,jdbcType=TIMESTAMP},
+            #{bizRefType,jdbcType=VARCHAR},
+            #{bizRefId,jdbcType=BIGINT},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.UserNotification">
+        UPDATE user_notification
+        <set>
+            <if test="type != null">type = #{type,jdbcType=VARCHAR},</if>
+            <if test="title != null">title = #{title,jdbcType=VARCHAR},</if>
+            <if test="content != null">content = #{content,jdbcType=VARCHAR},</if>
+            <if test="isRead != null">is_read = #{isRead,jdbcType=BOOLEAN},</if>
+            <if test="readTime != null">read_time = #{readTime,jdbcType=TIMESTAMP},</if>
+            <if test="bizRefType != null">biz_ref_type = #{bizRefType,jdbcType=VARCHAR},</if>
+            <if test="bizRefId != null">biz_ref_id = #{bizRefId,jdbcType=BIGINT},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

@@ -4,7 +4,8 @@
 
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
-        id, user_name, user_password, user_email, user_phone, user_status, last_login_time, 
+        id, user_name, pen_name, user_password, user_email, user_phone, user_status, is_admin, last_login_time,
+        membership_tier, membership_start_at, membership_end_at,
         create_time, update_time, res_state
     </sql>
 
@@ -14,6 +15,14 @@
             <include refid="Base_Column_List" />
         FROM user_info 
         WHERE id = #{id} AND res_state = 1
+    </select>
+
+    <select id="selectByPrimaryKeyForUpdate" parameterType="java.lang.Long" resultType="com.aicreation.entity.po.User">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM user_info
+        WHERE id = #{id} AND res_state = 1
+        FOR UPDATE
     </select>
 
     <!-- 根据用户名查询用户 -->
@@ -27,10 +36,12 @@
     <!-- 插入用户 -->
     <insert id="insert" parameterType="com.aicreation.entity.po.User" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_info (
-            user_name, user_password, user_email, user_phone, user_status, last_login_time,
+            user_name, pen_name, user_password, user_email, user_phone, user_status, is_admin, last_login_time,
+            membership_tier, membership_start_at, membership_end_at,
             create_time, update_time, res_state
         ) VALUES (
-            #{userName,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR}, #{userEmail,jdbcType=VARCHAR}, #{userPhone,jdbcType=VARCHAR}, #{userStatus,jdbcType=INTEGER}, #{lastLoginTime,jdbcType=TIMESTAMP},
+            #{userName,jdbcType=VARCHAR}, #{penName,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR}, #{userEmail,jdbcType=VARCHAR}, #{userPhone,jdbcType=VARCHAR}, #{userStatus,jdbcType=INTEGER}, #{isAdmin,jdbcType=BOOLEAN}, #{lastLoginTime,jdbcType=TIMESTAMP},
+            #{membershipTier,jdbcType=VARCHAR}, #{membershipStartAt,jdbcType=TIMESTAMP}, #{membershipEndAt,jdbcType=TIMESTAMP},
             #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{resState,jdbcType=INTEGER}
         )
     </insert>
@@ -40,11 +51,16 @@
         UPDATE user_info
         <set>
             <if test="userName != null">user_name = #{userName,jdbcType=VARCHAR},</if>
+            <if test="penName != null">pen_name = #{penName,jdbcType=VARCHAR},</if>
             <if test="userPassword != null">user_password = #{userPassword,jdbcType=VARCHAR},</if>
             <if test="userEmail != null">user_email = #{userEmail,jdbcType=VARCHAR},</if>
             <if test="userPhone != null">user_phone = #{userPhone,jdbcType=VARCHAR},</if>
             <if test="userStatus != null">user_status = #{userStatus,jdbcType=INTEGER},</if>
+            <if test="isAdmin != null">is_admin = #{isAdmin,jdbcType=BOOLEAN},</if>
             <if test="lastLoginTime != null">last_login_time = #{lastLoginTime,jdbcType=TIMESTAMP},</if>
+            <if test="membershipTier != null">membership_tier = #{membershipTier,jdbcType=VARCHAR},</if>
+            <if test="membershipStartAt != null">membership_start_at = #{membershipStartAt,jdbcType=TIMESTAMP},</if>
+            <if test="membershipEndAt != null">membership_end_at = #{membershipEndAt,jdbcType=TIMESTAMP},</if>
             <if test="updateTime != null">update_time = #{updateTime,jdbcType=TIMESTAMP},</if>
             <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
         </set>

@@ -45,13 +45,10 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>文章名称</th>
+                <th class="no-ellipsis">文章名称</th>
                 <th>文章简介</th>
-                <th>文章类型</th>
-                <th>文章特点</th>
-                <th>音色</th>
-                <th>语音链接</th>
-                <th>视频链接</th>
+                <th>附加特点</th>
+                <th>创建人</th>
                 <th>发布状态</th>
                 <th>创建时间</th>
                 <th class="action-column">操作</th>
@@ -60,28 +57,18 @@
             <tbody>
               <tr v-for="article in articles" :key="article.id">
                 <td>{{ article.id }}</td>
-                <td>{{ article.articleName }}</td>
+                <td class="no-ellipsis">{{ article.articleName }}</td>
                 <td class="outline-cell">
                   <div class="outline-text" :title="article.articleOutline || ''">
                     {{ truncateText(article.articleOutline || '', 50) }}
                   </div>
                 </td>
-                <td>{{ article.articleType || '-' }}</td>
-                <td>
+                <td class="outline-cell">
+                  <div class="outline-text" :title="article.additionalCharacteristics || ''">
+                    {{ truncateText(article.additionalCharacteristics || '', 50) }}
+                  </div>
                 </td>
-                <td>{{ getVoiceToneText(article.voiceTone) }}</td>
-                <td>
-                  <a v-if="article.voiceLink" :href="article.voiceLink" target="_blank" class="link-text">
-                    查看链接
-                  </a>
-                  <span v-else>-</span>
-                </td>
-                <td>
-                  <a v-if="article.videoLink" :href="article.videoLink" target="_blank" class="link-text">
-                    查看链接
-                  </a>
-                  <span v-else>-</span>
-                </td>
+                <td>{{ article.createUserName || '-' }}</td>
                 <td>
                   <span :class="getPublishStatusBadgeClass(article.publishStatus)">
                     {{ getPublishStatusText(article.publishStatus) }}
@@ -98,16 +85,6 @@
                     </button>
                     <select @change="handleActionSelect($event, article)" class="action-select">
                       <option value="">更多操作</option>
-                      <option
-                        :value="'generateChapters_' + article.id"
-                      >
-                        生成全部章节
-                      </option>
-                      <option
-                        :value="'generateChapterContent_' + article.id"
-                      >
-                        按序生成全部章节内容
-                      </option>
                       <option
                         :value="'downloadFullText_' + article.id"
                       >
@@ -198,8 +175,17 @@
               <textarea v-model="newArticle.storyBackground" class="form-textarea" rows="4" placeholder="请输入故事背景..."></textarea>
             </div>
             <div class="form-group">
-              <label class="form-label">文章类型</label>
-              <input v-model="newArticle.articleType" class="form-input" placeholder="请输入文章类型" />
+              <label class="form-label">主题/想法</label>
+              <input v-model="newArticle.theme" class="form-input" placeholder="请输入主题/想法" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">附加特点</label>
+              <textarea
+                v-model="newArticle.additionalCharacteristics"
+                class="form-textarea"
+                rows="3"
+                placeholder="请输入附加特点，用逗号分隔（如：玄幻,热血,搞笑）"
+              ></textarea>
             </div>
             <div class="form-group">
               <label class="form-label">音色</label>
@@ -257,8 +243,17 @@
               <textarea v-model="editingArticle.storyBackground" class="form-textarea" rows="4" placeholder="请输入故事背景..."></textarea>
             </div>
             <div class="form-group">
-              <label class="form-label">文章类型</label>
-              <input v-model="editingArticle.articleType" class="form-input" placeholder="请输入文章类型" />
+              <label class="form-label">主题/想法</label>
+              <input v-model="editingArticle.theme" class="form-input" placeholder="请输入主题/想法" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">附加特点</label>
+              <textarea
+                v-model="editingArticle.additionalCharacteristics"
+                class="form-textarea"
+                rows="3"
+                placeholder="请输入附加特点，用逗号分隔（如：玄幻,热血,搞笑）"
+              ></textarea>
             </div>
             <div class="form-group">
               <label class="form-label">音色</label>
@@ -340,10 +335,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 import { http } from '../lib/http/client';
 import type { BaseResponse, PageRespDto } from '../lib/types/base';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 interface ArticleRespDto {
   id: number;
@@ -351,7 +348,9 @@ interface ArticleRespDto {
   articleOutline?: string;
   storyBackground?: string;
   imageDesc?: string;
-  articleType?: string;
+  theme?: string;
+  additionalCharacteristics?: string;
+  createUserName?: string;
   voiceTone?: string;
   voiceLink?: string;
   voiceFilePath?: string;
@@ -380,7 +379,8 @@ const newArticle = ref({
   articleName: '',
   articleOutline: '',
   storyBackground: '',
-  articleType: '',
+  theme: '',
+  additionalCharacteristics: '',
   voiceTone: '',
   voiceLink: '',
   voiceFilePath: '',
@@ -442,10 +442,12 @@ const changePage = (page: number) => {
 const createArticle = async () => {
   try {
     // 创建文章时如果未填写预估字数，则使用默认值传给后端
+    const uid = auth.userId;
     const payload = {
       ...newArticle.value,
       totalWordCountEstimate: (newArticle.value as any).totalWordCountEstimate ?? 100000,
-      chapterWordCountEstimate: (newArticle.value as any).chapterWordCountEstimate ?? 5000
+      chapterWordCountEstimate: (newArticle.value as any).chapterWordCountEstimate ?? 5000,
+      ...(uid != null && uid > 0 ? { createUserId: uid } : {})
     };
 
     await http.post('/api/articles', payload);
@@ -454,7 +456,8 @@ const createArticle = async () => {
       articleName: '',
       articleOutline: '',
       storyBackground: '',
-      articleType: '',
+      theme: '',
+      additionalCharacteristics: '',
       voiceTone: '',
       voiceLink: '',
       voiceFilePath: '',
@@ -507,7 +510,8 @@ const updateArticle = async () => {
       articleName: editingArticle.value.articleName,
       articleOutline: editingArticle.value.articleOutline,
       storyBackground: editingArticle.value.storyBackground,
-      articleType: editingArticle.value.articleType,
+      theme: editingArticle.value.theme,
+      additionalCharacteristics: editingArticle.value.additionalCharacteristics,
       voiceTone: editingArticle.value.voiceTone,
       voiceLink: editingArticle.value.voiceLink,
       voiceFilePath: editingArticle.value.voiceFilePath,
@@ -578,34 +582,6 @@ const getVoiceToneText = (tone: string | undefined) => {
   return tone;
 };
 
-// 触发文章级别操作：生成全部章节
-const generateChaptersForArticle = async (articleId: number) => {
-  try {
-    window.showNotification('章节生成任务已启动', 'success');
-    await http.post<BaseResponse<boolean>>(
-      `/api/articles/${articleId}/generate-chapters`,
-      {},
-      { timeout: 300000, silentBizError: true } as any
-    );
-  } catch (error) {
-    console.error('章节生成失败:', error);
-  }
-};
-
-// 触发文章级别操作：按序生成全部章节内容
-const generateChapterContentForArticle = async (articleId: number) => {
-  try {
-    window.showNotification('章节内容生成任务已启动', 'success');
-    await http.post<BaseResponse<boolean>>(
-      `/api/articles/${articleId}/generate-chapter-content`,
-      {},
-      { timeout: 600000, silentBizError: true } as any
-    );
-  } catch (error) {
-    console.error('章节内容生成失败:', error);
-  }
-};
-
 // 下载文章全文
 const downloadFullText = async (article: ArticleRespDto) => {
   try {
@@ -655,10 +631,6 @@ const handleActionSelect = async (event: Event, article: ArticleRespDto) => {
         loadArticles();
         window.showNotification('文章删除成功！', 'success');
       }
-    } else if (action === 'generateChapters') {
-      await generateChaptersForArticle(articleId);
-    } else if (action === 'generateChapterContent') {
-      await generateChapterContentForArticle(articleId);
     } else if (action === 'downloadFullText') {
       await downloadFullText(article);
     }
@@ -692,6 +664,47 @@ const truncateText = (text: string, maxLength: number) => {
   align-items: center;
   margin-bottom: 1rem;
   gap: 1rem;
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table th.action-column,
+.table td.action-column {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+}
+
+/* 操作栏：按钮/下拉保持横向不换行（避免文字竖排） */
+.table td.action-column .btn,
+.table td.action-column .action-select {
+  white-space: nowrap;
+}
+
+.table td.action-column .btn {
+  min-width: 3.5rem; /* “查看/编辑”至少能横向显示 */
+}
+
+.table td.action-column .action-select {
+  min-width: 6.5rem; /* “更多操作”横向显示 */
+}
+
+.table th.no-ellipsis,
+.table td.no-ellipsis {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .search-section {

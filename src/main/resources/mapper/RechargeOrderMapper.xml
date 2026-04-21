@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.RechargeOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.RechargeOrder">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="channel" jdbcType="VARCHAR" property="channel"/>
+        <result column="amount_cent" jdbcType="BIGINT" property="amountCent"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="subject" jdbcType="VARCHAR" property="subject"/>
+        <result column="pay_trade_no" jdbcType="VARCHAR" property="payTradeNo"/>
+        <result column="pay_url" jdbcType="VARCHAR" property="payUrl"/>
+        <result column="expire_time" jdbcType="TIMESTAMP" property="expireTime"/>
+        <result column="paid_time" jdbcType="TIMESTAMP" property="paidTime"/>
+        <result column="callback_time" jdbcType="TIMESTAMP" property="callbackTime"/>
+        <result column="callback_payload" jdbcType="VARCHAR" property="callbackPayload"/>
+        <result column="idempotency_key" jdbcType="VARCHAR" property="idempotencyKey"/>
+        <result column="biz_type" jdbcType="VARCHAR" property="bizType"/>
+        <result column="membership_pricing_config_id" jdbcType="BIGINT" property="membershipPricingConfigId"/>
+        <result column="membership_duration_months" jdbcType="SMALLINT" property="membershipDurationMonths"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, order_no, user_id, channel, amount_cent, status, subject, pay_trade_no, pay_url,
+        expire_time, paid_time, callback_time, callback_payload, idempotency_key,
+        biz_type, membership_pricing_config_id, membership_duration_months, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recharge_order
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recharge_order
+        WHERE order_no = #{orderNo,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByIdempotencyKey" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recharge_order
+        WHERE idempotency_key = #{idempotencyKey,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recharge_order
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+    <select id="selectExpiredUnpaidOrders" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM recharge_order
+        WHERE expire_time &lt;= #{beforeTime,jdbcType=TIMESTAMP}
+        AND status != 'PAID'
+        AND (callback_time IS NULL OR callback_time &lt;= #{beforeTime,jdbcType=TIMESTAMP})
+        ORDER BY expire_time ASC, id DESC
+        LIMIT #{limit}
+    </select>
+
+    <update id="markExpiredUnpaidOrdersAsClosed">
+        UPDATE recharge_order
+        SET status = 'CLOSED',
+            update_time = #{now,jdbcType=TIMESTAMP}
+        WHERE expire_time &lt;= #{now,jdbcType=TIMESTAMP}
+          AND status IN ('CREATED', 'PAYING')
+    </update>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.RechargeOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO recharge_order (
+            order_no, user_id, channel, amount_cent, status, subject, pay_trade_no, pay_url,
+            expire_time, paid_time, callback_time, callback_payload, idempotency_key,
+            biz_type, membership_pricing_config_id, membership_duration_months, create_time, update_time
+        ) VALUES (
+            #{orderNo,jdbcType=VARCHAR},
+            #{userId,jdbcType=BIGINT},
+            #{channel,jdbcType=VARCHAR},
+            #{amountCent,jdbcType=BIGINT},
+            #{status,jdbcType=VARCHAR},
+            #{subject,jdbcType=VARCHAR},
+            #{payTradeNo,jdbcType=VARCHAR},
+            #{payUrl,jdbcType=VARCHAR},
+            #{expireTime,jdbcType=TIMESTAMP},
+            #{paidTime,jdbcType=TIMESTAMP},
+            #{callbackTime,jdbcType=TIMESTAMP},
+            #{callbackPayload,jdbcType=VARCHAR},
+            #{idempotencyKey,jdbcType=VARCHAR},
+            #{bizType,jdbcType=VARCHAR},
+            #{membershipPricingConfigId,jdbcType=BIGINT},
+            #{membershipDurationMonths,jdbcType=SMALLINT},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.RechargeOrder">
+        UPDATE recharge_order
+        <set>
+            <if test="orderNo != null">order_no = #{orderNo,jdbcType=VARCHAR},</if>
+            <if test="userId != null">user_id = #{userId,jdbcType=BIGINT},</if>
+            <if test="channel != null">channel = #{channel,jdbcType=VARCHAR},</if>
+            <if test="amountCent != null">amount_cent = #{amountCent,jdbcType=BIGINT},</if>
+            <if test="status != null">status = #{status,jdbcType=VARCHAR},</if>
+            <if test="subject != null">subject = #{subject,jdbcType=VARCHAR},</if>
+            <if test="payTradeNo != null">pay_trade_no = #{payTradeNo,jdbcType=VARCHAR},</if>
+            <if test="payUrl != null">pay_url = #{payUrl,jdbcType=VARCHAR},</if>
+            <if test="expireTime != null">expire_time = #{expireTime,jdbcType=TIMESTAMP},</if>
+            <if test="paidTime != null">paid_time = #{paidTime,jdbcType=TIMESTAMP},</if>
+            <if test="callbackTime != null">callback_time = #{callbackTime,jdbcType=TIMESTAMP},</if>
+            <if test="callbackPayload != null">callback_payload = #{callbackPayload,jdbcType=VARCHAR},</if>
+            <if test="idempotencyKey != null">idempotency_key = #{idempotencyKey,jdbcType=VARCHAR},</if>
+            <if test="bizType != null">biz_type = #{bizType,jdbcType=VARCHAR},</if>
+            <if test="membershipPricingConfigId != null">membership_pricing_config_id = #{membershipPricingConfigId,jdbcType=BIGINT},</if>
+            <if test="membershipDurationMonths != null">membership_duration_months = #{membershipDurationMonths,jdbcType=SMALLINT},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

@@ -11,6 +11,8 @@ import com.aicreation.mapper.PlotMapper;
 import com.aicreation.external.VolcengineChatClient;
 import com.aicreation.external.ResponseContentExtractor;
 import com.volcengine.ark.runtime.model.responses.response.ResponseObject;
+import com.aicreation.exception.BusinessException;
+import com.aicreation.service.AiBillingService;
 import com.aicreation.util.TraceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ public class ArticleContentGenerationTask {
 
     @Autowired
     private com.aicreation.generate.ArticleContentGenerator articleContentGenerator;
+
+    @Autowired
+    private AiBillingService aiBillingService;
 
     /**
      * 任务执行状态标记，避免并发执行
@@ -200,6 +205,11 @@ public class ArticleContentGenerationTask {
             // 记录开始生成内容
             log.info("开始为文章[{}]生成章节内容", article.getArticleName());
 
+            // 标记为生成中（用于排除并发任务/避免重复）
+            chapter.setGenerationStatus(1);
+            chapter.setUpdateTime(LocalDateTime.now());
+            articleChapterMapper.updateByPrimaryKey(chapter);
+
             // 获取文章生成配置
             ArticleGenerationConfig config = findArticleGenerationConfig(article);
 
@@ -220,6 +230,7 @@ public class ArticleContentGenerationTask {
 
             // 内容生成成功，立即落表
             chapter.setChapterContent(chapterContent);
+            chapter.setGenerationStatus(2);
             chapter.setUpdateTime(LocalDateTime.now());
             articleChapterMapper.updateByPrimaryKey(chapter);
 
@@ -230,6 +241,15 @@ public class ArticleContentGenerationTask {
 
         } catch (Exception e) {
             log.error("生成章节[ID:{}]内容时发生异常：{}", chapter.getId(), e.getMessage(), e);
+
+            // 标记为失败，避免下次定时任务反复重试
+            try {
+                chapter.setGenerationStatus(3);
+                chapter.setUpdateTime(LocalDateTime.now());
+                articleChapterMapper.updateByPrimaryKey(chapter);
+            } catch (Exception ignore) {
+                // ignore
+            }
 
             throw e;
         }
@@ -252,10 +272,21 @@ public class ArticleContentGenerationTask {
             // 使用Responses API生成内容，以上一轮本章规划的 response_id 作为上下文起点
             log.info("开始使用Responses API生成章节内容...");
             String previousResponseId = chapter.getResponseIdPlan();
-            ResponseObject response = volcengineChatClient.createResponse(
-                    prompt,
-                    previousResponseId,
-                    "content"
+            Long userId = article.getCreateUserId();
+            Integer lenEstimate = chapter.getWordCountEstimate() != null ? chapter.getWordCountEstimate() : 2000;
+            long estimatedCostCent = aiBillingService.estimateCostCent("GENERATE_CHAPTER_CONTENT", lenEstimate);
+
+            ResponseObject response = aiBillingService.executeWithAiBilling(
+                    userId,
+                    "GENERATE_CHAPTER_CONTENT",
+                    article.getId(),
+                    chapter.getId(),
+                    estimatedCostCent,
+                    () -> volcengineChatClient.createResponse(
+                            prompt,
+                            previousResponseId,
+                            "content"
+                    )
             );
             String generatedContent = ResponseContentExtractor.extractContent(response);
 
@@ -277,6 +308,9 @@ public class ArticleContentGenerationTask {
             return cleanContent;
         } catch (Exception e) {
             log.error("调用AI生成章节内容失败：{}", e.getMessage(), e);
+            if (e instanceof BusinessException be) {
+                throw be;
+            }
             throw new RuntimeException("AI生成章节内容失败: " + e.getMessage(), e);
         }
     }
@@ -478,8 +512,8 @@ public class ArticleContentGenerationTask {
      */
     private ArticleGenerationConfig findArticleGenerationConfig(Article article) {
         try {
-            if (StringUtils.hasText(article.getArticleType())) {
-                return articleGenerationConfigMapper.selectByTheme(article.getArticleType());
+            if (StringUtils.hasText(article.getTheme())) {
+                return articleGenerationConfigMapper.selectByTheme(article.getTheme());
             }
         } catch (Exception e) {
             log.warn("查找文章生成配置失败：{}", e.getMessage());

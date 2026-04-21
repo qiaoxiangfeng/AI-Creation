@@ -7,6 +7,8 @@ import com.aicreation.entity.po.Dictionary;
 import com.aicreation.enums.ErrorCodeEnum;
 import com.aicreation.exception.BusinessException;
 import com.aicreation.mapper.DictionaryMapper;
+import com.aicreation.security.AccessControlService;
+import com.aicreation.security.CurrentUserHolder;
 import com.aicreation.service.IDictionaryService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +37,23 @@ public class DictionaryServiceImpl implements IDictionaryService {
     @Autowired
     private DictionaryMapper dictionaryMapper;
 
+    @Autowired
+    private AccessControlService accessControlService;
+
+    /**
+     * Web 请求：按用户过滤字典；非 Web：不做可见性过滤（内部调用）。
+     */
+    private boolean dictionaryScopeApply() {
+        return accessControlService.isWebRequestContext();
+    }
+
+    /**
+     * 已登录返回用户 ID；未登录 Web 请求返回 null（仅可查全局字典）。
+     */
+    private Long dictionaryViewerUserId() {
+        return CurrentUserHolder.requireUserId();
+    }
+
     @Override
     public DictionaryRespDto getDictionaryById(DictionaryQueryReqDto request) {
         if (Objects.isNull(request) || Objects.isNull(request.getId())) {
@@ -46,6 +66,7 @@ public class DictionaryServiceImpl implements IDictionaryService {
             return null;
         }
 
+        accessControlService.assertDictionaryReadable(dictionary);
         return convertToRespDto(dictionary);
     }
 
@@ -56,7 +77,10 @@ public class DictionaryServiceImpl implements IDictionaryService {
             throw new BusinessException(ErrorCodeEnum.PARAM_ERROR);
         }
 
-        List<Dictionary> dictionaries = dictionaryMapper.selectByDictKey(dictKey);
+        List<Dictionary> dictionaries = dictionaryMapper.selectByDictKey(
+                dictKey,
+                dictionaryScopeApply(),
+                dictionaryViewerUserId());
         return dictionaries.stream()
                 .map(this::convertToRespDto)
                 .collect(Collectors.toList());
@@ -64,7 +88,9 @@ public class DictionaryServiceImpl implements IDictionaryService {
 
     @Override
     public List<String> getAllDistinctDictKeys() {
-        List<Dictionary> dictionaries = dictionaryMapper.selectAll();
+        List<Dictionary> dictionaries = dictionaryMapper.selectAll(
+                dictionaryScopeApply(),
+                dictionaryViewerUserId());
         return dictionaries.stream()
                 .map(Dictionary::getDictKey)
                 .distinct()
@@ -94,6 +120,11 @@ public class DictionaryServiceImpl implements IDictionaryService {
         dictionary.setDictValue(dictionaryBo.getDictValue());
         dictionary.setSortOrder(dictionaryBo.getSortOrder());
         dictionary.setResState(dictionaryBo.getResState());
+        Long ownerId = null;
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            ownerId = CurrentUserHolder.requireUserId();
+        }
+        dictionary.setCreateUserId(ownerId);
         dictionary.setCreateTime(dictionaryBo.getCreateTime());
         dictionary.setUpdateTime(dictionaryBo.getUpdateTime());
 
@@ -120,6 +151,8 @@ public class DictionaryServiceImpl implements IDictionaryService {
             log.warn("更新字典失败：字典不存在，id={}", request.getId());
             throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
+
+        accessControlService.assertDictionaryWritable(existingDictionary);
 
         // 转换为持久化对象
         Dictionary dictionary = new Dictionary();
@@ -159,6 +192,8 @@ public class DictionaryServiceImpl implements IDictionaryService {
             throw new BusinessException(ErrorCodeEnum.DATA_NOT_FOUND);
         }
 
+        accessControlService.assertDictionaryWritable(existingDictionary);
+
         // 软删除字典
         int result = dictionaryMapper.deleteByPrimaryKey(request.getId());
         if (result <= 0) {
@@ -182,7 +217,9 @@ public class DictionaryServiceImpl implements IDictionaryService {
         // 查询字典列表
         List<Dictionary> dictionaries = dictionaryMapper.selectDictionaryList(
                 request.getDictKey(),
-                request.getDictValue()
+                request.getDictValue(),
+                dictionaryScopeApply(),
+                dictionaryViewerUserId()
         );
 
         // 获取分页信息
@@ -214,6 +251,7 @@ public class DictionaryServiceImpl implements IDictionaryService {
         dto.setDictKey(dictionary.getDictKey());
         dto.setDictValue(dictionary.getDictValue());
         dto.setSortOrder(dictionary.getSortOrder());
+        dto.setCreateUserId(dictionary.getCreateUserId());
         dto.setCreateTime(dictionary.getCreateTime());
         dto.setUpdateTime(dictionary.getUpdateTime());
         return dto;
@@ -228,6 +266,7 @@ public class DictionaryServiceImpl implements IDictionaryService {
         dto.setDictKey(dictionary.getDictKey());
         dto.setDictValue(dictionary.getDictValue());
         dto.setSortOrder(dictionary.getSortOrder());
+        dto.setCreateUserId(dictionary.getCreateUserId());
         dto.setCreateTime(dictionary.getCreateTime());
         return dto;
     }

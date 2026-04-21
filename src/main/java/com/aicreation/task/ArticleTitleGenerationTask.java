@@ -179,7 +179,7 @@ public class ArticleTitleGenerationTask {
      */
     private List<String> getExistingTitlesByArticleType(String articleType) {
         try {
-            return articleMapper.selectExistingTitlesByArticleType(articleType);
+            return articleMapper.selectExistingTitlesByTheme(articleType);
         } catch (Exception e) {
             log.warn("查询已存在文章标题失败：articleType={}, error={}", articleType, e.getMessage());
             return new ArrayList<>();

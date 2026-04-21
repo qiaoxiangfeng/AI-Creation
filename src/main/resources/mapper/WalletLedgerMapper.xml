@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.WalletLedgerMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.WalletLedger">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="biz_type" jdbcType="VARCHAR" property="bizType"/>
+        <result column="direction" jdbcType="VARCHAR" property="direction"/>
+        <result column="amount_cent" jdbcType="BIGINT" property="amountCent"/>
+        <result column="balance_before_cent" jdbcType="BIGINT" property="balanceBeforeCent"/>
+        <result column="balance_after_cent" jdbcType="BIGINT" property="balanceAfterCent"/>
+        <result column="related_biz_type" jdbcType="VARCHAR" property="relatedBizType"/>
+        <result column="related_biz_id" jdbcType="BIGINT" property="relatedBizId"/>
+        <result column="idempotency_key" jdbcType="VARCHAR" property="idempotencyKey"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, biz_type, direction, amount_cent, balance_before_cent, balance_after_cent,
+        related_biz_type, related_biz_id, idempotency_key, remark, create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM wallet_ledger
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByIdempotencyKey" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM wallet_ledger
+        WHERE idempotency_key = #{idempotencyKey,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM wallet_ledger
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.WalletLedger" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO wallet_ledger (
+            user_id, biz_type, direction, amount_cent, balance_before_cent, balance_after_cent,
+            related_biz_type, related_biz_id, idempotency_key, remark, create_time
+        ) VALUES (
+            #{userId,jdbcType=BIGINT},
+            #{bizType,jdbcType=VARCHAR},
+            #{direction,jdbcType=VARCHAR},
+            #{amountCent,jdbcType=BIGINT},
+            #{balanceBeforeCent,jdbcType=BIGINT},
+            #{balanceAfterCent,jdbcType=BIGINT},
+            #{relatedBizType,jdbcType=VARCHAR},
+            #{relatedBizId,jdbcType=BIGINT},
+            #{idempotencyKey,jdbcType=VARCHAR},
+            #{remark,jdbcType=VARCHAR},
+            #{createTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+</mapper>

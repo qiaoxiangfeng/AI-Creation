@@ -35,9 +35,13 @@ public class ArticleCreateReqDto extends BaseDto {
     @Size(max = 2000, message = "形象描述不能超过2000个字符")
     private String imageDesc;
 
-    @Schema(description = "文章类型", example = "科技文章")
-    @Size(max = 100, message = "文章类型不能超过100个字符")
-    private String articleType;
+    @Schema(description = "文章主题/分类", example = "玄幻")
+    @Size(max = 100, message = "文章主题/分类不能超过100个字符")
+    private String theme;
+
+    @Schema(description = "附加特点（生成配置的非主题字段值拼接，逗号分隔）", example = "男生小说,玄幻,升级,主角光环,热血,搞笑,100000,5000")
+    @Size(max = 2000, message = "附加特点不能超过2000个字符")
+    private String additionalCharacteristics;
 
     @Schema(description = "音色", example = "alex")
     @Size(max = 100, message = "音色不能超过100个字符")
@@ -67,6 +71,9 @@ public class ArticleCreateReqDto extends BaseDto {
 
     @Schema(description = "每章节字数预估", example = "4000")
     private Integer chapterWordCountEstimate;
+
+    @Schema(description = "创建人用户ID（前端传入当前登录用户；配置任务生成文章时由后端填入配置的创建人）")
+    private Long createUserId;
 
     // Getter and Setter methods
     public String getArticleName() {
@@ -101,12 +108,20 @@ public class ArticleCreateReqDto extends BaseDto {
         this.imageDesc = imageDesc;
     }
 
-    public String getArticleType() {
-        return articleType;
+    public String getTheme() {
+        return theme;
     }
 
-    public void setArticleType(String articleType) {
-        this.articleType = articleType;
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
+
+    public String getAdditionalCharacteristics() {
+        return additionalCharacteristics;
+    }
+
+    public void setAdditionalCharacteristics(String additionalCharacteristics) {
+        this.additionalCharacteristics = additionalCharacteristics;
     }
 
     public String getVoiceTone() {
@@ -173,5 +188,11 @@ public class ArticleCreateReqDto extends BaseDto {
         this.chapterWordCountEstimate = chapterWordCountEstimate;
     }
 
+    public Long getCreateUserId() {
+        return createUserId;
+    }
 
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
+    }
 }

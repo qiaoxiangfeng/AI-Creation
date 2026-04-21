@@ -13,4 +13,5 @@ logging:
   level:
     com.aicreation: info
     org.springframework.web: info
-    org.mybatis: info 
+    org.mybatis: debug
+    com.aicreation.mapper: debug

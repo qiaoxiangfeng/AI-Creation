@@ -1,5 +1,6 @@
 package com.aicreation.service.impl;
 
+import com.aicreation.constant.MembershipTier;
 import com.aicreation.enums.ErrorCodeEnum;
 import com.aicreation.exception.BusinessException;
 import com.aicreation.converter.UserConverter;
@@ -57,7 +58,22 @@ public class UserServiceImpl implements IUserService {
         }
         
         log.info("查询用户成功，用户ID: {}, 用户名: {}", userId, user.getUserName());
-        return UserConverter.INSTANCE.toUserRespDto(user);
+        UserRespDto dto = UserConverter.INSTANCE.toUserRespDto(user);
+        fillMembershipActive(dto, user);
+        return dto;
+    }
+
+    private static void fillMembershipActive(UserRespDto dto, User user) {
+        if (dto == null || user == null) {
+            return;
+        }
+        String tier = user.getMembershipTier();
+        LocalDateTime end = user.getMembershipEndAt();
+        if (end == null || tier == null || MembershipTier.NONE.equalsIgnoreCase(tier)) {
+            dto.setMembershipActive(false);
+            return;
+        }
+        dto.setMembershipActive(end.isAfter(LocalDateTime.now()));
     }
 
     @Override
@@ -111,6 +127,9 @@ public class UserServiceImpl implements IUserService {
         // 创建用户实体
         User user = new User();
         user.setUserName(userBo.getUserName());
+        if (StringUtils.hasText(userBo.getPenName())) {
+            user.setPenName(userBo.getPenName());
+        }
         // 对密码进行BCrypt加密
         user.setUserPassword(passwordEncoder.encode(userBo.getUserPassword()));
         
@@ -123,10 +142,12 @@ public class UserServiceImpl implements IUserService {
         }
         
         user.setUserStatus(1); // 默认启用
+        user.setIsAdmin(Boolean.TRUE.equals(request.getIsAdmin()));
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         user.setResState(1); // 默认有效
-        
+        user.setMembershipTier(MembershipTier.NONE);
+
         log.info("创建用户，用户名: {}", request.getUserName());
         int result = userMapper.insert(user);
         
@@ -161,6 +182,9 @@ public class UserServiceImpl implements IUserService {
         User user = new User();
         user.setId(userBo.getId());
         user.setUserName(userBo.getUserName());
+        if (StringUtils.hasText(userBo.getPenName())) {
+            user.setPenName(userBo.getPenName());
+        }
         
         // 可选字段，只有在有值时才更新
         if (StringUtils.hasText(userBo.getUserEmail())) {
@@ -175,6 +199,10 @@ public class UserServiceImpl implements IUserService {
             // 对密码进行加密处理
             String encryptedPassword = passwordEncoder.encode(userBo.getUserPassword());
             user.setUserPassword(encryptedPassword);
+        }
+
+        if (request.getIsAdmin() != null) {
+            user.setIsAdmin(request.getIsAdmin());
         }
         
         user.setUpdateTime(LocalDateTime.now());
@@ -230,7 +258,11 @@ public class UserServiceImpl implements IUserService {
         
         log.info("查询用户列表成功，总数: {}", userList.size());
         PageInfo<User> pageInfo = new PageInfo<>(userList);
-        return PageRespDto.of(pageInfo).convert(UserConverter.INSTANCE::toUserRespDto);
+        return PageRespDto.of(pageInfo).convert(u -> {
+            UserRespDto d = UserConverter.INSTANCE.toUserRespDto(u);
+            fillMembershipActive(d, u);
+            return d;
+        });
     }
 
     @Override
@@ -260,7 +292,9 @@ public class UserServiceImpl implements IUserService {
         userMapper.updateByPrimaryKeySelective(user);
         
         log.info("用户登录成功，用户名: {}", request.getUserName());
-        return UserConverter.INSTANCE.toUserRespDto(user);
+        UserRespDto dto = UserConverter.INSTANCE.toUserRespDto(user);
+        fillMembershipActive(dto, user);
+        return dto;
     }
 
     @Override

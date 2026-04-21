@@ -18,7 +18,8 @@ CREATE TABLE article (
     article_outline TEXT,
     story_background TEXT,
     image_desc TEXT,
-    article_type VARCHAR(100),
+    theme TEXT,
+    additional_characteristics TEXT,
     voice_tone VARCHAR(100),
     voice_link VARCHAR(500),
     voice_file_path VARCHAR(500),
@@ -30,6 +31,7 @@ CREATE TABLE article (
     story_complete BOOLEAN DEFAULT FALSE,
     response_id VARCHAR(255),
     res_state SMALLINT DEFAULT 1,
+    create_user_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -40,6 +42,8 @@ CREATE INDEX IF NOT EXISTS idx_article_create_time ON article(create_time);
 CREATE INDEX IF NOT EXISTS idx_article_publish_status ON article(publish_status);
 CREATE INDEX IF NOT EXISTS idx_article_res_state ON article(res_state);
 CREATE INDEX IF NOT EXISTS idx_article_response_id ON article(response_id);
+CREATE INDEX IF NOT EXISTS idx_article_theme ON article(theme);
+CREATE INDEX IF NOT EXISTS idx_article_create_user_id ON article(create_user_id);
 
 -- 注释
 COMMENT ON TABLE article IS '文章表';
@@ -48,7 +52,8 @@ COMMENT ON COLUMN article.article_name IS '文章名称';
 COMMENT ON COLUMN article.article_outline IS '文章简介';
 COMMENT ON COLUMN article.story_background IS '故事背景';
 COMMENT ON COLUMN article.image_desc IS '形象描述';
-COMMENT ON COLUMN article.article_type IS '文章类型';
+COMMENT ON COLUMN article.theme IS '文章主题/分类（原 article_type）';
+COMMENT ON COLUMN article.additional_characteristics IS '附加特点（生成配置的非主题字段值拼接，逗号分隔）';
 COMMENT ON COLUMN article.voice_tone IS '音色';
 COMMENT ON COLUMN article.voice_link IS '语音链接';
 COMMENT ON COLUMN article.voice_file_path IS '语音文件地址';
@@ -60,6 +65,7 @@ COMMENT ON COLUMN article.chapter_word_count_estimate IS '每章节字数预估'
 COMMENT ON COLUMN article.story_complete IS '章节完结标识（true-章节已完结，false-章节未完结）';
 COMMENT ON COLUMN article.response_id IS 'Responses API的response_id，用于小说上下文管理和多任务隔离';
 COMMENT ON COLUMN article.res_state IS '删除标记（1-有效，0-无效）';
+COMMENT ON COLUMN article.create_user_id IS '创建人用户ID（关联 user_info.id；由配置任务生成的文章与配置的创建人一致）';
 COMMENT ON COLUMN article.create_time IS '创建时间';
 COMMENT ON COLUMN article.update_time IS '更新时间';
 
@@ -125,7 +131,7 @@ DROP TABLE IF EXISTS article_generation_config;
 -- 创建文章生成配置表（包含字数预估等字段）
 CREATE TABLE article_generation_config (
     id BIGSERIAL PRIMARY KEY,
-    theme VARCHAR(100) NOT NULL,
+    theme TEXT NOT NULL,
     gender VARCHAR(50),
     genre VARCHAR(100),
     plot VARCHAR(200),
@@ -136,12 +142,14 @@ CREATE TABLE article_generation_config (
     chapter_word_count_estimate INTEGER DEFAULT 5000,
     pending_count INTEGER DEFAULT 0,
     res_state SMALLINT DEFAULT 1,
+    create_user_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_article_generation_config_theme ON article_generation_config(theme);
+CREATE INDEX IF NOT EXISTS idx_article_generation_config_create_user_id ON article_generation_config(create_user_id);
 CREATE INDEX IF NOT EXISTS idx_article_generation_config_create_time ON article_generation_config(create_time);
 CREATE INDEX IF NOT EXISTS idx_article_generation_config_res_state ON article_generation_config(res_state);
 
@@ -159,6 +167,7 @@ COMMENT ON COLUMN article_generation_config.total_word_count_estimate IS '总字
 COMMENT ON COLUMN article_generation_config.chapter_word_count_estimate IS '每章节字数预估（默认5000）';
 COMMENT ON COLUMN article_generation_config.pending_count IS '待生成数量';
 COMMENT ON COLUMN article_generation_config.res_state IS '删除标记（1-有效，0-无效）';
+COMMENT ON COLUMN article_generation_config.create_user_id IS '创建人用户ID（关联 user_info.id）';
 COMMENT ON COLUMN article_generation_config.create_time IS '创建时间';
 COMMENT ON COLUMN article_generation_config.update_time IS '更新时间';
 
@@ -177,6 +186,7 @@ CREATE TABLE dictionary (
     dict_value VARCHAR(500) NOT NULL,
     sort_order INTEGER DEFAULT 0,
     res_state SMALLINT DEFAULT 1,
+    create_user_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -185,6 +195,7 @@ CREATE TABLE dictionary (
 CREATE INDEX IF NOT EXISTS idx_dictionary_key ON dictionary(dict_key);
 CREATE INDEX IF NOT EXISTS idx_dictionary_create_time ON dictionary(create_time);
 CREATE INDEX IF NOT EXISTS idx_dictionary_res_state ON dictionary(res_state);
+CREATE INDEX IF NOT EXISTS idx_dictionary_create_user_id ON dictionary(create_user_id);
 
 -- 注释
 COMMENT ON TABLE dictionary IS '字典表';
@@ -193,6 +204,7 @@ COMMENT ON COLUMN dictionary.dict_key IS '字典键';
 COMMENT ON COLUMN dictionary.dict_value IS '字典值';
 COMMENT ON COLUMN dictionary.sort_order IS '排序顺序';
 COMMENT ON COLUMN dictionary.res_state IS '删除标记（1-有效，0-无效）';
+COMMENT ON COLUMN dictionary.create_user_id IS '创建人用户ID（NULL 表示全局字典，所有用户可见）';
 COMMENT ON COLUMN dictionary.create_time IS '创建时间';
 COMMENT ON COLUMN dictionary.update_time IS '更新时间';
 
@@ -247,11 +259,16 @@ DROP TABLE IF EXISTS user_info;
 CREATE TABLE user_info (
     id BIGSERIAL PRIMARY KEY,
     user_name VARCHAR(100) NOT NULL,
+    pen_name VARCHAR(100),
     user_password VARCHAR(255) NOT NULL,
     user_email VARCHAR(255),
     user_phone VARCHAR(20),
     user_status SMALLINT DEFAULT 1,
+    is_admin BOOLEAN DEFAULT FALSE,
     last_login_time TIMESTAMP,
+    membership_tier VARCHAR(32) NOT NULL DEFAULT 'NONE',
+    membership_start_at TIMESTAMP,
+    membership_end_at TIMESTAMP,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     res_state SMALLINT DEFAULT 1
@@ -266,19 +283,287 @@ CREATE INDEX IF NOT EXISTS idx_user_info_res_state ON user_info(res_state);
 COMMENT ON TABLE user_info IS '用户信息表';
 COMMENT ON COLUMN user_info.id IS '主键ID';
 COMMENT ON COLUMN user_info.user_name IS '用户名';
+COMMENT ON COLUMN user_info.pen_name IS '笔名';
 COMMENT ON COLUMN user_info.user_password IS '用户密码（加密存储）';
 COMMENT ON COLUMN user_info.user_email IS '用户邮箱';
 COMMENT ON COLUMN user_info.user_phone IS '用户手机号';
 COMMENT ON COLUMN user_info.user_status IS '用户状态（1-启用，0-禁用）';
+COMMENT ON COLUMN user_info.is_admin IS '是否管理员（true-可查看全部文章与配置）';
 COMMENT ON COLUMN user_info.last_login_time IS '最后登录时间';
 COMMENT ON COLUMN user_info.create_time IS '创建时间';
 COMMENT ON COLUMN user_info.update_time IS '更新时间';
 COMMENT ON COLUMN user_info.res_state IS '删除标记（1-有效，0-无效）';
+COMMENT ON COLUMN user_info.membership_tier IS '会员等级：NONE/BASIC';
+COMMENT ON COLUMN user_info.membership_start_at IS '首次成为会员时间';
+COMMENT ON COLUMN user_info.membership_end_at IS '当前会员权益截止时间';
 
+CREATE INDEX IF NOT EXISTS idx_user_info_membership_end ON user_info(membership_end_at);
+
+-- =====================================================================
+-- 6.1 会员定价配置 membership_pricing_config
+-- =====================================================================
+
+CREATE TABLE membership_pricing_config (
+    id BIGSERIAL PRIMARY KEY,
+    tier VARCHAR(32) NOT NULL,
+    duration_months SMALLINT NOT NULL,
+    base_month_price_cent BIGINT NOT NULL,
+    discount_rate DECIMAL(5, 4) NOT NULL DEFAULT 1.0000,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_membership_pricing_tier_duration UNIQUE (tier, duration_months)
+);
+
+CREATE INDEX IF NOT EXISTS idx_membership_pricing_enabled ON membership_pricing_config(enabled);
+
+COMMENT ON TABLE membership_pricing_config IS '会员定价配置（基础会员各档位）';
+
+-- =====================================================================
+-- 6.2 会员开通记录 membership_subscription
+-- =====================================================================
+
+CREATE TABLE membership_subscription (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    source VARCHAR(32) NOT NULL,
+    payment_order_id BIGINT,
+    tier VARCHAR(32) NOT NULL,
+    duration_months SMALLINT,
+    previous_end_at TIMESTAMP,
+    new_end_at TIMESTAMP NOT NULL,
+    amount_cent BIGINT NOT NULL DEFAULT 0,
+    channel VARCHAR(16),
+    external_trade_no VARCHAR(128),
+    remark VARCHAR(500),
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_membership_sub_user_time ON membership_subscription(user_id, create_time DESC);
+CREATE UNIQUE INDEX uk_membership_sub_payment_order ON membership_subscription(payment_order_id) WHERE payment_order_id IS NOT NULL;
+
+COMMENT ON TABLE membership_subscription IS '会员开通/变更/退款审计记录';
+
+INSERT INTO membership_pricing_config (tier, duration_months, base_month_price_cent, discount_rate, enabled, sort_order) VALUES
+('BASIC', 1, 9900, 1.0000, TRUE, 1),
+('BASIC', 3, 9900, 0.9800, TRUE, 2),
+('BASIC', 6, 9900, 0.9500, TRUE, 3),
+('BASIC', 12, 9900, 0.9200, TRUE, 4);
 
 -- =====================================================================
 -- 7. 音频文件记录表 audio_file_record
 -- =====================================================================
+
+-- =====================================================================
+-- 7.1 用户钱包表 user_wallet
+-- =====================================================================
+
+DROP TABLE IF EXISTS user_wallet;
+
+CREATE TABLE user_wallet (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE,
+    total_balance_cent BIGINT NOT NULL DEFAULT 0,
+    frozen_balance_cent BIGINT NOT NULL DEFAULT 0,
+    available_balance_cent BIGINT NOT NULL DEFAULT 0,
+    version INTEGER NOT NULL DEFAULT 0,
+    res_state SMALLINT DEFAULT 1,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_wallet_user_id ON user_wallet(user_id);
+
+COMMENT ON TABLE user_wallet IS '用户钱包表';
+COMMENT ON COLUMN user_wallet.user_id IS '用户ID（关联 user_info.id）';
+COMMENT ON COLUMN user_wallet.total_balance_cent IS '总余额（分）';
+COMMENT ON COLUMN user_wallet.frozen_balance_cent IS '冻结余额（分）';
+COMMENT ON COLUMN user_wallet.available_balance_cent IS '可用余额（分）';
+COMMENT ON COLUMN user_wallet.version IS '乐观锁版本号';
+COMMENT ON COLUMN user_wallet.res_state IS '删除标记（1-有效，0-无效）';
+COMMENT ON COLUMN user_wallet.create_time IS '创建时间';
+COMMENT ON COLUMN user_wallet.update_time IS '更新时间';
+
+-- =====================================================================
+-- 7.2 钱包流水表 wallet_ledger
+-- =====================================================================
+
+DROP TABLE IF EXISTS wallet_ledger;
+
+CREATE TABLE wallet_ledger (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    biz_type VARCHAR(32) NOT NULL,
+    direction VARCHAR(16) NOT NULL,
+    amount_cent BIGINT NOT NULL,
+    balance_before_cent BIGINT,
+    balance_after_cent BIGINT,
+    related_biz_type VARCHAR(32),
+    related_biz_id BIGINT,
+    idempotency_key VARCHAR(128) NOT NULL UNIQUE,
+    remark VARCHAR(500),
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_wallet_ledger_user_id_create_time ON wallet_ledger(user_id, create_time DESC);
+CREATE INDEX IF NOT EXISTS idx_wallet_ledger_related_biz ON wallet_ledger(related_biz_type, related_biz_id);
+
+COMMENT ON TABLE wallet_ledger IS '钱包流水表';
+COMMENT ON COLUMN wallet_ledger.user_id IS '用户ID（关联 user_info.id）';
+COMMENT ON COLUMN wallet_ledger.biz_type IS '业务类型（RECHARGE/AI_PRE_AUTH/AI_SETTLE_DEBIT/AI_SETTLE_REFUND/MANUAL_ADJUST）';
+COMMENT ON COLUMN wallet_ledger.direction IS '方向（IN/OUT/FREEZE/UNFREEZE）';
+COMMENT ON COLUMN wallet_ledger.amount_cent IS '金额（分）';
+COMMENT ON COLUMN wallet_ledger.balance_before_cent IS '变更前余额（分）';
+COMMENT ON COLUMN wallet_ledger.balance_after_cent IS '变更后余额（分）';
+COMMENT ON COLUMN wallet_ledger.related_biz_type IS '关联业务类型（RECHARGE_ORDER/AI_USAGE）';
+COMMENT ON COLUMN wallet_ledger.related_biz_id IS '关联业务ID';
+COMMENT ON COLUMN wallet_ledger.idempotency_key IS '幂等键（唯一）';
+COMMENT ON COLUMN wallet_ledger.remark IS '备注';
+COMMENT ON COLUMN wallet_ledger.create_time IS '创建时间';
+
+-- =====================================================================
+-- 7.3 AI 使用计费表 ai_usage_billing
+-- =====================================================================
+
+DROP TABLE IF EXISTS ai_usage_billing;
+
+CREATE TABLE ai_usage_billing (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    article_id BIGINT,
+    chapter_id BIGINT,
+    biz_scene VARCHAR(64) NOT NULL,
+    provider VARCHAR(32) NOT NULL,
+    model_name VARCHAR(64),
+    request_tokens INTEGER DEFAULT 0,
+    response_tokens INTEGER DEFAULT 0,
+    total_tokens INTEGER DEFAULT 0,
+    estimated_cost_cent BIGINT DEFAULT 0,
+    actual_cost_cent BIGINT DEFAULT 0,
+    pre_auth_amount_cent BIGINT DEFAULT 0,
+    settled_amount_cent BIGINT DEFAULT 0,
+    refund_amount_cent BIGINT DEFAULT 0,
+    status VARCHAR(32) NOT NULL,
+    trace_id VARCHAR(64),
+    idempotency_key VARCHAR(128) NOT NULL UNIQUE,
+    error_message VARCHAR(1000),
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_usage_user_id_create_time ON ai_usage_billing(user_id, create_time DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_usage_article_id ON ai_usage_billing(article_id);
+CREATE INDEX IF NOT EXISTS idx_ai_usage_status ON ai_usage_billing(status);
+
+COMMENT ON TABLE ai_usage_billing IS 'AI 使用计费表';
+COMMENT ON COLUMN ai_usage_billing.user_id IS '用户ID（关联 user_info.id）';
+COMMENT ON COLUMN ai_usage_billing.article_id IS '文章ID（可空）';
+COMMENT ON COLUMN ai_usage_billing.chapter_id IS '章节ID（可空）';
+COMMENT ON COLUMN ai_usage_billing.biz_scene IS '业务场景（GENERATE_CHAPTERS/GENERATE_CHAPTER_CONTENT/REGENERATE_CHAPTER_CONTENT/REFINE_OUTLINE）';
+COMMENT ON COLUMN ai_usage_billing.provider IS 'AI 提供方（如 VOLCENGINE）';
+COMMENT ON COLUMN ai_usage_billing.model_name IS '模型名称';
+COMMENT ON COLUMN ai_usage_billing.request_tokens IS '请求 token 数';
+COMMENT ON COLUMN ai_usage_billing.response_tokens IS '响应 token 数';
+COMMENT ON COLUMN ai_usage_billing.total_tokens IS '总 token 数';
+COMMENT ON COLUMN ai_usage_billing.estimated_cost_cent IS '预估成本（分）';
+COMMENT ON COLUMN ai_usage_billing.actual_cost_cent IS '实际成本（分）';
+COMMENT ON COLUMN ai_usage_billing.pre_auth_amount_cent IS '预占金额（分）';
+COMMENT ON COLUMN ai_usage_billing.settled_amount_cent IS '结算扣款（分）';
+COMMENT ON COLUMN ai_usage_billing.refund_amount_cent IS '结算退回（分）';
+COMMENT ON COLUMN ai_usage_billing.status IS '状态（INIT/PRE_AUTHED/SUCCESS/FAILED/SETTLED/CANCELED）';
+COMMENT ON COLUMN ai_usage_billing.trace_id IS '链路追踪ID';
+COMMENT ON COLUMN ai_usage_billing.idempotency_key IS '幂等键（唯一）';
+COMMENT ON COLUMN ai_usage_billing.error_message IS '错误信息（脱敏）';
+COMMENT ON COLUMN ai_usage_billing.create_time IS '创建时间';
+COMMENT ON COLUMN ai_usage_billing.update_time IS '更新时间';
+
+-- =====================================================================
+-- 7.4 充值订单表 recharge_order
+-- =====================================================================
+
+DROP TABLE IF EXISTS recharge_order;
+
+CREATE TABLE recharge_order (
+    id BIGSERIAL PRIMARY KEY,
+    order_no VARCHAR(64) NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL,
+    channel VARCHAR(16) NOT NULL,
+    amount_cent BIGINT NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    subject VARCHAR(128),
+    pay_trade_no VARCHAR(128),
+    pay_url TEXT,
+    expire_time TIMESTAMP,
+    paid_time TIMESTAMP,
+    callback_time TIMESTAMP,
+    callback_payload TEXT,
+    idempotency_key VARCHAR(128) NOT NULL UNIQUE,
+    biz_type VARCHAR(32) NOT NULL DEFAULT 'RECHARGE',
+    membership_pricing_config_id BIGINT,
+    membership_duration_months SMALLINT,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_recharge_order_user_id_create_time ON recharge_order(user_id, create_time DESC);
+CREATE INDEX IF NOT EXISTS idx_recharge_order_status ON recharge_order(status);
+CREATE INDEX IF NOT EXISTS idx_recharge_order_biz_type ON recharge_order(biz_type);
+
+COMMENT ON TABLE recharge_order IS '统一支付订单（充值、会员等）';
+COMMENT ON COLUMN recharge_order.order_no IS '商户订单号';
+COMMENT ON COLUMN recharge_order.user_id IS '用户ID（关联 user_info.id）';
+COMMENT ON COLUMN recharge_order.channel IS '充值渠道（ALIPAY/WECHAT）';
+COMMENT ON COLUMN recharge_order.amount_cent IS '订单金额（分）';
+COMMENT ON COLUMN recharge_order.status IS '状态（CREATED/PAYING/PAID/CLOSED/FAILED）';
+COMMENT ON COLUMN recharge_order.subject IS '订单标题';
+COMMENT ON COLUMN recharge_order.pay_trade_no IS '平台交易号';
+COMMENT ON COLUMN recharge_order.pay_url IS '支付URL（二维码/跳转）';
+COMMENT ON COLUMN recharge_order.expire_time IS '过期时间';
+COMMENT ON COLUMN recharge_order.paid_time IS '支付完成时间';
+COMMENT ON COLUMN recharge_order.callback_time IS '回调接收时间';
+COMMENT ON COLUMN recharge_order.callback_payload IS '回调原始数据（建议脱敏）';
+COMMENT ON COLUMN recharge_order.idempotency_key IS '幂等键（唯一）';
+COMMENT ON COLUMN recharge_order.biz_type IS '业务类型：RECHARGE=余额充值，MEMBERSHIP=会员购买';
+COMMENT ON COLUMN recharge_order.membership_pricing_config_id IS '会员定价配置ID（biz_type=MEMBERSHIP）';
+COMMENT ON COLUMN recharge_order.membership_duration_months IS '会员购买时长（月）';
+COMMENT ON COLUMN recharge_order.create_time IS '创建时间';
+COMMENT ON COLUMN recharge_order.update_time IS '更新时间';
+
+-- =====================================================================
+-- 7.5 用户消息通知表 user_notification
+-- =====================================================================
+
+DROP TABLE IF EXISTS user_notification;
+
+CREATE TABLE user_notification (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(32) NOT NULL,
+    title VARCHAR(128) NOT NULL,
+    content VARCHAR(1000) NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    read_time TIMESTAMP,
+    biz_ref_type VARCHAR(32),
+    biz_ref_id BIGINT,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_notification_user_id_create_time ON user_notification(user_id, create_time DESC);
+CREATE INDEX IF NOT EXISTS idx_user_notification_user_id_is_read ON user_notification(user_id, is_read);
+
+COMMENT ON TABLE user_notification IS '用户消息通知表';
+COMMENT ON COLUMN user_notification.user_id IS '用户ID（关联 user_info.id）';
+COMMENT ON COLUMN user_notification.type IS '消息类型（BALANCE_LOW/RECHARGE_SUCCESS/AI_CHARGE/AI_REFUND/SYSTEM）';
+COMMENT ON COLUMN user_notification.title IS '标题';
+COMMENT ON COLUMN user_notification.content IS '内容';
+COMMENT ON COLUMN user_notification.is_read IS '是否已读';
+COMMENT ON COLUMN user_notification.read_time IS '阅读时间';
+COMMENT ON COLUMN user_notification.biz_ref_type IS '关联业务类型（RECHARGE_ORDER/AI_USAGE）';
+COMMENT ON COLUMN user_notification.biz_ref_id IS '关联业务ID';
+COMMENT ON COLUMN user_notification.create_time IS '创建时间';
+COMMENT ON COLUMN user_notification.update_time IS '更新时间';
 
 -- 删除已存在的表
 DROP TABLE IF EXISTS audio_file_record;
@@ -327,9 +612,9 @@ COMMENT ON COLUMN audio_file_record.updated_by IS '更新人';
 
 
 --用户初始化
-INSERT INTO user_info (id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state) VALUES (1, 'admin', '$2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi', 'admin@aicreation.com', '13800138000', 1, '2026-03-06 14:12:19.466373', '2025-08-17 07:09:51.962571', '2026-03-06 14:12:19.472975', 1);
-INSERT INTO user_info (id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state) VALUES (2, 'test_user', '$2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi', 'test@aicreation.com', '13800138001', 1, null, '2025-08-17 07:09:51.962571', '2025-08-20 10:08:02.381484', 1);
-INSERT INTO user_info (id, user_name, user_password, user_email, user_phone, user_status, last_login_time, create_time, update_time, res_state) VALUES (3, 'demo_user', '$2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi', 'demo@aicreation.com', '13800138002', 1, '2025-08-18 09:42:17.969563', '2025-08-17 07:09:51.962571', '2025-08-20 10:08:02.381484', 1);
+INSERT INTO user_info (id, user_name, pen_name, user_password, user_email, user_phone, user_status, is_admin, last_login_time, create_time, update_time, res_state) VALUES (1, 'admin', '管理员', '$2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi', 'admin@aicreation.com', '13800138000', 1, TRUE, '2026-03-06 14:12:19.466373', '2025-08-17 07:09:51.962571', '2026-03-06 14:12:19.472975', 1);
+INSERT INTO user_info (id, user_name, pen_name, user_password, user_email, user_phone, user_status, is_admin, last_login_time, create_time, update_time, res_state) VALUES (2, 'test_user', '测试用户', '$2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi', 'test@aicreation.com', '13800138001', 1, FALSE, null, '2025-08-17 07:09:51.962571', '2025-08-20 10:08:02.381484', 1);
+INSERT INTO user_info (id, user_name, pen_name, user_password, user_email, user_phone, user_status, is_admin, last_login_time, create_time, update_time, res_state) VALUES (3, 'demo_user', '演示用户', '$2a$10$5YZZPtjmXHpvECf4fFQFNulMrOskCta0cbdp1/kTAkYvFT9n7FSIi', 'demo@aicreation.com', '13800138002', 1, FALSE, '2025-08-18 09:42:17.969563', '2025-08-17 07:09:51.962571', '2025-08-20 10:08:02.381484', 1);
 --字段初始化
 INSERT INTO dictionary (id, dict_key, dict_value, sort_order, res_state, create_time, update_time) VALUES (1, '文章特点', '搞笑', 1, 1, '2026-02-28 10:33:18.961490', '2026-02-28 10:33:18.961490');
 INSERT INTO dictionary (id, dict_key, dict_value, sort_order, res_state, create_time, update_time) VALUES (2, '文章特点', '失落', 2, 1, '2026-02-28 10:33:18.961490', '2026-02-28 10:33:18.961490');
@@ -504,3 +789,35 @@ INSERT INTO dictionary (id, dict_key, dict_value, sort_order, res_state, create_
 INSERT INTO dictionary (id, dict_key, dict_value, sort_order, res_state, create_time, update_time) VALUES (371, '风格分类', '励志', 13, 1, '2026-03-02 10:48:50.771110', '2026-03-02 10:48:50.771110');
 INSERT INTO dictionary (id, dict_key, dict_value, sort_order, res_state, create_time, update_time) VALUES (372, '风格分类', '治愈', 14, 1, '2026-03-02 10:48:50.771110', '2026-03-02 10:48:50.771110');
 INSERT INTO dictionary (id, dict_key, dict_value, sort_order, res_state, create_time, update_time) VALUES (373, '风格分类', '爽文', 15, 1, '2026-03-02 10:48:50.771110', '2026-03-02 10:48:50.771110');
+
+-- =====================================================================
+-- 自增主键序列：下一值 >= 10000 且 > 当前表内最大 id（避免显式 INSERT 后序列滞后导致主键冲突）
+-- =====================================================================
+DO $$
+DECLARE
+  tbl text;
+BEGIN
+  FOREACH tbl IN ARRAY ARRAY[
+    'article',
+    'article_chapter',
+    'article_generation_config',
+    'dictionary',
+    'plot',
+    'user_info',
+    'audio_file_record',
+    'user_wallet',
+    'wallet_ledger',
+    'ai_usage_billing',
+    'recharge_order',
+    'user_notification',
+    'membership_pricing_config',
+    'membership_subscription'
+  ]
+  LOOP
+    EXECUTE format(
+      'SELECT setval(pg_get_serial_sequence(%L, ''id''), GREATEST(COALESCE((SELECT MAX(id) FROM %I), 0), 9999), true)',
+      tbl,
+      tbl
+    );
+  END LOOP;
+END $$;

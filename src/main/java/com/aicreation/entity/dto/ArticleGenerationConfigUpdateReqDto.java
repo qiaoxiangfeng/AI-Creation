@@ -24,7 +24,6 @@ public class ArticleGenerationConfigUpdateReqDto extends BaseDto {
     private Long id;
 
     @Schema(description = "文章主题", example = "程序员逆袭")
-    @Size(max = 100, message = "文章主题不能超过100个字符")
     private String theme;
 
     @Schema(description = "性别分类", example = "男生小说")

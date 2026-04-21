@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.AiUsageBillingMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.AiUsageBilling">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="article_id" jdbcType="BIGINT" property="articleId"/>
+        <result column="chapter_id" jdbcType="BIGINT" property="chapterId"/>
+        <result column="biz_scene" jdbcType="VARCHAR" property="bizScene"/>
+        <result column="provider" jdbcType="VARCHAR" property="provider"/>
+        <result column="model_name" jdbcType="VARCHAR" property="modelName"/>
+        <result column="request_tokens" jdbcType="INTEGER" property="requestTokens"/>
+        <result column="response_tokens" jdbcType="INTEGER" property="responseTokens"/>
+        <result column="total_tokens" jdbcType="INTEGER" property="totalTokens"/>
+        <result column="estimated_cost_cent" jdbcType="BIGINT" property="estimatedCostCent"/>
+        <result column="actual_cost_cent" jdbcType="BIGINT" property="actualCostCent"/>
+        <result column="pre_auth_amount_cent" jdbcType="BIGINT" property="preAuthAmountCent"/>
+        <result column="settled_amount_cent" jdbcType="BIGINT" property="settledAmountCent"/>
+        <result column="refund_amount_cent" jdbcType="BIGINT" property="refundAmountCent"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="trace_id" jdbcType="VARCHAR" property="traceId"/>
+        <result column="idempotency_key" jdbcType="VARCHAR" property="idempotencyKey"/>
+        <result column="error_message" jdbcType="VARCHAR" property="errorMessage"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, article_id, chapter_id, biz_scene, provider, model_name,
+        request_tokens, response_tokens, total_tokens,
+        estimated_cost_cent, actual_cost_cent, pre_auth_amount_cent, settled_amount_cent, refund_amount_cent,
+        status, trace_id, idempotency_key, error_message, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ai_usage_billing
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByIdempotencyKey" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ai_usage_billing
+        WHERE idempotency_key = #{idempotencyKey,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ai_usage_billing
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+    <select id="selectStuckAiBillings" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM ai_usage_billing
+        WHERE update_time &lt;= #{beforeTime,jdbcType=TIMESTAMP}
+        AND status IN ('PRE_AUTHED', 'SUCCESS')
+        ORDER BY update_time ASC, id DESC
+        LIMIT #{limit}
+    </select>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.AiUsageBilling" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_usage_billing (
+            user_id, article_id, chapter_id, biz_scene, provider, model_name,
+            request_tokens, response_tokens, total_tokens,
+            estimated_cost_cent, actual_cost_cent, pre_auth_amount_cent, settled_amount_cent, refund_amount_cent,
+            status, trace_id, idempotency_key, error_message, create_time, update_time
+        ) VALUES (
+            #{userId,jdbcType=BIGINT},
+            #{articleId,jdbcType=BIGINT},
+            #{chapterId,jdbcType=BIGINT},
+            #{bizScene,jdbcType=VARCHAR},
+            #{provider,jdbcType=VARCHAR},
+            #{modelName,jdbcType=VARCHAR},
+            #{requestTokens,jdbcType=INTEGER},
+            #{responseTokens,jdbcType=INTEGER},
+            #{totalTokens,jdbcType=INTEGER},
+            #{estimatedCostCent,jdbcType=BIGINT},
+            #{actualCostCent,jdbcType=BIGINT},
+            #{preAuthAmountCent,jdbcType=BIGINT},
+            #{settledAmountCent,jdbcType=BIGINT},
+            #{refundAmountCent,jdbcType=BIGINT},
+            #{status,jdbcType=VARCHAR},
+            #{traceId,jdbcType=VARCHAR},
+            #{idempotencyKey,jdbcType=VARCHAR},
+            #{errorMessage,jdbcType=VARCHAR},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.AiUsageBilling">
+        UPDATE ai_usage_billing
+        <set>
+            <if test="articleId != null">article_id = #{articleId,jdbcType=BIGINT},</if>
+            <if test="chapterId != null">chapter_id = #{chapterId,jdbcType=BIGINT},</if>
+            <if test="bizScene != null">biz_scene = #{bizScene,jdbcType=VARCHAR},</if>
+            <if test="provider != null">provider = #{provider,jdbcType=VARCHAR},</if>
+            <if test="modelName != null">model_name = #{modelName,jdbcType=VARCHAR},</if>
+            <if test="requestTokens != null">request_tokens = #{requestTokens,jdbcType=INTEGER},</if>
+            <if test="responseTokens != null">response_tokens = #{responseTokens,jdbcType=INTEGER},</if>
+            <if test="totalTokens != null">total_tokens = #{totalTokens,jdbcType=INTEGER},</if>
+            <if test="estimatedCostCent != null">estimated_cost_cent = #{estimatedCostCent,jdbcType=BIGINT},</if>
+            <if test="actualCostCent != null">actual_cost_cent = #{actualCostCent,jdbcType=BIGINT},</if>
+            <if test="preAuthAmountCent != null">pre_auth_amount_cent = #{preAuthAmountCent,jdbcType=BIGINT},</if>
+            <if test="settledAmountCent != null">settled_amount_cent = #{settledAmountCent,jdbcType=BIGINT},</if>
+            <if test="refundAmountCent != null">refund_amount_cent = #{refundAmountCent,jdbcType=BIGINT},</if>
+            <if test="status != null">status = #{status,jdbcType=VARCHAR},</if>
+            <if test="traceId != null">trace_id = #{traceId,jdbcType=VARCHAR},</if>
+            <if test="idempotencyKey != null">idempotency_key = #{idempotencyKey,jdbcType=VARCHAR},</if>
+            <if test="errorMessage != null">error_message = #{errorMessage,jdbcType=VARCHAR},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

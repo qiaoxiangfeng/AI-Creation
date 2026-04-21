@@ -9,10 +9,12 @@ import com.aicreation.mapper.PlotMapper;
 import com.aicreation.external.VolcengineChatClient;
 import com.aicreation.external.ResponseContentExtractor;
 import com.volcengine.ark.runtime.model.responses.response.ResponseObject;
+import com.aicreation.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.aicreation.service.AiBillingService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +43,9 @@ public class ArticleChapterGenerator {
     @Autowired
     private VolcengineChatClient volcengineChatClient;
 
+    @Autowired
+    private AiBillingService aiBillingService;
+
     /**
      * 为指定文章生成章节
      * 注意：此方法必须同步执行，因为每个章节的生成都依赖于前一个章节生成的最新response_id
@@ -50,10 +55,26 @@ public class ArticleChapterGenerator {
      * @param articleId 文章ID
      */
     public void generateChaptersForArticle(Long articleId) {
+        generateChaptersForArticle(articleId, null);
+    }
+
+    /**
+     * 为指定文章按需生成章节（最多生成到目标章节号）
+     *
+     * @param articleId 文章ID
+     * @param targetChapterCount 目标章节总数；null 表示生成全部直到完结
+     */
+    public void generateChaptersForArticle(Long articleId, Integer targetChapterCount) {
         // 获取文章信息
         Article article = articleMapper.selectByPrimaryKey(articleId);
         if (article == null) {
             throw new RuntimeException("文章不存在: " + articleId);
+        }
+
+        // 如果文章已标记完结，则不允许继续生成新章节
+        if (Boolean.TRUE.equals(article.getStoryComplete())) {
+            log.info("文章[{}]已标记为故事完结，跳过章节生成", article.getArticleName());
+            return;
         }
 
 
@@ -80,6 +101,10 @@ public class ArticleChapterGenerator {
 
         // 逐章生成，直到故事完结
         while (!storyComplete && currentChapterNo <= MAX_CHAPTERS) {
+            // 按需生成：达到目标章节数即停止（不代表故事完结）
+            if (targetChapterCount != null && currentChapterNo > targetChapterCount) {
+                break;
+            }
             log.info("开始生成文章[{}]第{}章", article.getArticleName(), currentChapterNo);
 
             try {
@@ -163,28 +188,33 @@ public class ArticleChapterGenerator {
             } catch (Exception e) {
                 log.error("生成文章[{}]第{}章失败: {}", article.getArticleName(), currentChapterNo, e.getMessage(), e);
                 // 章节生成失败，停止本篇文章的生成任务
+                if (e instanceof BusinessException be) {
+                    throw be;
+                }
                 throw new RuntimeException("章节生成失败，停止文章《" + article.getArticleName() + "》的生成任务: " + e.getMessage(), e);
             }
         }
 
         // 如果故事已完结，更新文章表的完结标识
-        if (storyComplete) {
-            try {
-                Article articleToUpdate = articleMapper.selectByPrimaryKey(article.getId());
-                if (articleToUpdate != null) {
+        try {
+            Article articleToUpdate = articleMapper.selectByPrimaryKey(article.getId());
+            if (articleToUpdate != null) {
+                if (storyComplete) {
                     articleToUpdate.setStoryComplete(true);
-                    // 将最新的 response_id 写回文章，便于后续在最新上下文基础上继续生成
-                    if (currentResponseId != null && !currentResponseId.trim().isEmpty()) {
-                        articleToUpdate.setResponseId(currentResponseId);
-                    }
-                    articleToUpdate.setUpdateTime(LocalDateTime.now());
-                    articleMapper.updateByPrimaryKey(articleToUpdate);
+                }
+                // 无论是否完结，都将最新的 response_id 写回文章，便于后续继续生成
+                if (currentResponseId != null && !currentResponseId.trim().isEmpty()) {
+                    articleToUpdate.setResponseId(currentResponseId);
+                }
+                articleToUpdate.setUpdateTime(LocalDateTime.now());
+                articleMapper.updateByPrimaryKey(articleToUpdate);
+                if (storyComplete) {
                     log.info("文章[{}]已标记为故事完结", article.getArticleName());
                 }
-            } catch (Exception e) {
-                log.error("更新文章完结状态失败: {}", e.getMessage(), e);
-                // 不抛出异常，因为主要任务已完成
             }
+        } catch (Exception e) {
+            log.error("更新文章 responseId/完结状态失败: {}", e.getMessage(), e);
+            // 不抛出异常，因为主要任务已完成
         }
 
         log.info("文章[{}]章节基本信息生成完成，共生成{}章，故事{}完结",
@@ -201,17 +231,35 @@ public class ArticleChapterGenerator {
         log.info("文章: {}", article.getArticleName());
         log.info("章节: 第{}章", chapterNo);
         log.info("AI提示词长度: {} 字符", prompt.length());
-        log.debug("=== 完整AI提示词 ===");
-        log.debug("{}", prompt);
+        if (chapterNo == 1) {
+            log.info("=== 第1章完整AI提示词 ===");
+            log.info("{}", prompt);
+        } else {
+            log.debug("=== 完整AI提示词 ===");
+            log.debug("{}", prompt);
+        }
 
         try {
             // 使用Responses API生成章节信息（基于传入的上下文response_id，获取本章专用的 response_id）
             log.info("开始使用Responses API生成单章信息...");
             log.info("本次AI请求 previous_response_id: {}", previousResponseId != null ? previousResponseId : "null");
-            ResponseObject response = volcengineChatClient.createResponse(
-                    prompt,
-                    previousResponseId,
-                    "content"
+            Long userId = article.getCreateUserId();
+            Integer lenEstimate = article.getChapterWordCountEstimate() != null
+                    ? article.getChapterWordCountEstimate()
+                    : 2000;
+            long estimatedCostCent = aiBillingService.estimateCostCent("GENERATE_CHAPTERS", lenEstimate);
+
+            ResponseObject response = aiBillingService.executeWithAiBilling(
+                userId,
+                "GENERATE_CHAPTERS",
+                article.getId(),
+                null,
+                estimatedCostCent,
+                () -> volcengineChatClient.createResponse(
+                        prompt,
+                        previousResponseId,
+                        "content"
+                )
             );
 
             String generatedContent = ResponseContentExtractor.extractContent(response);
@@ -233,6 +281,9 @@ public class ArticleChapterGenerator {
 
         } catch (Exception e) {
             log.error("调用AI生成单章信息失败：{}", e.getMessage(), e);
+            if (e instanceof BusinessException be) {
+                throw be;
+            }
             throw new RuntimeException("AI生成章节信息失败: " + e.getMessage(), e);
         }
     }
@@ -271,8 +322,12 @@ public class ArticleChapterGenerator {
 
             // 文章基本信息（仅保留必要字段，避免重复提供已在上下文中的长文本）
             prompt.append("- 小说名称：").append(article.getArticleName()).append("\n");
-            if (StringUtils.hasText(article.getArticleType())) {
-                prompt.append("- 小说类型：").append(article.getArticleType()).append("\n");
+            if (StringUtils.hasText(article.getAdditionalCharacteristics())) {
+                prompt.append("- 附加特点：").append(article.getAdditionalCharacteristics()).append("\n");
+            }
+            if (StringUtils.hasText(article.getArticleOutline())) {
+                prompt.append("- 完整故事大纲（全文）：\n");
+                prompt.append(article.getArticleOutline().trim()).append("\n");
             }
 
             // 全局创作目标，用于帮助AI控制整体篇幅与章节数量
@@ -296,6 +351,13 @@ public class ArticleChapterGenerator {
                     .append("，除非还有非常关键且尚未展开或收束的主线，否则应将 storyComplete 设置为 true，避免无止境拆分新章节。\n");
             prompt.append("  • 只有在你确信故事还有重要主线没有展开或没有收束，且当前章节号明显低于预期章节数时，")
                     .append("才将 storyComplete 设置为 false 并继续拆分后续章节。\n");
+
+            // 内容安全与措辞要求（用于降低平台敏感词触发风险）
+            prompt.append("- 内容安全与措辞要求（适用于全书全部章节）：\n");
+            prompt.append("  • 全文避免成人露骨描写与性暗示，不写具体身体细节、敏感部位、挑逗性措辞与露骨对白。\n");
+            prompt.append("  • 涉及亲密/情感线时，用克制、含蓄、点到为止的方式表达，更多描写心理、氛围与剧情推动，不写具体行为过程。\n");
+            prompt.append("  • 避免使用或生成可能触发平台审核的敏感词、低俗词、极端暴力血腥细节、违法犯罪操作细节等；必要时使用中性、安全表述进行替换。\n");
+            prompt.append("  • 章节标题（chapterTitle）、梗概（corePlot）与伏笔（plots）同样必须遵守以上要求，优先使用中性、安全表述。\n");
 
             // 章节输出格式与字段结构统一要求（后续章节必须沿用）
             prompt.append("- 章节输出格式与字段结构统一要求：\n");

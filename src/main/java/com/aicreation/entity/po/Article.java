@@ -41,9 +41,14 @@ public class Article implements Serializable {
     private String imageDesc;
 
     /**
-     * 文章类型
+     * 文章主题/分类（原 articleType）
      */
-    private String articleType;
+    private String theme;
+
+    /**
+     * 附加特点（生成配置的非主题字段值拼接，逗号分隔）
+     */
+    private String additionalCharacteristics;
 
     /**
      * 音色
@@ -94,6 +99,16 @@ public class Article implements Serializable {
      * 删除标记：1-有效，0-无效
      */
     private Integer resState;
+
+    /**
+     * 创建人用户ID
+     */
+    private Long createUserId;
+
+    /**
+     * 创建人用户名（列表查询 JOIN 填充，非表字段）
+     */
+    private String createUserName;
 
     /**
      * 创建时间
@@ -152,12 +167,20 @@ public class Article implements Serializable {
         this.imageDesc = imageDesc;
     }
 
-    public String getArticleType() {
-        return articleType;
+    public String getTheme() {
+        return theme;
     }
 
-    public void setArticleType(String articleType) {
-        this.articleType = articleType;
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
+
+    public String getAdditionalCharacteristics() {
+        return additionalCharacteristics;
+    }
+
+    public void setAdditionalCharacteristics(String additionalCharacteristics) {
+        this.additionalCharacteristics = additionalCharacteristics;
     }
 
 
@@ -239,6 +262,22 @@ public class Article implements Serializable {
 
     public void setResState(Integer resState) {
         this.resState = resState;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
+    }
+
+    public String getCreateUserName() {
+        return createUserName;
+    }
+
+    public void setCreateUserName(String createUserName) {
+        this.createUserName = createUserName;
     }
 
     public LocalDateTime getCreateTime() {

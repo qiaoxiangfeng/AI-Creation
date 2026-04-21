@@ -52,6 +52,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { parseAdminFlag } from '../lib/parseAdminFlag';
 import { http } from '../lib/http/client';
 import type { BaseResponse } from '../lib/types/base';
 
@@ -83,9 +84,17 @@ const handleLogin = async () => {
       return;
     }
     const name = data.userName || userName.value;
-    // 后端暂未下发 token，这里使用占位符，待接入 JWT 后替换
-    auth.login('session-token', name);
-    await router.replace({ name: 'users' });
+    const penName = data.penName || '';
+    const userId = Number(data.id || 0);
+    const isAdmin = parseAdminFlag(data as Record<string, unknown>);
+    auth.login({
+      userId,
+      userName: name,
+      penName,
+      isAdmin,
+      membershipActive: Boolean((data as any).membershipActive),
+    });
+    await router.replace({ name: 'dashboard' });
   } catch (e: any) {
     error.value = e?.message || '登录失败';
   } finally {

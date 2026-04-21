@@ -25,6 +25,8 @@ public interface UserConverter {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     UserBo toUserBo(UserUpdateReqDto request);
 
+    @Mapping(source = "isAdmin", target = "isAdmin")
+    @Mapping(target = "membershipActive", ignore = true)
     UserRespDto toUserRespDto(User user);
 }
 

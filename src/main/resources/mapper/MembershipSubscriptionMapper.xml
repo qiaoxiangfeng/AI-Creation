@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.MembershipSubscriptionMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.MembershipSubscription">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="source" jdbcType="VARCHAR" property="source"/>
+        <result column="payment_order_id" jdbcType="BIGINT" property="paymentOrderId"/>
+        <result column="tier" jdbcType="VARCHAR" property="tier"/>
+        <result column="duration_months" jdbcType="SMALLINT" property="durationMonths"/>
+        <result column="previous_end_at" jdbcType="TIMESTAMP" property="previousEndAt"/>
+        <result column="new_end_at" jdbcType="TIMESTAMP" property="newEndAt"/>
+        <result column="amount_cent" jdbcType="BIGINT" property="amountCent"/>
+        <result column="channel" jdbcType="VARCHAR" property="channel"/>
+        <result column="external_trade_no" jdbcType="VARCHAR" property="externalTradeNo"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.MembershipSubscription" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO membership_subscription (
+            user_id, source, payment_order_id, tier, duration_months, previous_end_at, new_end_at,
+            amount_cent, channel, external_trade_no, remark, create_time
+        ) VALUES (
+            #{userId,jdbcType=BIGINT},
+            #{source,jdbcType=VARCHAR},
+            #{paymentOrderId,jdbcType=BIGINT},
+            #{tier,jdbcType=VARCHAR},
+            #{durationMonths,jdbcType=SMALLINT},
+            #{previousEndAt,jdbcType=TIMESTAMP},
+            #{newEndAt,jdbcType=TIMESTAMP},
+            #{amountCent,jdbcType=BIGINT},
+            #{channel,jdbcType=VARCHAR},
+            #{externalTradeNo,jdbcType=VARCHAR},
+            #{remark,jdbcType=VARCHAR},
+            #{createTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <select id="selectByPaymentOrderId" resultMap="BaseResultMap">
+        SELECT id, user_id, source, payment_order_id, tier, duration_months, previous_end_at, new_end_at,
+               amount_cent, channel, external_trade_no, remark, create_time
+        FROM membership_subscription
+        WHERE payment_order_id = #{paymentOrderId,jdbcType=BIGINT}
+        LIMIT 1
+    </select>
+</mapper>

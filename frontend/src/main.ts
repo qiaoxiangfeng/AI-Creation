@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import { createPinia } from 'pinia';
+import { createPinia, setActivePinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import './assets/main.css';
@@ -75,8 +75,11 @@ const showNotification = (message: string, type: 'success' | 'error' | 'warning'
 // 将通知函数添加到全局
 window.showNotification = showNotification;
 
+const pinia = createPinia();
+setActivePinia(pinia);
+
 const app = createApp(App);
-app.use(createPinia());
+app.use(pinia);
 app.use(router);
 app.mount('#app');
 

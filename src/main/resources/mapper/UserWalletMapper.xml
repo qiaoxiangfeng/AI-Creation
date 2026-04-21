@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.UserWalletMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.UserWallet">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="total_balance_cent" jdbcType="BIGINT" property="totalBalanceCent"/>
+        <result column="frozen_balance_cent" jdbcType="BIGINT" property="frozenBalanceCent"/>
+        <result column="available_balance_cent" jdbcType="BIGINT" property="availableBalanceCent"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, total_balance_cent, frozen_balance_cent, available_balance_cent, version, res_state, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_wallet
+        WHERE id = #{id,jdbcType=BIGINT}
+        AND res_state = 1
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_wallet
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        AND res_state = 1
+    </select>
+
+    <select id="selectByUserIdForUpdate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_wallet
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        AND res_state = 1
+        FOR UPDATE
+    </select>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.UserWallet" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_wallet (
+            user_id, total_balance_cent, frozen_balance_cent, available_balance_cent, version, res_state, create_time, update_time
+        ) VALUES (
+            #{userId,jdbcType=BIGINT},
+            #{totalBalanceCent,jdbcType=BIGINT},
+            #{frozenBalanceCent,jdbcType=BIGINT},
+            #{availableBalanceCent,jdbcType=BIGINT},
+            #{version,jdbcType=INTEGER},
+            #{resState,jdbcType=INTEGER},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.UserWallet">
+        UPDATE user_wallet
+        <set>
+            <if test="totalBalanceCent != null">total_balance_cent = #{totalBalanceCent,jdbcType=BIGINT},</if>
+            <if test="frozenBalanceCent != null">frozen_balance_cent = #{frozenBalanceCent,jdbcType=BIGINT},</if>
+            <if test="availableBalanceCent != null">available_balance_cent = #{availableBalanceCent,jdbcType=BIGINT},</if>
+            <if test="version != null">version = #{version,jdbcType=INTEGER},</if>
+            <if test="resState != null">res_state = #{resState,jdbcType=INTEGER},</if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

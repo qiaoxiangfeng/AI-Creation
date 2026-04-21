@@ -75,6 +75,16 @@ public class ArticleGenerationConfig implements Serializable {
     private Integer resState;
 
     /**
+     * 创建人用户ID
+     */
+    private Long createUserId;
+
+    /**
+     * 创建人用户名（列表查询 JOIN 填充）
+     */
+    private String createUserName;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
@@ -181,6 +191,22 @@ public class ArticleGenerationConfig implements Serializable {
         this.resState = resState;
     }
 
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
+    }
+
+    public String getCreateUserName() {
+        return createUserName;
+    }
+
+    public void setCreateUserName(String createUserName) {
+        this.createUserName = createUserName;
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -212,6 +238,7 @@ public class ArticleGenerationConfig implements Serializable {
                 ", chapterWordCountEstimate=" + chapterWordCountEstimate +
                 ", pendingCount=" + pendingCount +
                 ", resState=" + resState +
+                ", createUserId=" + createUserId +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

@@ -138,9 +138,38 @@ public interface IArticleService {
     Boolean generateArticleChapters(Long articleId);
 
     /**
+     * 按需生成文章章节（生成到指定章节数，或生成全部直到完结）
+     *
+     * @param articleId 文章ID
+     * @param targetChapterCount 目标章节总数（null 表示生成全部直到完结）
+     * @param all 是否生成全部（true 时忽略 targetChapterCount）
+     * @return 是否启动成功
+     */
+    Boolean generateArticleChapters(Long articleId, Integer targetChapterCount, Boolean all);
+
+    /**
      * 生成文章章节内容
      * @param articleId 文章ID
      * @return 是否启动成功
      */
     Boolean generateArticleChapterContent(Long articleId);
+
+    /**
+     * 按需生成文章章节内容（针对“已有章节”）
+     *
+     * @param articleId 文章ID
+     * @param count 生成数量（从未生成内容的章节中按章节号顺序取前 N 个；null 表示按 all）
+     * @param all 是否生成全部已有章节内容（true 时忽略 count）
+     * @return 是否启动成功
+     */
+    Boolean generateArticleChapterContent(Long articleId, Integer count, Boolean all);
+
+    /**
+     * AI 修订文章大纲（根据用户修改意见生成新大纲并落库）
+     *
+     * @param articleId 文章ID
+     * @param instruction 修改意见
+     * @return 新的大纲文本
+     */
+    String refineArticleOutline(Long articleId, String instruction);
 }

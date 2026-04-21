@@ -30,14 +30,17 @@ public interface DictionaryMapper {
      * @param dictKey 字典键
      * @return 字典列表
      */
-    List<Dictionary> selectByDictKey(@Param("dictKey") String dictKey);
+    List<Dictionary> selectByDictKey(@Param("dictKey") String dictKey,
+                                    @Param("dictionaryScopeApply") boolean dictionaryScopeApply,
+                                    @Param("dictionaryViewerUserId") Long dictionaryViewerUserId);
 
     /**
      * 查询所有字典
      *
      * @return 字典列表
      */
-    List<Dictionary> selectAll();
+    List<Dictionary> selectAll(@Param("dictionaryScopeApply") boolean dictionaryScopeApply,
+                               @Param("dictionaryViewerUserId") Long dictionaryViewerUserId);
 
     /**
      * 查询字典列表
@@ -46,7 +49,10 @@ public interface DictionaryMapper {
      * @param dictValue 字典值（可选）
      * @return 字典列表
      */
-    List<Dictionary> selectDictionaryList(@Param("dictKey") String dictKey, @Param("dictValue") String dictValue);
+    List<Dictionary> selectDictionaryList(@Param("dictKey") String dictKey,
+                                         @Param("dictValue") String dictValue,
+                                         @Param("dictionaryScopeApply") boolean dictionaryScopeApply,
+                                         @Param("dictionaryViewerUserId") Long dictionaryViewerUserId);
 
     /**
      * 插入字典

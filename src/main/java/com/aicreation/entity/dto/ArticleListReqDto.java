@@ -28,9 +28,9 @@ public class ArticleListReqDto extends PageReqDto {
     @Schema(description = "发布状态筛选（可选）：1-未发布，2-已发布", example = "1")
     private Integer publishStatus;
 
-    @Schema(description = "文章类型筛选（可选）", example = "科技文章")
-    @Size(max = 100, message = "文章类型不能超过100个字符")
-    private String articleType;
+    @Schema(description = "文章主题/分类筛选（可选）", example = "玄幻")
+    @Size(max = 100, message = "文章主题/分类不能超过100个字符")
+    private String theme;
 
     public String getArticleName() {
         return articleName;
@@ -56,11 +56,11 @@ public class ArticleListReqDto extends PageReqDto {
         this.publishStatus = publishStatus;
     }
 
-    public String getArticleType() {
-        return articleType;
+    public String getTheme() {
+        return theme;
     }
 
-    public void setArticleType(String articleType) {
-        this.articleType = articleType;
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 }

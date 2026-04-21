@@ -10,6 +10,8 @@ import com.aicreation.mapper.ArticleMapper;
 import com.aicreation.mapper.PlotMapper;
 import com.aicreation.external.VolcengineChatClient;
 import com.aicreation.external.ResponseContentExtractor;
+import com.aicreation.exception.BusinessException;
+import com.aicreation.service.AiBillingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,9 @@ public class ArticleContentGenerator {
 
     @Autowired
     private VolcengineChatClient volcengineChatClient;
+
+    @Autowired
+    private AiBillingService aiBillingService;
 
     /**
      * 为指定章节生成内容
@@ -122,8 +127,19 @@ public class ArticleContentGenerator {
                     : chapter.getResponseIdPlan();
 
             log.info("本次AI章节内容重新生成请求 previous_response_id: {}", previousResponseId != null ? previousResponseId : "null");
+            Long userId = article.getCreateUserId();
+            Integer lenEstimate = chapter.getWordCountEstimate() != null ? chapter.getWordCountEstimate() : 2000;
+            long estimatedCostCent = aiBillingService.estimateCostCent("REGENERATE_CHAPTER_CONTENT", lenEstimate);
+
             com.volcengine.ark.runtime.model.responses.response.ResponseObject response =
-                    volcengineChatClient.createResponse(prompt, previousResponseId, "content");
+                    aiBillingService.executeWithAiBilling(
+                            userId,
+                            "REGENERATE_CHAPTER_CONTENT",
+                            article.getId(),
+                            chapter.getId(),
+                            estimatedCostCent,
+                            () -> volcengineChatClient.createResponse(prompt, previousResponseId, "content")
+                    );
             String generatedContent = ResponseContentExtractor.extractContent(response);
 
             log.info("=== AI章节内容重新生成响应 ===");
@@ -145,6 +161,9 @@ public class ArticleContentGenerator {
 
         } catch (Exception e) {
             log.error("重新生成文章[{}]第{}章内容失败：{}", article.getArticleName(), chapter.getChapterNo(), e.getMessage(), e);
+            if (e instanceof BusinessException be) {
+                throw be;
+            }
             throw new RuntimeException("重新生成章节内容失败: " + e.getMessage(), e);
         }
     }
@@ -236,6 +255,9 @@ public class ArticleContentGenerator {
                 // 不抛出异常，避免覆盖原始异常
             }
 
+            if (e instanceof BusinessException be) {
+                throw be;
+            }
             throw new RuntimeException("生成章节内容失败: " + e.getMessage(), e);
         }
     }
@@ -259,8 +281,19 @@ public class ArticleContentGenerator {
             log.info("开始使用Responses API生成章节内容...");
             String previousResponseId = chapter.getResponseIdPlan();
             log.info("本次AI章节内容生成请求 previous_response_id: {}", previousResponseId != null ? previousResponseId : "null");
+            Long userId = article.getCreateUserId();
+            Integer lenEstimate = chapter.getWordCountEstimate() != null ? chapter.getWordCountEstimate() : 2000;
+            long estimatedCostCent = aiBillingService.estimateCostCent("GENERATE_CHAPTER_CONTENT", lenEstimate);
+
             com.volcengine.ark.runtime.model.responses.response.ResponseObject response =
-                    volcengineChatClient.createResponse(prompt, previousResponseId, "content");
+                    aiBillingService.executeWithAiBilling(
+                            userId,
+                            "GENERATE_CHAPTER_CONTENT",
+                            article.getId(),
+                            chapter.getId(),
+                            estimatedCostCent,
+                            () -> volcengineChatClient.createResponse(prompt, previousResponseId, "content")
+                    );
             String generatedContent = ResponseContentExtractor.extractContent(response);
 
             log.info("=== AI原始响应 ===");
@@ -279,6 +312,9 @@ public class ArticleContentGenerator {
 
         } catch (Exception e) {
             log.error("调用AI生成章节内容失败：{}", e.getMessage(), e);
+            if (e instanceof BusinessException be) {
+                throw be;
+            }
             throw new RuntimeException("AI生成章节内容失败: " + e.getMessage(), e);
         }
     }
@@ -288,9 +324,9 @@ public class ArticleContentGenerator {
      */
     private ArticleGenerationConfig findArticleGenerationConfig(Article article) {
         try {
-            // 根据文章类型查找匹配的配置
-            if (article.getArticleType() != null && !article.getArticleType().trim().isEmpty()) {
-                return articleGenerationConfigMapper.selectByTheme(article.getArticleType());
+            // 根据文章主题/分类查找匹配的配置
+            if (article.getTheme() != null && !article.getTheme().trim().isEmpty()) {
+                return articleGenerationConfigMapper.selectByTheme(article.getTheme());
             }
         } catch (Exception e) {
             log.warn("查找文章生成配置失败：{}", e.getMessage());
@@ -342,8 +378,11 @@ public class ArticleContentGenerator {
         // 简要生成指令（避免重复罗列通用写作规范）
         prompt.append("请根据以上信息，生成本章的小说正文内容，要求：\n");
         prompt.append("1. 使用连续、自然的小说段落，不要使用 Markdown 或其它形式的小标题，例如“### 一、xxx”之类。\n");
-        prompt.append("2. 不要在正文中输出“本章完”、“（本章完）”、“(本章完)”或类似章节结束标记。\n");
-        prompt.append("3. 不要输出任何结构说明、分节标题，只保留读者阅读用的纯正文。\n");
+        prompt.append("2. 只输出【小说正文】本身，不要输出任何非正文内容，例如：伏笔清单/伏笔说明/回收说明、写作提示、注释、分隔线、（正文结束）、（本章完）等。\n");
+        prompt.append("3. 不要在正文中输出“本章完”、“（本章完）”、“(本章完)”、“（正文结束）”或类似章节结束标记。\n");
+        prompt.append("4. 不要输出任何结构说明、分节标题、清单、总结、后记，只保留读者阅读用的纯正文。\n");
+        prompt.append("5. 如果你想表达伏笔或回收伏笔，请把它们自然地写进故事情节与对白中，禁止用“伏笔：xxx”这种标注方式。\n");
+        prompt.append("6. 输出必须直接从正文第一句开始，到正文最后一句结束，中间不允许出现任何额外标签或括号说明。\n");
 
         return prompt.toString();
     }

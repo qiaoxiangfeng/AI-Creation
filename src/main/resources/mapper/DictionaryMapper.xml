@@ -9,13 +9,28 @@
         <result column="dict_value" jdbcType="VARCHAR" property="dictValue"/>
         <result column="sort_order" jdbcType="INTEGER" property="sortOrder"/>
         <result column="res_state" jdbcType="INTEGER" property="resState"/>
+        <result column="create_user_id" jdbcType="BIGINT" property="createUserId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <!-- 基础字段列表 -->
     <sql id="Base_Column_List">
-        id, dict_key, dict_value, sort_order, res_state, create_time, update_time
+        id, dict_key, dict_value, sort_order, res_state, create_user_id, create_time, update_time
+    </sql>
+
+    <!-- Web 请求下：已登录则 (全局 OR 本人)；未登录仅全局。dictionaryScopeApply=false 时不限制（非 Web 调用） -->
+    <sql id="Dictionary_Visibility_Clause">
+        <if test="dictionaryScopeApply">
+            <choose>
+                <when test="dictionaryViewerUserId != null">
+                    AND (create_user_id IS NULL OR create_user_id = #{dictionaryViewerUserId,jdbcType=BIGINT})
+                </when>
+                <otherwise>
+                    AND create_user_id IS NULL
+                </otherwise>
+            </choose>
+        </if>
     </sql>
 
     <!-- 根据ID查询字典 -->
@@ -28,21 +43,23 @@
     </select>
 
     <!-- 根据字典键查询字典列表 -->
-    <select id="selectByDictKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <select id="selectByDictKey" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM dictionary
         WHERE dict_key = #{dictKey,jdbcType=VARCHAR}
         AND res_state = 1
+        <include refid="Dictionary_Visibility_Clause"/>
         ORDER BY sort_order ASC, create_time ASC
     </select>
 
-    <!-- 查询所有字典 -->
+    <!-- 查询所有字典（在可见范围内） -->
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM dictionary
         WHERE res_state = 1
+        <include refid="Dictionary_Visibility_Clause"/>
         ORDER BY dict_key ASC, sort_order ASC
     </select>
 
@@ -53,6 +70,7 @@
         FROM dictionary
         <where>
             res_state = 1
+            <include refid="Dictionary_Visibility_Clause"/>
             <if test="dictKey != null and dictKey != ''">
                 AND dict_key LIKE CONCAT('%', #{dictKey,jdbcType=VARCHAR}, '%')
             </if>
@@ -66,10 +84,10 @@
     <!-- 插入字典 -->
     <insert id="insert" parameterType="com.aicreation.entity.po.Dictionary" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO dictionary (
-            dict_key, dict_value, sort_order, res_state, create_time, update_time
+            dict_key, dict_value, sort_order, res_state, create_user_id, create_time, update_time
         ) VALUES (
             #{dictKey,jdbcType=VARCHAR}, #{dictValue,jdbcType=VARCHAR}, #{sortOrder,jdbcType=INTEGER},
-            #{resState,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+            #{resState,jdbcType=INTEGER}, #{createUserId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
 

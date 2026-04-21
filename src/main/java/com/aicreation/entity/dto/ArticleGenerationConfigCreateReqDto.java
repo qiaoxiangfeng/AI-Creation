@@ -21,7 +21,6 @@ public class ArticleGenerationConfigCreateReqDto extends BaseDto {
 
     @Schema(description = "文章主题", example = "程序员逆袭")
     @NotBlank(message = "文章主题不能为空")
-    @Size(max = 100, message = "文章主题不能超过100个字符")
     private String theme;
 
     @Schema(description = "性别分类", example = "男生小说")
@@ -59,6 +58,9 @@ public class ArticleGenerationConfigCreateReqDto extends BaseDto {
     @Schema(description = "待生成数量", example = "10")
     @Min(value = 0, message = "待生成数量不能小于0")
     private Integer pendingCount;
+
+    @Schema(description = "创建人用户ID（前端传入当前登录用户）")
+    private Long createUserId;
 
     // Getter and Setter methods
     public String getTheme() {
@@ -139,5 +141,13 @@ public class ArticleGenerationConfigCreateReqDto extends BaseDto {
 
     public void setPendingCount(Integer pendingCount) {
         this.pendingCount = pendingCount;
+    }
+
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
     }
 }

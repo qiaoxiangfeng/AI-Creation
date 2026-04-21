@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicreation.mapper.MembershipPricingConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.aicreation.entity.po.MembershipPricingConfig">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="tier" jdbcType="VARCHAR" property="tier"/>
+        <result column="duration_months" jdbcType="SMALLINT" property="durationMonths"/>
+        <result column="base_month_price_cent" jdbcType="BIGINT" property="baseMonthPriceCent"/>
+        <result column="discount_rate" jdbcType="DECIMAL" property="discountRate"/>
+        <result column="enabled" jdbcType="BOOLEAN" property="enabled"/>
+        <result column="sort_order" jdbcType="INTEGER" property="sortOrder"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, tier, duration_months, base_month_price_cent, discount_rate, enabled, sort_order, create_time, update_time
+    </sql>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM membership_pricing_config
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectEnabledByTier" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM membership_pricing_config
+        WHERE tier = #{tier,jdbcType=VARCHAR} AND enabled = TRUE
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+    <select id="selectAllForAdmin" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM membership_pricing_config
+        ORDER BY tier ASC, sort_order ASC, id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.aicreation.entity.po.MembershipPricingConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO membership_pricing_config (
+            tier, duration_months, base_month_price_cent, discount_rate, enabled, sort_order, create_time, update_time
+        ) VALUES (
+            #{tier,jdbcType=VARCHAR},
+            #{durationMonths,jdbcType=SMALLINT},
+            #{baseMonthPriceCent,jdbcType=BIGINT},
+            #{discountRate,jdbcType=DECIMAL},
+            #{enabled,jdbcType=BOOLEAN},
+            #{sortOrder,jdbcType=INTEGER},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.aicreation.entity.po.MembershipPricingConfig">
+        UPDATE membership_pricing_config
+        SET tier = #{tier,jdbcType=VARCHAR},
+            duration_months = #{durationMonths,jdbcType=SMALLINT},
+            base_month_price_cent = #{baseMonthPriceCent,jdbcType=BIGINT},
+            discount_rate = #{discountRate,jdbcType=DECIMAL},
+            enabled = #{enabled,jdbcType=BOOLEAN},
+            sort_order = #{sortOrder,jdbcType=INTEGER},
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>
